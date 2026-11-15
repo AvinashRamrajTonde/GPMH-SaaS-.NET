@@ -1,0 +1,14 @@
+{
+  "isSuccess": true,
+  "statusCode": 200,
+  "title": "Dashboard summary fetched successfully",
+  "data": {
+    "totalProperties": 1,
+    "totalDemand": 248,
+    "totalCollection": 248,
+    "totalArrears": 0,
+    "todayCollection": 0,
+    "todayReceipts": 0
+  },
+  "errors": []
+}

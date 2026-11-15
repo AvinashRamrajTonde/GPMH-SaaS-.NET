@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1e4a3b">
+  <title>नमुना ९ — मागणी व वसुली नोंदवही (Register Print)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @page {
+      size: A4 landscape;
+      margin: 4mm 5mm;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #e2e8f0;
+      font-family: 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #0f172a;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Action Bar (no-print) */
+    .top-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: #0f172a;
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+      border-bottom: 1px solid #334155;
+      padding: 10px 16px;
+    }
+
+    /* Screen preview wrappers */
+    .doc0, .doc1 {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 10px 24px 10px;
+    }
+
+    .page {
+      width: 287mm;
+      min-height: 200mm;
+      background: #ffffff;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+      border: 1px solid #cbd5e1;
+      padding: 5mm 6mm;
+      box-sizing: border-box;
+      position: relative;
+      page-break-after: always;
+      break-after: page;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    @media print {
+      html, body {
+        background: #ffffff !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .doc0, .doc1 {
+        padding: 0 !important;
+        display: block !important;
+      }
+      .page {
+        box-shadow: none !important;
+        border: none !important;
+        width: 100% !important;
+        min-height: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        page-break-after: always;
+        break-after: page;
+      }
+    }
+
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #475569;
+      border-bottom: 1.5px dashed #94a3b8;
+      padding-bottom: 2px;
+      margin-bottom: 5px;
+    }
+
+    .hd {
+      position: relative;
+      text-align: center;
+      margin-bottom: 5px;
+      min-height: 42px;
+    }
+
+    .hd .badge {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 38px;
+      height: 38px;
+      line-height: 38px;
+      border-radius: 8px;
+      font-weight: 900;
+      font-size: 24px;
+      text-align: center;
+      background-color: #1e4a3b;
+      color: #ffffff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .hd .l1 {
+      font-size: 11px;
+      font-weight: 700;
+      color: #1e4a3b;
+      margin: 0;
+    }
+
+    .hd h1 {
+      font-size: 19px;
+      font-weight: 800;
+      color: #1e4a3b;
+      margin: 1px 0;
+      letter-spacing: -0.2px;
+    }
+
+    .hd .l3 {
+      font-size: 10.5px;
+      font-weight: 600;
+      color: #475569;
+      margin: 0;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 4px 10px;
+      background: #f4f9f7;
+      border: 1px solid #a3c9bb;
+      border-radius: 4px;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+
+    .meta span b {
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #528b76;
+      table-layout: fixed;
+      margin-bottom: 3px;
+    }
+
+    thead {
+      display: table-header-group;
+    }
+
+    th, td {
+      border: 1px solid #7baea0;
+      padding: 2px 1.5px;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 8.5px;
+      line-height: 1.2;
+    }
+
+    /* Colored Print Theme: body.clr */
+    body.clr th.dk {
+      background-color: #1e4a3b !important;
+      color: #ffffff !important;
+      font-weight: 700;
+      font-size: 9px;
+    }
+
+    body.clr th.lt {
+      background-color: #e2efe9 !important;
+      color: #1e4a3b !important;
+      font-weight: 700;
+      font-size: 8.5px;
+    }
+
+    body.clr th.sub {
+      background-color: #f4f9f7 !important;
+      color: #334155 !important;
+      font-weight: 600;
+      font-size: 8px;
+    }
+
+    body.clr th.fee {
+      background-color: #fef9c3 !important;
+      color: #713f12 !important;
+      font-weight: 600;
+      font-size: 8px;
+    }
+
+    body.clr th.gtH {
+      background-color: #bbf7d0 !important;
+      color: #064e3b !important;
+      font-weight: 800;
+      font-size: 9px;
+    }
+
+    /* Vasuli Register Specific Header Classes */
+    body.clr th.gR {
+      background-color: #1e4a3b !important;
+      color: #ffffff !important;
+      font-weight: 800;
+      font-size: 9.5px;
+    }
+
+    body.clr th.gS {
+      background-color: #854d0e !important;
+      color: #ffffff !important;
+      font-weight: 800;
+      font-size: 9.5px;
+    }
+
+    body.clr th.gB {
+      background-color: #991b1b !important;
+      color: #ffffff !important;
+      font-weight: 800;
+      font-size: 9.5px;
+    }
+
+    body.clr th.sootH {
+      background-color: #fef3c7 !important;
+      color: #78350f !important;
+      font-size: 7.5px;
+      font-weight: 700;
+    }
+
+    body.clr th.bkH {
+      background-color: #fee2e2 !important;
+      color: #7f1d1d !important;
+      font-size: 7.5px;
+      font-weight: 700;
+    }
+
+    /* Non-color fallback (black & white) */
+    body:not(.clr) th.dk { background: #e2e8f0; color: #000; font-weight: 700; }
+    body:not(.clr) th.lt { background: #f1f5f9; color: #000; font-weight: 700; }
+    body:not(.clr) th.sub { background: #f8fafc; color: #000; font-weight: 600; }
+    body:not(.clr) th.fee { background: #f1f5f9; color: #000; font-weight: 600; }
+    body:not(.clr) th.gtH { background: #cbd5e1; color: #000; font-weight: 800; }
+    body:not(.clr) th.gR { background: #e2e8f0; color: #000; font-weight: 800; }
+    body:not(.clr) th.gS { background: #f1f5f9; color: #000; font-weight: 800; }
+    body:not(.clr) th.gB { background: #cbd5e1; color: #000; font-weight: 800; }
+    body:not(.clr) th.sootH { background: #f8fafc; color: #000; }
+    body:not(.clr) th.bkH { background: #f8fafc; color: #000; }
+    body:not(.clr) table, body:not(.clr) th, body:not(.clr) td { border-color: #475569; }
+
+    tr.d {
+      height: 6.8mm;
+    }
+
+    tr.d:nth-child(even) {
+      background-color: #fafdfc;
+    }
+
+    td.nm {
+      text-align: left;
+      padding-left: 4px;
+      font-weight: 600;
+      color: #0f172a;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 8.5px;
+    }
+
+    td.n {
+      text-align: right;
+      padding-right: 3px;
+      font-variant-numeric: tabular-nums;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 8.5px;
+    }
+
+    td.pn {
+      text-align: center;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      font-size: 9px;
+    }
+
+    td.tot {
+      background-color: #eaf3ef !important;
+      font-weight: 700;
+    }
+
+    td.gt {
+      background-color: #dcebe3 !important;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    td.rc {
+      font-size: 8px;
+      color: #475569;
+    }
+
+    tr.t {
+      background-color: #dcebe3 !important;
+      font-weight: 800;
+      border-top: 1.5px solid #1e4a3b;
+      border-bottom: 1.5px solid #1e4a3b;
+    }
+
+    tr.t td {
+      font-weight: 800;
+      font-size: 9px;
+    }
+
+    .sumbox {
+      margin-top: 4px;
+      border: 1px solid #a3c9bb;
+      border-radius: 4px;
+      padding: 3px 8px;
+      background-color: #f4f9f7;
+    }
+
+    .sumbox h4 {
+      font-size: 10px;
+      font-weight: 700;
+      color: #1e4a3b;
+      margin: 0 0 3px 0;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px 6px;
+    }
+
+    .chip {
+      background-color: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 1.5px 6px;
+      font-size: 8.5px;
+      color: #334155;
+      white-space: nowrap;
+    }
+
+    .chip b {
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    /* KPI Summary Boxes in doc1 */
+    .boxes {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .bx {
+      background-color: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 4px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    body.clr .bx:nth-child(1) { border-left: 3px solid #0284c7; background: #f0f9ff; }
+    body.clr .bx:nth-child(2) { border-left: 3px solid #059669; background: #ecfdf5; }
+    body.clr .bx:nth-child(3) { border-left: 3px solid #d97706; background: #fffbeb; }
+    body.clr .bx:nth-child(4) { border-left: 3px solid #dc2626; background: #fef2f2; }
+
+    .bx span {
+      font-size: 8.5px;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .bx b {
+      font-size: 13px;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .pg {
+      text-align: right;
+      font-size: 9px;
+      font-weight: 600;
+      color: #64748b;
+      margin-top: 3px;
+    }
+  </style>
+</head>
+<body class="clr">
+
+  <!-- Floating Screen Toolbar -->
+  <div class="no-print top-toolbar">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex flex-wrap items-center gap-3">
+        <a href="11_namuna_9_demand_register.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          मागे (नमुना ९ नोंदवही)
+        </a>
+        <div class="h-5 w-px bg-slate-700 hidden sm:block"></div>
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-bold text-slate-300">Print प्रकार:</label>
+          <select id="toolbarPrintType" onchange="switchRegisterFormat(this.value)" class="bg-slate-800 border border-slate-600 rounded-lg px-2.5 py-1 text-xs font-bold text-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <option value="general" selected>सामान्य नमुना ९ (Format A)</option>
+            <option value="combined">एकत्रित नमुना ९ (Format C)</option>
+            <option value="water">पाणी नमुना ९ (Format B)</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-bold text-slate-300">रजिस्टर भाग:</label>
+          <select id="toolbarSection" onchange="filterRegisterSections(this.value)" class="bg-slate-800 border border-slate-600 rounded-lg px-2.5 py-1 text-xs font-semibold text-white focus:outline-none">
+            <option value="both">दोन्ही पाने (मागणी + वसुली)</option>
+            <option value="doc0">केवळ मागणी नोंदवही (Page 1)</option>
+            <option value="doc1">केवळ वसुली नोंदवही (Page 2)</option>
+          </select>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-xs font-bold text-slate-300">शैली:</label>
+          <div class="inline-flex rounded-lg overflow-hidden border border-slate-700">
+            <button type="button" id="btnColor" onclick="setStyle('clr')" class="px-2.5 py-1 text-xs font-bold bg-emerald-700 text-white">रंगीत</button>
+            <button type="button" id="btnBW" onclick="setStyle('bw')" class="px-2.5 py-1 text-xs font-bold bg-slate-800 text-slate-400 hover:text-white">B&W</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="exportCurrentFormatToExcel()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition active:scale-95">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+          Excel Export
+        </button>
+        <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm transition active:scale-95">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+          Print / PDF (Ctrl+P)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Register Printable Documents Container -->
+  <main id="registerMainContent">
+    <!-- Format A (General) rendered by default -->
+  </main>
+
+  <script>
+    // Exact statutory formats dictionary
+    const REGISTER_TEMPLATES = {
+      // FORMAT A: सामान्य नमुना ९ (मागणी + वसुली)
+      general: `
+<div class="doc0"><section class="page"><div class="top"><b>ई-ग्रामपंचायत ERP | नमुना ९</b><b>संगणकीकृत नोंदवही</b></div><div class="hd"><span class="badge">A</span><p class="l1">नमुना ९ • (नियम २२(९), ३२(४), ५(६) व (७) पहा)</p><h1>सामान्य कर मागणी नोंदवही</h1><p class="l3">सन २०२६-२७ या वर्षी आकारणी केलेल्या करांची मागणी नोंदवही</p></div><div class="meta"><span>ग्रामपंचायत : <b>चिंचोली खुर्द</b></span><span>गाव / मोहल्ला : <b>चिंचोली खुर्द, रहिमापूर</b></span><span>तालुका : <b>अंजनगाव सुर्जी</b></span><span>जिल्हा : <b>अमरावती</b></span><span>वॉर्ड क्रमांक : <b>१</b></span><span>मंडळ : <b>—</b></span><span>फॉरमॅट : <b>A</b></span></div><table><colgroup><col style="width:6mm"><col style="width:7mm"><col style="width:15mm"><col style="width:50.400000000000006mm"><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col style="width:18mm"><col style="width:26mm"></colgroup><thead><tr><th rowspan="3" class="dk">अ.क्र.</th><th rowspan="3" class="dk">वॉर्ड</th><th rowspan="3" class="dk">मिळकत क्र.</th><th rowspan="3" class="dk">मालमत्ता धारकाचे नाव</th><th colspan="20" class="dk">मागणी</th><th rowspan="3" class="dk">पावती क्रमांक व तारीख</th></tr><tr><th colspan="3" class="lt">घरपट्टी</th><th colspan="3" class="lt">दिवाबत्ती कर</th><th colspan="3" class="lt">आरोग्य कर</th><th colspan="3" class="lt">स्वच्छता कर</th><th colspan="3" class="lt">इतर कर</th><th rowspan="2" class="fee">नोटीस फी</th><th rowspan="2" class="fee">वारंट फी</th><th rowspan="2" class="fee">दंड</th><th rowspan="2" class="fee">सूट</th><th rowspan="2" class="lt gtH">एकूण मागणी</th></tr><tr><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">ए</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">ए</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">ए</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">ए</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">ए</th></tr></thead><tbody><tr class="d"><td>1</td><td>1</td><td>1</td><td class="nm">ऋषिकेश सावरकर</td><td class="n">2</td><td class="n">66</td><td class="n tot">68</td><td class="n">0</td><td class="n">40</td><td class="n tot">40</td><td class="n">0</td><td class="n">40</td><td class="n tot">40</td><td class="n">0</td><td class="n">100</td><td class="n tot">100</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot gt">248</td><td class="rc"></td></tr><tr class="d"><td>2</td><td>1</td><td>2</td><td class="nm">बलवान पेंदिनाथ दिनकर</td><td class="n">0</td><td class="n">1,624</td><td class="n tot">1,624</td><td class="n">0</td><td class="n">50</td><td class="n tot">50</td><td class="n">0</td><td class="n">50</td><td class="n tot">50</td><td class="n">0</td><td class="n">100</td><td class="n tot">100</td><td class="n">0</td><td class="n">20</td><td class="n tot">20</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot gt">1,844</td><td class="rc"></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="t"><td colspan="4">या पानाची बेरीज</td><td class="n">2</td><td class="n">1,690</td><td class="n">1,692</td><td class="n">0</td><td class="n">90</td><td class="n">90</td><td class="n">0</td><td class="n">90</td><td class="n">90</td><td class="n">0</td><td class="n">200</td><td class="n">200</td><td class="n">0</td><td class="n">20</td><td class="n">20</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">2,092</td><td></td></tr></tbody></table><div class="sumbox"><h4>पानाची करनिहाय एकूण बेरीज</h4><div class="chips"><span class="chip">घरपट्टी: <b>₹1,692</b></span><span class="chip">दिवाबत्ती कर: <b>₹90</b></span><span class="chip">आरोग्य कर: <b>₹90</b></span><span class="chip">स्वच्छता कर: <b>₹200</b></span><span class="chip">इतर कर: <b>₹20</b></span><span class="chip">नोटीस फी: <b>₹0</b></span><span class="chip">वारंट फी: <b>₹0</b></span><span class="chip">दंड: <b>₹0</b></span><span class="chip">सूट: <b>₹0</b></span><span class="chip">एकूण मागणी: <b>₹2,092</b></span></div></div><div class="pg">पान 1 / 1</div></section></div>
+
+<div class="doc1"><section class="page"><div class="top"><b>ई-ग्रामपंचायत ERP | नमुना ९</b><b>संगणकीकृत नोंदवही</b></div><div class="hd"><span class="badge">A</span><p class="l1">नमुना ९ • (नियम २२(९), ३२(४), ५(६) व (७) पहा)</p><h1>सामान्य कर वसुली नोंदवही</h1><p class="l3">सन २०२६-२७ या वर्षी आकारणी केलेल्या करांची वसुली नोंदवही</p></div><div class="meta"><span>ग्रामपंचायत : <b>चिंचोली खुर्द</b></span><span>तालुका : <b>अंजनगाव सुर्जी</b></span><span>जिल्हा : <b>अमरावती</b></span><span>वॉर्ड क्रमांक : <b>१</b></span><span>मंडळ : <b>—</b></span><span>फॉरमॅट : <b>A</b></span></div><table><colgroup><col style="width:17mm"><col><col><col><col><col><col><col><col><col><col><col><col><col><col style="width:14mm"><col><col><col><col><col><col><col><col><col><col><col><col><col><col style="width:14mm"></colgroup><thead><tr><th rowspan="3" class="dk">मिळकत क्र.</th><th colspan="14" class="gR">वसुली</th><th colspan="5" class="gS">मंजूर सूट</th><th colspan="9" class="gB">बाकी</th></tr><tr><th colspan="2" class="lt">घरपट्टी</th><th colspan="2" class="lt">दिवाबत्ती कर</th><th colspan="2" class="lt">आरोग्य कर</th><th colspan="2" class="lt">स्वच्छता कर</th><th colspan="2" class="lt">इतर कर</th><th rowspan="2" class="fee">नोटीस फी</th><th rowspan="2" class="fee">वारंट फी</th><th rowspan="2" class="fee">दंड</th><th rowspan="2" class="dk">एकूण वसुली</th><th rowspan="2" class="sootH">घरपट्टी</th><th rowspan="2" class="sootH">दिवाबत्ती कर</th><th rowspan="2" class="sootH">आरोग्य कर</th><th rowspan="2" class="sootH">स्वच्छता कर</th><th rowspan="2" class="sootH">इतर कर</th><th rowspan="2" class="bkH">घरपट्टी</th><th rowspan="2" class="bkH">दिवाबत्ती कर</th><th rowspan="2" class="bkH">आरोग्य कर</th><th rowspan="2" class="bkH">स्वच्छता कर</th><th rowspan="2" class="bkH">इतर कर</th><th rowspan="2" class="fee">नोटीस फी</th><th rowspan="2" class="fee">वारंट फी</th><th rowspan="2" class="fee">दंड</th><th rowspan="2" class="dk">एकूण बाकी</th></tr><tr><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">मा.</th><th class="sub">चा.</th></tr></thead><tbody><tr class="d"><td class="pn">1</td><td class="n">2</td><td class="n">66</td><td class="n">0</td><td class="n">40</td><td class="n">0</td><td class="n">40</td><td class="n">0</td><td class="n">100</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">248</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td></tr><tr class="d"><td class="pn">2</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">1,624</td><td class="n">50</td><td class="n">50</td><td class="n">100</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">1,824</td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="t"><td>बेरीज</td><td class="n">2</td><td class="n">66</td><td class="n">0</td><td class="n">40</td><td class="n">0</td><td class="n">40</td><td class="n">0</td><td class="n">100</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">248</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">1,624</td><td class="n">50</td><td class="n">50</td><td class="n">100</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">1,824</td></tr></tbody></table><div class="sumbox"><h4>पानाची करनिहाय वसुली बेरीज</h4><div class="chips"><span class="chip">घरपट्टी वसुली: <b>₹68</b></span><span class="chip">दिवाबत्ती कर वसुली: <b>₹40</b></span><span class="chip">आरोग्य कर वसुली: <b>₹40</b></span><span class="chip">स्वच्छता कर वसुली: <b>₹100</b></span><span class="chip">इतर कर वसुली: <b>₹0</b></span><span class="chip">नोटीस फी वसुली: <b>₹0</b></span><span class="chip">वारंट फी वसुली: <b>₹0</b></span><span class="chip">दंड वसुली: <b>₹0</b></span></div></div><div class="boxes" style="grid-template-columns:repeat(4,1fr)"><div class="bx"><span>संपूर्ण नोंदवही मागणी</span><b>₹2,092</b></div><div class="bx"><span>संपूर्ण नोंदवही वसुली</span><b>₹248</b></div><div class="bx"><span>संपूर्ण नोंदवही मंजूर सूट</span><b>₹0</b></div><div class="bx"><span>संपूर्ण नोंदवही बाकी</span><b>₹1,824</b></div></div><div class="pg">पान 1 / 1</div></section></div>
+`,
+
+      // FORMAT C: एकत्रित नमुना ९ (मागणी + वसुली - As in user uploaded image)
+      combined: `
+<div class="doc0"><section class="page"><div class="top"><b>ई-ग्रामपंचायत ERP | नमुना ९</b><b>संगणकीकृत नोंदवही</b></div><div class="hd"><span class="badge">C</span><p class="l1">नमुना ९ • (नियम २२(९), ३२(४), ५(६) व (७) पहा)</p><h1>एकत्रित मागणी नोंदवही</h1><p class="l3">सन २०२६-२७ या वर्षी आकारणी केलेल्या करांची मागणी नोंदवही</p></div><div class="meta"><span>ग्रामपंचायत : <b>चिंचोली खुर्द</b></span><span>गाव / मोहल्ला : <b>चिंचोली खुर्द, रहिमापूर</b></span><span>तालुका : <b>अंजनगाव सुर्जी</b></span><span>जिल्हा : <b>अमरावती</b></span><span>वॉर्ड क्रमांक : <b>१</b></span><span>मंडळ : <b>—</b></span><span>फॉरमॅट : <b>C</b></span></div><table><colgroup><col style="width:6mm"><col style="width:7mm"><col style="width:12mm"><col style="width:38mm"><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col style="width:9mm"><col style="width:9mm"><col style="width:9mm"><col style="width:9mm"><col style="width:16mm"><col style="width:22mm"></colgroup><thead><tr><th rowspan="3" class="dk">अ.क्र.</th><th rowspan="3" class="dk">वॉर्ड</th><th rowspan="3" class="dk">मिळकत क्र.</th><th rowspan="3" class="dk">मालमत्ता धारकाचे नाव</th><th colspan="26" class="dk">मागणी</th><th rowspan="3" class="dk">पावती क्रमांक व तारीख</th></tr><tr><th colspan="3" class="lt">घरपट्टी</th><th colspan="3" class="lt">दिवाबत्ती कर</th><th colspan="3" class="lt">आरोग्य कर</th><th colspan="3" class="lt">स्वच्छता कर</th><th colspan="3" class="lt">इतर कर</th><th colspan="3" class="lt">सामान्य पाणीपट्टी</th><th colspan="3" class="lt">विशेष पाणीपट्टी</th><th rowspan="2" class="fee">नोटीस फी</th><th rowspan="2" class="fee">वारंट फी</th><th rowspan="2" class="fee">दंड</th><th rowspan="2" class="fee">सूट</th><th rowspan="2" class="lt gtH">एकूण मागणी</th></tr><tr><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">ए</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">ए</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">ए</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">ए</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">ए</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">ए</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">ए</th></tr></thead><tbody><tr class="d"><td>1</td><td>1</td><td>1</td><td class="nm">ऋषिकेश सावरकर</td><td class="n">2</td><td class="n">66</td><td class="n tot">68</td><td class="n">0</td><td class="n">40</td><td class="n tot">40</td><td class="n">0</td><td class="n">40</td><td class="n tot">40</td><td class="n">0</td><td class="n">100</td><td class="n tot">100</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot gt">248</td><td class="rc"></td></tr><tr class="d"><td>2</td><td>1</td><td>2</td><td class="nm">बलवान पेंदिनाथ दिनकर</td><td class="n">0</td><td class="n">1,624</td><td class="n tot">1,624</td><td class="n">0</td><td class="n">50</td><td class="n tot">50</td><td class="n">0</td><td class="n">50</td><td class="n tot">50</td><td class="n">0</td><td class="n">100</td><td class="n tot">100</td><td class="n">0</td><td class="n">20</td><td class="n tot">20</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot gt">1,844</td><td class="rc"></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="t"><td colspan="4">या पानाची बेरीज</td><td class="n">2</td><td class="n">1,690</td><td class="n">1,692</td><td class="n">0</td><td class="n">90</td><td class="n">90</td><td class="n">0</td><td class="n">90</td><td class="n">90</td><td class="n">0</td><td class="n">200</td><td class="n">200</td><td class="n">0</td><td class="n">20</td><td class="n">20</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">2,092</td><td></td></tr></tbody></table><div class="sumbox"><h4>पानाची करनिहाय एकूण बेरीज</h4><div class="chips"><span class="chip">घरपट्टी: <b>₹1,692</b></span><span class="chip">दिवाबत्ती कर: <b>₹90</b></span><span class="chip">आरोग्य कर: <b>₹90</b></span><span class="chip">स्वच्छता कर: <b>₹200</b></span><span class="chip">इतर कर: <b>₹20</b></span><span class="chip">सामान्य पाणीपट्टी: <b>₹0</b></span><span class="chip">विशेष पाणीपट्टी: <b>₹0</b></span><span class="chip">नोटीस फी: <b>₹0</b></span><span class="chip">वारंट फी: <b>₹0</b></span><span class="chip">दंड: <b>₹0</b></span><span class="chip">सूट: <b>₹0</b></span><span class="chip">एकूण मागणी: <b>₹2,092</b></span></div></div><div class="pg">पान 1 / 1</div></section></div>
+
+<div class="doc1"><section class="page"><div class="top"><b>ई-ग्रामपंचायत ERP | नमुना ९</b><b>संगणकीकृत नोंदवही</b></div><div class="hd"><span class="badge">C</span><p class="l1">नमुना ९ • (नियम २२(९), ३२(४), ५(६) व (७) पहा)</p><h1>एकत्रित कर वसुली नोंदवही</h1><p class="l3">सन २०२६-२७ या वर्षी आकारणी केलेल्या करांची वसुली नोंदवही</p></div><div class="meta"><span>ग्रामपंचायत : <b>चिंचोली खुर्द</b></span><span>तालुका : <b>अंजनगाव सुर्जी</b></span><span>जिल्हा : <b>अमरावती</b></span><span>वॉर्ड क्रमांक : <b>१</b></span><span>मंडळ : <b>—</b></span><span>फॉरमॅट : <b>C</b></span></div><table><colgroup><col style="width:16mm"><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col style="width:14mm"><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col><col style="width:14mm"></colgroup><thead><tr><th rowspan="3" class="dk">मिळकत क्र.</th><th colspan="18" class="gR">वसुली</th><th colspan="7" class="gS">मंजूर सूट</th><th colspan="11" class="gB">बाकी</th></tr><tr><th colspan="2" class="lt">घरपट्टी</th><th colspan="2" class="lt">दिवाबत्ती</th><th colspan="2" class="lt">आरोग्य</th><th colspan="2" class="lt">स्वच्छता</th><th colspan="2" class="lt">इतर कर</th><th colspan="2" class="lt">सामान्य पाणी</th><th colspan="2" class="lt">विशेष पाणी</th><th rowspan="2" class="fee">नोटीस</th><th rowspan="2" class="fee">वारंट</th><th rowspan="2" class="fee">दंड</th><th rowspan="2" class="dk">एकूण वसुली</th><th rowspan="2" class="sootH">घरपट्टी</th><th rowspan="2" class="sootH">दिवाबत्ती</th><th rowspan="2" class="sootH">आरोग्य</th><th rowspan="2" class="sootH">स्वच्छता</th><th rowspan="2" class="sootH">इतर</th><th rowspan="2" class="sootH">सा.पाणी</th><th rowspan="2" class="sootH">वि.पाणी</th><th rowspan="2" class="bkH">घरपट्टी</th><th rowspan="2" class="bkH">दिवाबत्ती</th><th rowspan="2" class="bkH">आरोग्य</th><th rowspan="2" class="bkH">स्वच्छता</th><th rowspan="2" class="bkH">इतर</th><th rowspan="2" class="bkH">सा.पाणी</th><th rowspan="2" class="bkH">वि.पाणी</th><th rowspan="2" class="fee">नोटीस</th><th rowspan="2" class="fee">वारंट</th><th rowspan="2" class="fee">दंड</th><th rowspan="2" class="dk">एकूण बाकी</th></tr><tr><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">मा.</th><th class="sub">चा.</th></tr></thead><tbody><tr class="d"><td class="pn">1</td><td class="n">2</td><td class="n">66</td><td class="n">0</td><td class="n">40</td><td class="n">0</td><td class="n">40</td><td class="n">0</td><td class="n">100</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">248</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td></tr><tr class="d"><td class="pn">2</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">1,624</td><td class="n">50</td><td class="n">50</td><td class="n">100</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">1,824</td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="t"><td>बेरीज</td><td class="n">2</td><td class="n">66</td><td class="n">0</td><td class="n">40</td><td class="n">0</td><td class="n">40</td><td class="n">0</td><td class="n">100</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">248</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">1,624</td><td class="n">50</td><td class="n">50</td><td class="n">100</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">1,824</td></tr></tbody></table><div class="sumbox"><h4>पानाची करनिहाय वसुली बेरीज</h4><div class="chips"><span class="chip">घरपट्टी वसुली: <b>₹68</b></span><span class="chip">दिवाबत्ती कर वसुली: <b>₹40</b></span><span class="chip">आरोग्य कर वसुली: <b>₹40</b></span><span class="chip">स्वच्छता कर वसुली: <b>₹100</b></span><span class="chip">इतर कर वसुली: <b>₹0</b></span><span class="chip">सामान्य पाणीपट्टी वसुली: <b>₹0</b></span><span class="chip">विशेष पाणीपट्टी वसुली: <b>₹0</b></span><span class="chip">नोटीस फी वसुली: <b>₹0</b></span><span class="chip">वारंट फी वसुली: <b>₹0</b></span><span class="chip">दंड वसुली: <b>₹0</b></span></div></div><div class="boxes" style="grid-template-columns:repeat(4,1fr)"><div class="bx"><span>संपूर्ण नोंदवही मागणी</span><b>₹2,092</b></div><div class="bx"><span>संपूर्ण नोंदवही वसुली</span><b>₹248</b></div><div class="bx"><span>संपूर्ण नोंदवही मंजूर सूट</span><b>₹0</b></div><div class="bx"><span>संपूर्ण नोंदवही बाकी</span><b>₹1,824</b></div></div><div class="pg">पान 1 / 1</div></section></div>
+`,
+
+      // FORMAT B: पाणी नमुना ९ (मागणी + वसुली)
+      water: `
+<div class="doc0"><section class="page"><div class="top"><b>ई-ग्रामपंचायत ERP | नमुना ९</b><b>संगणकीकृत नोंदवही</b></div><div class="hd"><span class="badge">B</span><p class="l1">नमुना ९ • (नियम २२(९), ३२(४), ५(६) व (७) पहा)</p><h1>पाणीपट्टी मागणी नोंदवही</h1><p class="l3">सन २०२६-२७ या वर्षी आकारणी केलेल्या करांची मागणी नोंदवही</p></div><div class="meta"><span>ग्रामपंचायत : <b>चिंचोली खुर्द</b></span><span>गाव / मोहल्ला : <b>चिंचोली खुर्द, रहिमापूर</b></span><span>तालुका : <b>अंजनगाव सुर्जी</b></span><span>जिल्हा : <b>अमरावती</b></span><span>वॉर्ड क्रमांक : <b>१</b></span><span>मंडळ : <b>—</b></span><span>फॉरमॅट : <b>B</b></span></div><table><colgroup><col style="width:6mm"><col style="width:7mm"><col style="width:15mm"><col style="width:52mm"><col><col><col><col><col><col><col><col><col><col><col style="width:18mm"><col style="width:26mm"></colgroup><thead><tr><th rowspan="3" class="dk">अ.क्र.</th><th rowspan="3" class="dk">वॉर्ड</th><th rowspan="3" class="dk">मिळकत क्र.</th><th rowspan="3" class="dk">मालमत्ता धारकाचे नाव</th><th colspan="11" class="dk">मागणी</th><th rowspan="3" class="dk">पावती क्रमांक व तारीख</th></tr><tr><th colspan="3" class="lt">सामान्य पाणीपट्टी</th><th colspan="3" class="lt">विशेष पाणीपट्टी</th><th rowspan="2" class="fee">नोटीस फी</th><th rowspan="2" class="fee">वारंट फी</th><th rowspan="2" class="fee">दंड</th><th rowspan="2" class="fee">सूट</th><th rowspan="2" class="lt gtH">एकूण मागणी</th></tr><tr><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">ए</th><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">ए</th></tr></thead><tbody><tr class="d"><td>1</td><td>1</td><td>1</td><td class="nm">ऋषिकेश सावरकर</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot gt">0</td><td class="rc"></td></tr><tr class="d"><td>2</td><td>1</td><td>2</td><td class="nm">बलवान पेंदिनाथ दिनकर</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot gt">0</td><td class="rc"></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="t"><td colspan="4">या पानाची बेरीज</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td></td></tr></tbody></table><div class="sumbox"><h4>पानाची करनिहाय एकूण बेरीज</h4><div class="chips"><span class="chip">सामान्य पाणीपट्टी: <b>₹0</b></span><span class="chip">विशेष पाणीपट्टी: <b>₹0</b></span><span class="chip">नोटीस फी: <b>₹0</b></span><span class="chip">वारंट फी: <b>₹0</b></span><span class="chip">दंड: <b>₹0</b></span><span class="chip">सूट: <b>₹0</b></span><span class="chip">एकूण मागणी: <b>₹0</b></span></div></div><div class="pg">पान 1 / 1</div></section></div>
+
+<div class="doc1"><section class="page"><div class="top"><b>ई-ग्रामपंचायत ERP | नमुना ९</b><b>संगणकीकृत नोंदवही</b></div><div class="hd"><span class="badge">B</span><p class="l1">नमुना ९ • (नियम २२(९), ३२(४), ५(६) व (७) पहा)</p><h1>पाणीपट्टी वसुली नोंदवही</h1><p class="l3">सन २०२६-२७ या वर्षी आकारणी केलेल्या करांची वसुली नोंदवही</p></div><div class="meta"><span>ग्रामपंचायत : <b>चिंचोली खुर्द</b></span><span>तालुका : <b>अंजनगाव सुर्जी</b></span><span>जिल्हा : <b>अमरावती</b></span><span>वॉर्ड क्रमांक : <b>१</b></span><span>मंडळ : <b>—</b></span><span>फॉरमॅट : <b>B</b></span></div><table><colgroup><col style="width:17mm"><col><col><col><col><col><col><col><col style="width:16mm"><col><col><col><col><col><col><col><col style="width:16mm"></colgroup><thead><tr><th rowspan="3" class="dk">मिळकत क्र.</th><th colspan="8" class="gR">वसुली</th><th colspan="2" class="gS">मंजूर सूट</th><th colspan="6" class="gB">बाकी</th></tr><tr><th colspan="2" class="lt">सामान्य पाणीपट्टी</th><th colspan="2" class="lt">विशेष पाणीपट्टी</th><th rowspan="2" class="fee">नोटीस</th><th rowspan="2" class="fee">वारंट</th><th rowspan="2" class="fee">दंड</th><th rowspan="2" class="dk">एकूण वसुली</th><th rowspan="2" class="sootH">सामान्य पाणी</th><th rowspan="2" class="sootH">विशेष पाणी</th><th rowspan="2" class="bkH">सामान्य पाणी</th><th rowspan="2" class="bkH">विशेष पाणी</th><th rowspan="2" class="fee">नोटीस</th><th rowspan="2" class="fee">वारंट</th><th rowspan="2" class="fee">दंड</th><th rowspan="2" class="dk">एकूण बाकी</th></tr><tr><th class="sub">मा.</th><th class="sub">चा.</th><th class="sub">मा.</th><th class="sub">चा.</th></tr></thead><tbody><tr class="d"><td class="pn">1</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td></tr><tr class="d"><td class="pn">2</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n tot">0</td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="d"><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr class="t"><td>बेरीज</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0</td></tr></tbody></table><div class="sumbox"><h4>पानाची करनिहाय वसुली बेरीज</h4><div class="chips"><span class="chip">सामान्य पाणीपट्टी वसुली: <b>₹0</b></span><span class="chip">विशेष पाणीपट्टी वसुली: <b>₹0</b></span><span class="chip">नोटीस फी वसुली: <b>₹0</b></span><span class="chip">वारंट फी वसुली: <b>₹0</b></span><span class="chip">दंड वसुली: <b>₹0</b></span></div></div><div class="boxes" style="grid-template-columns:repeat(4,1fr)"><div class="bx"><span>संपूर्ण नोंदवही मागणी</span><b>₹0</b></div><div class="bx"><span>संपूर्ण नोंदवही वसुली</span><b>₹0</b></div><div class="bx"><span>संपूर्ण नोंदवही मंजूर सूट</span><b>₹0</b></div><div class="bx"><span>संपूर्ण नोंदवही बाकी</span><b>₹0</b></div></div><div class="pg">पान 1 / 1</div></section></div>
+`
+    };
+
+    function switchRegisterFormat(formatKey) {
+      const container = document.getElementById('registerMainContent');
+      const markup = REGISTER_TEMPLATES[formatKey] || REGISTER_TEMPLATES.general;
+      container.innerHTML = markup;
+
+      const sel = document.getElementById('toolbarPrintType');
+      if (sel && sel.value !== formatKey) {
+        sel.value = formatKey;
+      }
+
+      // Title update
+      const titles = {
+        general: 'सामान्य कर नोंदवही (Format A)',
+        combined: 'एकत्रित नोंदवही (Format C)',
+        water: 'पाणीपट्टी नोंदवही (Format B)'
+      };
+      document.title = (titles[formatKey] || 'नमुना ९') + ' — चिंचोली खुर्द';
+
+      // Re-apply section filter if set
+      const secSel = document.getElementById('toolbarSection');
+      if (secSel) filterRegisterSections(secSel.value);
+
+      // Cleanly sync URL param
+      const url = new URL(window.location);
+      url.searchParams.set('format', formatKey);
+      window.history.replaceState({}, '', url);
+    }
+
+    function filterRegisterSections(sectionVal) {
+      const doc0 = document.querySelector('.doc0');
+      const doc1 = document.querySelector('.doc1');
+      if (!doc0 || !doc1) return;
+
+      if (sectionVal === 'doc0') {
+        doc0.style.display = 'block';
+        doc1.style.display = 'none';
+      } else if (sectionVal === 'doc1') {
+        doc0.style.display = 'none';
+        doc1.style.display = 'block';
+      } else {
+        doc0.style.display = 'block';
+        doc1.style.display = 'block';
+      }
+    }
+
+    function setStyle(styleVal) {
+      const btnColor = document.getElementById('btnColor');
+      const btnBW = document.getElementById('btnBW');
+
+      if (styleVal === 'clr') {
+        document.body.classList.add('clr');
+        if (btnColor) {
+          btnColor.className = 'px-2.5 py-1 text-xs font-bold bg-emerald-700 text-white';
+        }
+        if (btnBW) {
+          btnBW.className = 'px-2.5 py-1 text-xs font-bold bg-slate-800 text-slate-400 hover:text-white';
+        }
+      } else {
+        document.body.classList.remove('clr');
+        if (btnColor) {
+          btnColor.className = 'px-2.5 py-1 text-xs font-bold bg-slate-800 text-slate-400 hover:text-white';
+        }
+        if (btnBW) {
+          btnBW.className = 'px-2.5 py-1 text-xs font-bold bg-indigo-700 text-white';
+        }
+      }
+    }
+
+    function exportCurrentFormatToExcel() {
+      const formatKey = document.getElementById('toolbarPrintType')?.value || 'general';
+      let csv = "\uFEFF";
+      let filename = "Namuna_9_Register_" + formatKey + "_2026-27.csv";
+
+      if (formatKey === 'general') {
+        filename = "Namuna_9_General_Register_2026-27.csv";
+        csv += "मागणी नोंदवही (Demand Register - Format A)\n"
+            + "अ.क्र.,वॉर्ड,मिळकत क्र.,मालमत्ता धारकाचे नाव,घरपट्टी (मा.),घरपट्टी (चा.),घरपट्टी (ए),दिवाबत्ती (मा.),दिवाबत्ती (चा.),दिवाबत्ती (ए),आरोग्य (मा.),आरोग्य (चा.),आरोग्य (ए),स्वच्छता (मा.),स्वच्छता (चा.),स्वच्छता (ए),इतर कर (मा.),इतर कर (चा.),इतर कर (ए),नोटीस फी,वारंट फी,दंड,सूट,एकूण मागणी,पावती क्र. व दिनांक\n"
+            + "1,1,1,ऋषिकेश सावरकर,2,66,68,0,40,40,0,40,40,0,100,100,0,0,0,0,0,0,0,248,\n"
+            + "2,1,2,बलवान पेंदिनाथ दिनकर,0,1624,1624,0,50,50,0,50,50,0,100,100,0,20,20,0,0,0,0,1844,\n"
+            + "या पानाची बेरीज,,,,2,1690,1692,0,90,90,0,90,90,0,200,200,0,20,20,0,0,0,0,2092,\n\n"
+            + "वसुली नोंदवही (Collection Register - Format A)\n"
+            + "मिळकत क्र.,घरपट्टी वसुली,दिवाबत्ती वसुली,आरोग्य वसुली,स्वच्छता वसुली,इतर वसुली,नोटीस/वारंट/दंड वसुली,एकूण वसुली,मंजूर सूट,घरपट्टी बाकी,दिवाबत्ती बाकी,आरोग्य बाकी,स्वच्छता बाकी,इतर बाकी,एकूण बाकी\n"
+            + "1,68,40,40,100,0,0,248,0,0,0,0,0,0,0\n"
+            + "2,0,0,0,0,0,0,0,0,1624,50,50,100,0,1824\n"
+            + "बेरीज,68,40,40,100,0,0,248,0,1624,50,50,100,0,1824\n";
+      } else if (formatKey === 'water') {
+        filename = "Namuna_9_Water_Register_2026-27.csv";
+        csv += "पाणीपट्टी मागणी नोंदवही (Water Demand Register - Format B)\n"
+            + "अ.क्र.,वॉर्ड,मिळकत क्र.,मालमत्ता धारकाचे नाव,सामान्य पाणीपट्टी (मा.),सामान्य पाणीपट्टी (चा.),सामान्य पाणीपट्टी (ए),विशेष पाणीपट्टी (मा.),विशेष पाणीपट्टी (चा.),विशेष पाणीपट्टी (ए),नोटीस फी,वारंट फी,दंड,सूट,एकूण मागणी,पावती क्र. व दिनांक\n"
+            + "1,1,1,ऋषिकेश सावरकर,0,0,0,0,0,0,0,0,0,0,0,\n"
+            + "2,1,2,बलवान पेंदिनाथ दिनकर,0,0,0,0,0,0,0,0,0,0,0,\n"
+            + "या पानाची बेरीज,,,,0,0,0,0,0,0,0,0,0,0,0,\n";
+      } else {
+        filename = "Namuna_9_Combined_Register_2026-27.csv";
+        csv += "एकत्रित कर व पाणीपट्टी नोंदवही (Combined Register - Format C)\n"
+            + "अ.क्र.,वॉर्ड,मिळकत क्र.,मालमत्ता धारकाचे नाव,घरपट्टी (ए),दिवाबत्ती (ए),आरोग्य (ए),स्वच्छता (ए),इतर (ए),सामान्य पाणी (ए),विशेष पाणी (ए),नोटीस,वारंट,दंड,सूट,एकूण मागणी\n"
+            + "1,1,1,ऋषिकेश सावरकर,68,40,40,100,0,0,0,0,0,0,0,248\n"
+            + "2,1,2,बलवान पेंदिनाथ दिनकर,1624,50,50,100,20,0,0,0,0,0,0,1844\n"
+            + "या पानाची बेरीज,,,,1692,90,90,200,20,0,0,0,0,0,0,2092\n";
+      }
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Initialize from URL search parameters
+    window.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      let fmt = params.get('format') || params.get('type') || 'general';
+      if (fmt === 'A' || fmt === 'a') fmt = 'general';
+      if (fmt === 'B' || fmt === 'b') fmt = 'water';
+      if (fmt === 'C' || fmt === 'c') fmt = 'combined';
+
+      switchRegisterFormat(fmt);
+
+      const secParam = params.get('section');
+      if (secParam && document.getElementById('toolbarSection')) {
+        document.getElementById('toolbarSection').value = secParam;
+        filterRegisterSections(secParam);
+      }
+
+      if (params.get('print') === 'true' || params.get('autoprint') === '1') {
+        setTimeout(() => {
+          window.print();
+        }, 500);
+      }
+    });
+  </script>
+</body>
+</html>

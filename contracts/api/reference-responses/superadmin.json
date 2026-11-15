@@ -1,0 +1,84 @@
+{
+  "dashboardStats": {
+    "totalVillages": 3420,
+    "activeVillages": 3210,
+    "pendingActivation": 45,
+    "expiredVillages": 165,
+    "totalCitizens": 1850000,
+    "totalProperties": 1240580,
+    "totalTaxCollectedStatewide": 485000000.0,
+    "totalTaxDemandedStatewide": 576000000.0,
+    "collectionPercentage": 84.2,
+    "totalPlatformRevenue": 20520000.0,
+    "expiringIn30Days": 128,
+    "pendingPaymentSubmissions": 9
+  },
+  "sampleTenants": [
+    {
+      "id": 1,
+      "lgdCode": "123455",
+      "nameMr": "ग्रामपंचायत चिंचोली खुर्द",
+      "nameEn": "Gram Panchayat Chincholi Khurd",
+      "districtMr": "अमरावती",
+      "talukaMr": "अंजनगाव सुर्जी",
+      "totalWards": 6,
+      "populationCensus": 3250,
+      "adminName": "संजय गजाननराव देशमुख",
+      "adminPhone": "9422881122",
+      "subscriptionStatus": "ACTIVE",
+      "subscriptionExpiry": "2027-03-31T23:59:59Z",
+      "propertiesCount": 142,
+      "citizensCount": 210,
+      "taxDemanded": 248000.0,
+      "taxCollected": 106450.0
+    },
+    {
+      "id": 2,
+      "lgdCode": "555001",
+      "nameMr": "ग्रामपंचायत ढोकरी टेस्ट",
+      "nameEn": "Gram Panchayat Dhokri Test",
+      "districtMr": "अहिल्यानगर",
+      "talukaMr": "संगमनेर",
+      "totalWards": 4,
+      "populationCensus": 4800,
+      "adminName": "अशोक कडनार",
+      "adminPhone": "9822998877",
+      "subscriptionStatus": "ACTIVE",
+      "subscriptionExpiry": "2027-03-31T23:59:59Z",
+      "propertiesCount": 580,
+      "citizensCount": 720,
+      "taxDemanded": 1050000.0,
+      "taxCollected": 845200.0
+    },
+    {
+      "id": 3,
+      "lgdCode": "666012",
+      "nameMr": "ग्रामपंचायत शिरोळ",
+      "nameEn": "Gram Panchayat Shirol",
+      "districtMr": "कोल्हापूर",
+      "talukaMr": "शिरोळ",
+      "totalWards": 7,
+      "populationCensus": 6200,
+      "adminName": "विकास पाटील",
+      "adminPhone": "9890112233",
+      "subscriptionStatus": "PENDING_ACTIVATION",
+      "subscriptionExpiry": null,
+      "propertiesCount": 0,
+      "citizensCount": 0,
+      "taxDemanded": 0.0,
+      "taxCollected": 0.0
+    }
+  ],
+  "platformPaymentAccount": {
+    "accountName": "Maha e-Panchayat Solutions",
+    "bankName": "State Bank of India",
+    "branchName": "Nariman Point, Mumbai",
+    "accountNumber": "39876543210",
+    "ifscCode": "SBIN0001234",
+    "upiId": "epanchayatraj@sbi",
+    "annualFee": 6000.0,
+    "supportPhone": "0721-2550101",
+    "supportEmail": "support@epanchayat-mh.gov.in"
+  }
+}
+

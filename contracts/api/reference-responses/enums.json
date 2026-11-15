@@ -1,0 +1,101 @@
+{
+  "isSuccess": true,
+  "statusCode": 200,
+  "title": "Enums fetched",
+  "data": {
+    "wardNoTypes": [
+      "वॉर्ड१",
+      "वॉर्ड२",
+      "वॉर्ड३",
+      "वॉर्ड४",
+      "वॉर्ड५",
+      "वॉर्ड६"
+    ],
+    "constructionTypes": [
+      "OpenPlot",
+      "ZopdiOrMudBuilding",
+      "RCCPuccaHouse",
+      "StoneBuilding",
+      "BrickBuilding",
+      "TinShed",
+      "WoodenBuilding",
+      "Shop",
+      "Godown",
+      "OfficeBuilding",
+      "SchoolBuilding",
+      "ReligiousBuilding",
+      "Garage",
+      "Toilet",
+      "Other"
+    ],
+    "floorTypes": [
+      "तळमजला",
+      "पहिलामजला",
+      "दुसरामजला",
+      "तिसरामजला",
+      "चौथामजला",
+      "तळघर",
+      "गच्ची",
+      "इतर"
+    ],
+    "paymentMode": [
+      "Cash",
+      "Cheque",
+      "Upi",
+      "Online"
+    ],
+    "mutationResonType": [
+      "खरेदीखत",
+      "वारसनोंद",
+      "हक्कसोड",
+      "बक्षीसपत्र",
+      "वाटणीपत्र",
+      "न्यायालयीनआदेश",
+      "इतर"
+    ],
+    "mutationDocumentType": [
+      "खरेदीखत",
+      "वारसप्रमाणपत्र",
+      "हक्कसोडपत्र",
+      "बक्षीसपत्र",
+      "वाटणीपत्र",
+      "न्यायालयीनआदेश",
+      "ग्रामपंचायतठराव",
+      "इतर"
+    ],
+    "categoryType": [
+      "General",
+      "SC",
+      "ST",
+      "OBC",
+      "VJ_A",
+      "NT_B",
+      "NT_C",
+      "NT_D",
+      "SBC",
+      "SEBC",
+      "EWS"
+    ],
+    "genderType": [
+      "Male",
+      "Female",
+      "Other"
+    ],
+    "relationType": [
+      "SonOf",
+      "WifeOf",
+      "DaughterOf"
+    ],
+    "exemptionCategoryType": [
+      "NotExempted",
+      "FamilyOfFreedomFighter",
+      "ExServicemen",
+      "WarWidows",
+      "Martyrs",
+      "NaturalCalamityVictim",
+      "PoorWidow",
+      "PersonWithDisability"
+    ]
+  },
+  "errors": []
+}

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>एजंट लॉगिन — ई-ग्रामपंचायत ERP</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Noto Sans Devanagari', system-ui, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-900 text-slate-100 justify-between">
+
+<!-- OFFLINE NAVIGATION BAR -->
+<div class="no-print" id="offline-nav-bar" style="background:#f1f5f9; border-bottom:1px solid #cbd5e1; padding:5px 12px; font-family:'Noto Sans Devanagari',system-ui,sans-serif; font-size:11.5px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px; z-index:999999; position:relative;">
+  <div style="font-weight:800; font-size:11.5px; color:#0f6b61; display:flex; align-items:center; gap:5px;">
+    <span style="background:#0f6b61; color:#fff; border-radius:4px; padding:2px 5px; font-size:9.5px;">GPMH</span>
+    <span>ई-ग्रामपंचायत ERP (एजंट लॉगिन)</span>
+    <a href="./review_dashboard.html" style="display:inline-block; padding:4px 9px; margin:1.5px 2px; font-size:10.5px; border-radius:5px; text-decoration:none; border:1px solid #d97706; background:#fef3c7; color:#92400e; font-weight:700;">⭐ मंजुरी केंद्र</a>
+  </div>
+  <div style="display:flex; flex-wrap:wrap; align-items:center; gap:4px;">
+    <a href="./agent_register.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">नवीन एजंट नोंदणी</a>
+    <a href="./agent_dashboard.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">एजंट डॅशबोर्ड</a>
+    <a href="./superadmin_agents.html" style="padding:2px 8px; border-radius:4px; background:#fef3c7; color:#92400e; text-decoration:none; font-weight:700; border:1px solid #f59e0b;">सुपरॲडमिन एजंट्स हब</a>
+    <a href="./22_superadmin_dashboard.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">सुपरॲडमिन डॅशबोर्ड</a>
+  </div>
+</div>
+
+<main class="flex-1 flex items-center justify-center p-4">
+  <div class="w-full max-w-md space-y-6">
+    
+    <!-- Branding Header -->
+    <div class="text-center space-y-2">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-700 flex items-center justify-center text-3xl font-extrabold mx-auto shadow-lg border border-emerald-400/30">
+        🤝
+      </div>
+      <h1 class="text-xl font-extrabold text-white tracking-wide">अधिकृत विक्री प्रतिनिधी (Agent) लॉगिन</h1>
+      <p class="text-xs text-slate-400">ई-ग्रामपंचायत ERP महाराष्ट्र राज्य मल्टि-टेनंट प्रणाली</p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="bg-slate-950 border border-slate-800 rounded-2xl shadow-2xl p-7 space-y-5">
+      <form id="agentLoginForm" onsubmit="event.preventDefault(); handleAgentLogin();" class="space-y-4 text-xs">
+        
+        <div>
+          <label class="block font-bold text-slate-300 mb-1.5">नोंदणीकृत मोबाईल क्रमांक (Login ID)</label>
+          <div class="relative">
+            <span class="absolute left-3 top-2.5 text-slate-500 font-mono">📱</span>
+            <input type="tel" id="loginMobile" maxlength="10" placeholder="१० अंकी मोबाईल नंबर" required class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3 py-2.5 font-mono text-amber-300 font-bold focus:border-emerald-500 focus:outline-none"/>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex justify-between items-center mb-1.5">
+            <label class="font-bold text-slate-300">पासवर्ड (Password)</label>
+            <a href="#" onclick="alert('पासवर्ड रीसेटसाठी कृपया सुपरॲडमिन हेल्पलाईनवर संपर्क साधा: 0721-2550101')" class="text-[11px] text-emerald-400 hover:underline">पासवर्ड विसरलात?</a>
+          </div>
+          <div class="relative">
+            <span class="absolute left-3 top-2.5 text-slate-500 font-mono">🔒</span>
+            <input type="password" id="loginPassword" placeholder="पासवर्ड प्रविष्ट करा" required class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-9 pr-3 py-2.5 font-mono text-white focus:border-emerald-500 focus:outline-none"/>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg transition transform active:scale-95 flex items-center justify-center gap-2">
+          <span>🔑 एजंट डॅशबोर्डवर लॉगिन करा</span>
+        </button>
+      </form>
+
+      <!-- Fast Demo Switcher for Testing -->
+      <div class="pt-4 border-t border-slate-800/80 space-y-2">
+        <span class="text-[11px] font-bold text-slate-400 block uppercase tracking-wider text-center">चाचणीसाठी त्वरित लॉगिन (Demo Fast-Fill)</span>
+        <div class="grid grid-cols-1 gap-1.5 text-[11px]">
+          <button type="button" onclick="fastFill('9822112233', 'Agent@123')" class="w-full py-1.5 px-3 bg-slate-900 hover:bg-slate-800 border border-emerald-500/30 text-emerald-300 rounded-lg text-left flex justify-between items-center transition">
+            <span>👤 महेश देशमुख (सक्रिय एजंट • २५%)</span>
+            <span class="font-mono text-[10px] text-emerald-400 font-bold">ACTIVE ✓</span>
+          </button>
+          <button type="button" onclick="fastFill('9890445566', 'Agent@123')" class="w-full py-1.5 px-3 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-lg text-left flex justify-between items-center transition">
+            <span>👤 सचिन जोशी (बारामती • २०%)</span>
+            <span class="font-mono text-[10px] text-emerald-400 font-bold">ACTIVE ✓</span>
+          </button>
+          <button type="button" onclick="fastFill('9422889900', 'Agent@123')" class="w-full py-1.5 px-3 bg-slate-900 hover:bg-slate-800 border border-amber-500/30 text-amber-300 rounded-lg text-left flex justify-between items-center transition">
+            <span>👤 संदीप वानखडे (नवीन अर्ज • Pending)</span>
+            <span class="font-mono text-[10px] text-amber-400 font-bold">PENDING ⏳</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Registration Link -->
+      <div class="text-center pt-2">
+        <p class="text-xs text-slate-400">
+          अद्याप एजंट म्हणून नोंदणी केली नाही? 
+          <a href="./agent_register.html" class="text-emerald-400 font-bold hover:underline">येथे नवीन नोंदणी करा ↗</a>
+        </p>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Status Alert Modal (For Pending Approval / Inactive) -->
+<div id="statusModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-slate-900 border border-amber-500/40 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 text-xs">
+    <div class="text-center space-y-2">
+      <div id="modalIcon" class="w-14 h-14 bg-amber-500/20 text-amber-400 border border-amber-500/40 rounded-full flex items-center justify-center mx-auto text-2xl font-bold shadow-inner">
+        ⏳
+      </div>
+      <h3 class="text-base font-bold text-white" id="modalTitle">नोंदणी व KYC तपासणी प्रलंबित (Pending Approval)</h3>
+      <p class="text-slate-400 leading-relaxed text-[11px]" id="modalDesc">
+        आपला एजंट अर्ज सादर झाला असून सुपरॲडमिन द्वारे ओळखपत्राची पडताळणी बाकी आहे.
+      </p>
+    </div>
+
+    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2 font-mono text-[11px]">
+      <div class="flex justify-between"><span class="text-slate-400 font-sans">एजंट नाव:</span> <b class="text-white font-sans" id="modalAgentName">—</b></div>
+      <div class="flex justify-between"><span class="text-slate-400 font-sans">मोबाईल:</span> <b class="text-amber-300" id="modalAgentPhone">—</b></div>
+      <div class="flex justify-between"><span class="text-slate-400 font-sans">स्थिती:</span> <b class="text-amber-400 font-sans" id="modalAgentStatus">PENDING_APPROVAL</b></div>
+    </div>
+
+    <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-200 text-[11px] leading-relaxed">
+      <strong>ℹ️ कार्यप्रवाह नियम:</strong> सुपरॲडमिनने अर्ज मंजूर करून अधिकृत कमिशन दर निश्चित केल्यावरच आपले लॉगिन सक्रिय होईल. कृपया मदतीसाठी नियंत्रण कक्षाशी संपर्क साधा: <span class="font-mono text-white">0721-2550101</span>
+    </div>
+
+    <div class="flex gap-2 pt-1">
+      <button onclick="closeStatusModal()" class="flex-1 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold">
+        बंद करा
+      </button>
+      <a href="./superadmin_agents.html" class="flex-1 px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold text-center">
+        सुपरॲडमिनमध्ये तपासा ↗
+      </a>
+    </div>
+  </div>
+</div>
+
+<footer class="py-4 text-center text-xs text-slate-500 border-t border-slate-800/60">
+  ई-ग्रामपंचायत ERP • महाराष्ट्र शासन ग्रामविकास विभाग सुसंगत
+</footer>
+
+<script>
+  const defaultAgents = [
+    {
+      id: "agt-1",
+      agentCode: "AGT-MH-0101",
+      fullName: "महेश विठ्ठलराव देशमुख",
+      mobileNumber: "9822112233",
+      email: "mahesh.deshmukh@gmail.com",
+      idProofType: "AADHAAR",
+      idProofNumber: "9823-4412-8890",
+      idProofImage: "aadhaar_mahesh_deshmukh.pdf",
+      address: "प्लॉट क्र. १२, शिवाजी नगर, अचलपूर रोड",
+      village: "अचलपूर",
+      taluka: "अचलपूर",
+      district: "अमरावती",
+      state: "महाराष्ट्र",
+      requestedCommissionRate: 25.0,
+      approvedNewRate: 25.0,
+      approvedRenewalRate: 15.0,
+      password: "Agent@123",
+      status: "ACTIVE",
+      registeredAt: "2026-10-15 11:30 AM",
+      approvedAt: "2026-10-16 02:00 PM",
+      bankName: "State Bank of India",
+      accountNumber: "30992817261",
+      ifscCode: "SBIN0000301",
+      upiId: "mahesh.deshmukh@okhdfcbank"
+    },
+    {
+      id: "agt-2",
+      agentCode: "AGT-MH-0102",
+      fullName: "सचिन प्रभाकर जोशी",
+      mobileNumber: "9890445566",
+      email: "sachin.joshi@pune-it.com",
+      idProofType: "PAN",
+      idProofNumber: "ABCDE1234F",
+      idProofImage: "pan_sachin_joshi.pdf",
+      address: "रानडे गल्ली, बारामती",
+      village: "बारामती",
+      taluka: "बारामती",
+      district: "पुणे",
+      state: "महाराष्ट्र",
+      requestedCommissionRate: 30.0,
+      approvedNewRate: 20.0,
+      approvedRenewalRate: 10.0,
+      password: "Agent@123",
+      status: "ACTIVE",
+      registeredAt: "2026-10-20 04:15 PM",
+      approvedAt: "2026-10-21 10:00 AM",
+      bankName: "Bank of Maharashtra",
+      accountNumber: "60119283746",
+      ifscCode: "MAHB0000122",
+      upiId: "sachinjoshi@ybl"
+    },
+    {
+      id: "agt-3",
+      agentCode: "AGT-MH-0103",
+      fullName: "संदीप नारायण वानखडे",
+      mobileNumber: "9422889900",
+      email: "sandeep.wankhade@yahoo.com",
+      idProofType: "AADHAAR",
+      idProofNumber: "8812-7734-1192",
+      idProofImage: "aadhaar_sandeep.pdf",
+      address: "वारुड मेन रोड, अंजनगाव सुर्जी",
+      village: "अंजनगाव सुर्जी",
+      taluka: "अंजनगाव सुर्जी",
+      district: "अमरावती",
+      state: "महाराष्ट्र",
+      requestedCommissionRate: 25.0,
+      approvedNewRate: null,
+      approvedRenewalRate: null,
+      password: "Agent@123",
+      status: "PENDING_APPROVAL",
+      registeredAt: "2026-11-13 09:45 AM",
+      bankName: "HDFC Bank",
+      accountNumber: "50100293847",
+      ifscCode: "HDFC0000411",
+      upiId: "sandeepwankhade@sbi"
+    }
+  ];
+
+  function getAgents() {
+    try {
+      const stored = localStorage.getItem('gpmh_agents');
+      if (stored) return JSON.parse(stored);
+    } catch(e) {
+      console.error(e);
+    }
+    localStorage.setItem('gpmh_agents', JSON.stringify(defaultAgents));
+    return defaultAgents;
+  }
+
+  function fastFill(mobile, pwd) {
+    document.getElementById('loginMobile').value = mobile;
+    document.getElementById('loginPassword').value = pwd;
+  }
+
+  function handleAgentLogin() {
+    const mobile = document.getElementById('loginMobile').value.trim();
+    const pwd = document.getElementById('loginPassword').value.trim();
+    const agents = getAgents();
+
+    const agent = agents.find(a => a.mobileNumber === mobile);
+
+    if (!agent) {
+      alert('हा मोबाईल क्रमांक नोंदणीकृत नाही. कृपया आधी एजंट नोंदणी करा.');
+      return;
+    }
+
+    if (agent.password !== pwd) {
+      alert('पासवर्ड चुकीचा आहे! कृपया योग्य पासवर्ड टाका (किंवा डेमो Agent@123 वापरा).');
+      return;
+    }
+
+    // Check Account Status
+    if (agent.status === 'PENDING_APPROVAL') {
+      showStatusModal(
+        '⏳ नोंदणी व KYC तपासणी प्रलंबित',
+        'आपला अर्ज यशस्वीरित्या प्राप्त झाला असून तो सुपरॲडमिन मंजुरीसाठी Pending Approval स्थितीत आहे. सुपरॲडमिन द्वारे आधार/पॅन ओळखपत्र तपासून कमिशन दर निश्चित झाल्यावर आपले लॉगिन सुरू होईल.',
+        agent
+      );
+      return;
+    }
+
+    if (agent.status === 'REJECTED') {
+      showStatusModal(
+        '❌ अर्ज नाकारण्यात आला आहे (Application Rejected)',
+        'आपला अर्ज सुपरॲडमिन द्वारे नाकारण्यात आला आहे. कारण: ' + (agent.rejectionReason || 'ओळखपत्र अस्पष्ट / केवायसी त्रुटी.'),
+        agent
+      );
+      return;
+    }
+
+    if (agent.status === 'INACTIVE') {
+      showStatusModal(
+        '🔴 खाते तात्पुरते निष्क्रिय आहे (Account Inactive)',
+        'आपले एजंट खाते प्रशासकीय कारणास्तव तात्पुरते निष्क्रिय करण्यात आले आहे. कृपया राज्य नियंत्रण कक्षाशी संपर्क साधा.',
+        agent
+      );
+      return;
+    }
+
+    // Success -> Store current session agent & redirect
+    localStorage.setItem('gpmh_current_agent', JSON.stringify(agent));
+    alert('🎉 स्वागत आहे, ' + agent.fullName + '!\nआपले एजंट डॅशबोर्ड उघडत आहे...');
+    window.location.href = './agent_dashboard.html';
+  }
+
+  function showStatusModal(title, desc, agent) {
+    document.getElementById('modalTitle').textContent = title;
+    document.getElementById('modalDesc').textContent = desc;
+    document.getElementById('modalAgentName').textContent = agent.fullName;
+    document.getElementById('modalAgentPhone').textContent = agent.mobileNumber;
+    document.getElementById('modalAgentStatus').textContent = agent.status;
+    document.getElementById('statusModal').classList.remove('hidden');
+  }
+
+  function closeStatusModal() {
+    document.getElementById('statusModal').classList.add('hidden');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    getAgents();
+  });
+</script>
+
+</body>
+</html>
+

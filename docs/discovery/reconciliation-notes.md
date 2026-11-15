@@ -1,0 +1,10 @@
+# Discovery & Plan Reconciliation Notes
+
+This repository consolidates and resolves conflicts discovered during the audit of the upstream reference repository (`AMRAVATI-GPMH/`):
+
+1. **Stack Unification:** Legacy starter-kit docs (`AGENTS.md`, `FINDINGS_REGISTER.csv`, `universal-starter-analysis.md`, `nodejs-backend.md`, `prisma-database.md`, `pdf-documents.md`) targeted Node.js/Express/Prisma/Puppeteer (`gpId`). All active engineering rules, agents, skills, and solutions here strictly target **ASP.NET Core Clean Architecture + EF Core + PostgreSQL `FORCE ROW LEVEL SECURITY` (`TenantId`) + QuestPDF + React 19.3**.
+2. **Template Deduplication:** Consolidated 330 scattered HTML files (with 29 diverging variants) down to one canonical set of **84** screens under `templates/html/` plus 4 legacy print samples under `templates/print-reference/`. Preserved `21_gp_onboarding_wizard.html`'s dual-mode wizard UI while restoring live `https://api.grampanchayatmh.in/api/v1/panchayat/{code}` lookup.
+3. **Statutory & Formula Resolution:** Fixed the 10x mathematical error in older prose (`0.5%` vs `TaxDivisor = 1000`), resolved depreciation slab overlap (`Age > AgeFrom && Age <= AgeTo`), locked the verified capture seeds as defaults, and aligned print geometry to **QuestPDF A4 Landscape**.
+4. **Issue Backlog Reconciliation:** Aligned `github-plan.md` issue numbers to match live GitHub Project #2 (`#5–#30`), eliminated duplicate `#9/#10/#11`/`#14B`/`#15B`, fixed Sprint 5 point arithmetic (`21 pts`), and added previously missing Phase-1 items (`#31–#35`: Namuna 5-C/6 Cash Book sync, Citizen 360° & 26-Col Excel Bulk Import, Namuna 11 Misc & QR Plates, Offline Camp Sync + Public QR Verification, and FY Rollover + UPI Reconciliation).
+5. **Security & Schema Hardening:** Eliminated plaintext secrets, converted `Float` money fields to `numeric(14,2)`, replaced global `@unique` indexes with composite tenant keys, parameterized PostgreSQL `set_config` RLS, added `NOBYPASSRLS` role setup, added missing `User`/`TenantMembership`/`RefreshToken`/Counters/`Agent*` tables, and hardened `external-api-proj/`.
+

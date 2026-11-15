@@ -1,0 +1,26 @@
+{
+  "isSuccess": true,
+  "statusCode": 200,
+  "title": "Usage Weightage List",
+  "data": [
+    {
+      "id": 2,
+      "usageName": "निवासी",
+      "weightage": 1,
+      "isActive": true
+    },
+    {
+      "id": 3,
+      "usageName": "औद्योगिक",
+      "weightage": 1.2,
+      "isActive": true
+    },
+    {
+      "id": 4,
+      "usageName": "वाणिज्य",
+      "weightage": 1.25,
+      "isActive": true
+    }
+  ],
+  "errors": []
+}

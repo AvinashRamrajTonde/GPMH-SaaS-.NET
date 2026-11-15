@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>नवीन एजंट नोंदणी व KYC — ई-ग्रामपंचायत ERP</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Noto Sans Devanagari', system-ui, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-800">
+
+<!-- OFFLINE NAVIGATION BAR -->
+<div class="no-print" id="offline-nav-bar" style="background:#f1f5f9; border-bottom:1px solid #cbd5e1; padding:5px 12px; font-family:'Noto Sans Devanagari',system-ui,sans-serif; font-size:11.5px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px; z-index:999999; position:relative;">
+  <div style="font-weight:800; font-size:11.5px; color:#0f6b61; display:flex; align-items:center; gap:5px;">
+    <span style="background:#0f6b61; color:#fff; border-radius:4px; padding:2px 5px; font-size:9.5px;">GPMH</span>
+    <span>ई-ग्रामपंचायत ERP (एजंट मॉड्यूल)</span>
+    <a href="./review_dashboard.html" style="display:inline-block; padding:4px 9px; margin:1.5px 2px; font-size:10.5px; border-radius:5px; text-decoration:none; border:1px solid #d97706; background:#fef3c7; color:#92400e; font-weight:700;">⭐ मंजुरी केंद्र</a>
+  </div>
+  <div style="display:flex; flex-wrap:wrap; align-items:center; gap:4px;">
+    <a href="./agent_login.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">एजंट लॉगिन</a>
+    <a href="./agent_dashboard.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">एजंट डॅशबोर्ड</a>
+    <a href="./superadmin_agents.html" style="padding:2px 8px; border-radius:4px; background:#fef3c7; color:#92400e; text-decoration:none; font-weight:700; border:1px solid #f59e0b;">सुपरॲडमिन एजंट्स हब</a>
+    <a href="./22_superadmin_dashboard.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">सुपरॲडमिन डॅशबोर्ड</a>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="bg-gradient-to-r from-emerald-800 to-teal-900 text-white shadow-md py-4 px-6 sticky top-0 z-40">
+  <div class="max-w-4xl mx-auto flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center font-bold text-xl border border-white/20">
+        🤝
+      </div>
+      <div>
+        <h1 class="text-base font-extrabold tracking-wide">ई-ग्रामपंचायत ERP • अधिकृत विक्री प्रतिनिधी (Agent) नोंदणी</h1>
+        <p class="text-[11px] text-emerald-200">ग्रामपंचायती ऑनबोर्ड करा आणि आकर्षक कमिशन मिळवा</p>
+      </div>
+    </div>
+    <a href="./agent_login.html" class="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-lg border border-white/20 transition">
+      आधीच नोंदणीकृत आहात? लॉगिन करा ↗
+    </a>
+  </div>
+</header>
+
+<main class="max-w-4xl mx-auto w-full px-4 py-8 flex-1">
+  
+  <!-- Form Container -->
+  <div id="formContainer" class="bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden">
+    
+    <!-- Title Bar -->
+    <div class="p-6 bg-slate-50 border-b border-slate-200">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">नवीन एजंट ऑनबोर्डिंग व KYC अर्ज</h2>
+          <p class="text-xs text-slate-500 mt-1">सर्व आवश्यक तपशील आणि ओळख पुरावा (Aadhaar / PAN) जोडून अर्ज सादर करा.</p>
+        </div>
+        <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full border border-amber-300 whitespace-nowrap">
+          ⏳ पडताळणी अनिवार्य (Pending Approval)
+        </span>
+      </div>
+
+      <!-- Info Alert Box -->
+      <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs leading-relaxed flex items-start gap-2.5">
+        <span class="text-base">ℹ️</span>
+        <div>
+          <strong>महत्त्वाची कार्यप्रवाह सूचना:</strong> 
+          आपला अर्ज सादर झाल्यावर तो <b>Pending Approval</b> स्थितीत राहील. सुपरॲडमिन द्वारे आपले ओळखपत्र तपासले जाईल आणि <b>अधिकृत कमिशन दर (नवीन नोंदणी व नूतनीकरण)</b> निश्चित झाल्यावर आपले खाते सक्रिय (Active) केले जाईल. त्यानंतरच आपणास लॉगिन करून ग्रामपंचायती जोडता येतील.
+        </div>
+      </div>
+    </div>
+
+    <!-- Registration Form -->
+    <form id="agentRegForm" onsubmit="event.preventDefault(); submitAgentRegistration();" class="p-6 space-y-6 text-xs">
+      
+      <!-- Section 1: Personal & Contact -->
+      <div class="space-y-4">
+        <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider pb-1 border-b border-slate-200 flex items-center gap-2">
+          <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-mono text-[11px]">१</span>
+          <span>व्यक्तिगत व संपर्क माहिती (Personal & Contact Information)</span>
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Full Name -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">एजंटचे पूर्ण नाव <span class="text-rose-500">*</span></label>
+            <input type="text" id="fullName" placeholder="उदा. महेश विठ्ठलराव देशमुख" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none"/>
+            <span class="text-[10px] text-slate-400 mt-0.5 block">ओळखपत्रावरील नाव</span>
+          </div>
+
+          <!-- Mobile Number -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">मोबाईल क्रमांक (लॉगिन आयडी) <span class="text-rose-500">*</span></label>
+            <input type="tel" id="mobileNumber" maxlength="10" placeholder="उदा. 9822112233" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 font-mono text-emerald-700 font-bold focus:bg-white focus:border-emerald-600 focus:outline-none"/>
+            <span class="text-[10px] text-slate-400 mt-0.5 block">हाच आपला लॉगिन युजरनेम असेल</span>
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">ईमेल पत्ता <span class="text-rose-500">*</span></label>
+            <input type="email" id="email" placeholder="उदा. mahesh.deshmukh@gmail.com" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none"/>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Password -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">लॉगिन पासवर्ड सेट करा <span class="text-rose-500">*</span></label>
+            <input type="password" id="password" minlength="8" required placeholder="किमान ८ अक्षरे" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 font-mono text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none"/>
+            <span class="text-[10px] text-slate-400 mt-0.5 block">किमान ८ अक्षरे, १ कॅपिटल, १ अंक, १ चिन्ह</span>
+          </div>
+
+          <!-- Confirm Password -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">पासवर्ड पुष्टी (Confirm Password) <span class="text-rose-500">*</span></label>
+            <input type="password" id="confirmPassword" minlength="8" required placeholder="पासवर्ड पुन्हा टाका" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 font-mono text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: KYC & ID Proof -->
+      <div class="space-y-4 pt-2">
+        <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider pb-1 border-b border-slate-200 flex items-center gap-2">
+          <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-mono text-[11px]">२</span>
+          <span>ओळख पुरावा व केवायसी (KYC & ID Verification)</span>
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- ID Proof Type -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">ओळख पुरावा प्रकार (ID Proof Type) <span class="text-rose-500">*</span></label>
+            <select id="idProofType" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 font-semibold focus:bg-white focus:border-emerald-600 focus:outline-none">
+              <option value="AADHAAR" selected="">आधार कार्ड (Aadhaar Card)</option>
+              <option value="PAN">पॅन कार्ड (PAN Card)</option>
+              <option value="VOTER_ID">मतदान ओळखपत्र (Voter ID)</option>
+              <option value="OTHER">इतर शासकीय ओळखपत्र</option>
+            </select>
+          </div>
+
+          <!-- ID Proof Number -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">ओळख पुरावा क्रमांक <span class="text-rose-500">*</span></label>
+            <input type="text" id="idProofNumber" placeholder="उदा. 9823-4412-8890" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 font-mono text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none"/>
+          </div>
+
+          <!-- ID Proof File Upload -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">ओळखपत्र फाईल अपलोड करा <span class="text-rose-500">*</span></label>
+            <input type="file" id="idProofFile" accept="image/*,.pdf" onchange="previewKycDoc()" class="w-full text-[11px] text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"/>
+            <span class="text-[10px] text-slate-400 mt-0.5 block">PDF, JPG, PNG (कमाल ५ MB) • खाजगी सुरक्षित स्टोरेज</span>
+          </div>
+        </div>
+
+        <div id="fileUploadNotice" class="hidden p-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-800 text-[11px] flex items-center justify-between">
+          <span id="uploadedDocName">📄 ओळखपत्र निवडले आहे</span>
+          <span class="text-emerald-600 font-bold">✓ सुरक्षित इनक्रिप्शन सज्ज</span>
+        </div>
+      </div>
+
+      <!-- Section 3: Residential Address & Jurisdiction -->
+      <div class="space-y-4 pt-2">
+        <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider pb-1 border-b border-slate-200 flex items-center gap-2">
+          <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-mono text-[11px]">३</span>
+          <span>पत्ता व कार्यक्षेत्र (Address & Operating Jurisdiction)</span>
+        </h3>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">संपूर्ण रहिवासी पत्ता <span class="text-rose-500">*</span></label>
+          <input type="text" id="address" placeholder="घर/प्लॉट क्र., गल्ली/रस्ता, परिसर" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none"/>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <!-- Village -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">गाव / शहर <span class="text-rose-500">*</span></label>
+            <input type="text" id="village" placeholder="उदा. अचलपूर" required class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none"/>
+          </div>
+
+          <!-- District -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">जिल्हा <span class="text-rose-500">*</span></label>
+            <select id="district" onchange="onDistrictChange()" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none">
+              <option value="अमरावती" selected="">अमरावती</option>
+              <option value="अहिल्यानगर">अहिल्यानगर</option>
+              <option value="पुणे">पुणे</option>
+              <option value="नागपूर">नागपूर</option>
+              <option value="नाशिक">नाशिक</option>
+              <option value="कोल्हापूर">कोल्हापूर</option>
+              <option value="यवतमाळ">यवतमाळ</option>
+              <option value="बुलढाणा">बुलढाणा</option>
+              <option value="वाशिम">वाशिम</option>
+              <option value="अकोला">अकोला</option>
+            </select>
+          </div>
+
+          <!-- Taluka -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">तालुका / पं.स. <span class="text-rose-500">*</span></label>
+            <select id="taluka" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none">
+              <!-- Populated by JS -->
+            </select>
+          </div>
+
+          <!-- State -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">राज्य</label>
+            <input type="text" id="state" value="महाराष्ट्र" readonly class="w-full bg-slate-100 border border-slate-300 rounded-lg px-3 py-2 text-slate-600 font-semibold"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Requested Commission & Bank Info -->
+      <div class="space-y-4 pt-2">
+        <h3 class="font-bold text-slate-900 text-xs uppercase tracking-wider pb-1 border-b border-slate-200 flex items-center gap-2">
+          <span class="w-5 h-5 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-mono text-[11px]">४</span>
+          <span>अपेक्षित कमिशन दर व बँक तपशील (Payout Bank Account)</span>
+        </h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Requested Commission -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">अपेक्षित कमिशन दर (% Requested) <span class="text-rose-500">*</span></label>
+            <div class="relative">
+              <input type="number" id="requestedCommissionRate" min="1" max="50" step="0.5" value="25" required class="w-full bg-slate-50 border border-slate-300 rounded-lg pr-7 pl-3 py-2 font-mono font-bold text-emerald-700 text-sm focus:bg-white focus:border-emerald-600 focus:outline-none"/>
+              <span class="absolute right-3 top-2 font-bold text-slate-400">%</span>
+            </div>
+            <span class="text-[10px] text-amber-700 mt-0.5 block font-medium">⚠️ सुपरॲडमिन द्वारे अंतिम मंजूर कमिशन निश्चित होईल</span>
+          </div>
+
+          <!-- Bank Name -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">बँक नाव (कमिशन जमा होण्यासाठी)</label>
+            <input type="text" id="bankName" placeholder="उदा. State Bank of India" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none"/>
+          </div>
+
+          <!-- Account Number -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">बँक खाते क्रमांक</label>
+            <input type="text" id="accountNumber" placeholder="उदा. 30992817261" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 font-mono text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none"/>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- IFSC Code -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">IFSC कोड</label>
+            <input type="text" id="ifscCode" placeholder="उदा. SBIN0000301" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 font-mono uppercase text-slate-900 focus:bg-white focus:border-emerald-600 focus:outline-none"/>
+          </div>
+
+          <!-- UPI ID -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">UPI ID (तात्काळ पेआउटसाठी)</label>
+            <input type="text" id="upiId" placeholder="उदा. agentname@sbi किंवा phone@ybl" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 font-mono text-emerald-700 focus:bg-white focus:border-emerald-600 focus:outline-none"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="pt-4 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4">
+        <a href="./agent_login.html" class="text-xs text-slate-500 hover:text-slate-800 font-semibold">
+          ← लॉगिन पृष्ठाकडे परत जा
+        </a>
+        <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white rounded-xl text-xs font-bold shadow-md transition transform active:scale-95 flex items-center gap-2">
+          <span>✓ एजंट नोंदणी अर्ज सबमिट करा (Submit Application)</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Success Awaiting Approval Confirmation Box (Hidden initially) -->
+  <div id="successCard" class="hidden bg-white border border-emerald-300 rounded-2xl shadow-2xl p-8 space-y-6 max-w-xl mx-auto text-center">
+    <div class="w-16 h-16 bg-emerald-100 text-emerald-700 border border-emerald-300 rounded-full flex items-center justify-center mx-auto text-3xl font-bold shadow-inner">
+      ✓
+    </div>
+    
+    <div class="space-y-1">
+      <h3 class="text-lg font-bold text-slate-900">🎉 आपला एजंट अर्ज यशस्वीरित्या सादर झाला आहे!</h3>
+      <p class="text-xs text-slate-500 font-medium">आपला अर्ज सुपरॲडमिन मंजुरीसाठी <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">Pending Approval</span> रांगेत आहे.</p>
+    </div>
+
+    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left font-mono text-xs space-y-2">
+      <div class="flex justify-between border-b border-slate-200 pb-1.5">
+        <span class="text-slate-500 font-sans">एजंट अर्ज आयडी:</span>
+        <b class="text-emerald-700 font-bold" id="res-code">AGT-MH-0104</b>
+      </div>
+      <div class="flex justify-between border-b border-slate-200 pb-1.5">
+        <span class="text-slate-500 font-sans">एजंटचे नाव:</span>
+        <b class="text-slate-800 font-sans" id="res-name">—</b>
+      </div>
+      <div class="flex justify-between border-b border-slate-200 pb-1.5">
+        <span class="text-slate-500 font-sans">लॉगिन मोबाईल:</span>
+        <b class="text-amber-700 font-bold" id="res-phone">—</b>
+      </div>
+      <div class="flex justify-between border-b border-slate-200 pb-1.5">
+        <span class="text-slate-500 font-sans">अपेक्षित कमिशन:</span>
+        <b class="text-slate-800" id="res-comm">—</b>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-slate-500 font-sans">अर्ज स्थिती:</span>
+        <span class="bg-amber-100 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded">⏳ पडताळणी प्रलंबित (Pending Approval)</span>
+      </div>
+    </div>
+
+    <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-left text-xs text-amber-900 leading-relaxed space-y-1">
+      <strong>📌 पुढील पायऱ्या:</strong>
+      <p>१. राज्य नियंत्रण कक्ष / सुपरॲडमिन द्वारे आपले आधार/पॅन ओळखपत्र तपासले जाईल.</p>
+      <p>२. आपले अधिकृत कमिशन दर निश्चित करून मंजुरी दिल्यावर आपणास SMS प्राप्त होईल.</p>
+      <p>३. मंजुरीनंतर आपण वरील मोबाईल व पासवर्डने एजंट डॅशबोर्डवर लॉगिन करू शकाल.</p>
+    </div>
+
+    <div class="flex gap-3 pt-2">
+      <a href="./agent_login.html" class="flex-1 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+        <span>एजंट लॉगिन स्क्रीनकडे जा ↗</span>
+      </a>
+      <button onclick="window.print()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl text-xs font-semibold transition">
+        🖨️ पावती प्रिंट करा
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const districtTalukasMap = {
+    'अमरावती': ['अंजनगाव सुर्जी', 'अचलपूर', 'अमरावती', 'चांदूर बाजार', 'चांदूर रेल्वे', 'चिखलदरा', 'दर्यापूर', 'धामणगाव रेल्वे', 'धारणी', 'मोर्शी', 'नांदगाव खंडेश्वर', 'भातकुली', 'तिवसा', 'वरुड'],
+    'अहिल्यानगर': ['संगमनेर', 'अकोले', 'कोपरगाव', 'राहाता', 'श्रीरामपूर', 'नेवासा', 'शेवगाव', 'पाथर्डी', 'जामखेड', 'कर्जत', 'श्रीगोंदा', 'पारनेर', 'अहमदनगर'],
+    'पुणे': ['बारामती', 'हवेली', 'पुणे शहर', 'शिरूर', 'दौंड', 'इंदापूर', 'भोर', 'वेल्हे', 'पुरंदर', 'जुन्नर', 'आंबेगाव', 'खेड', 'मावळ', 'मुळशी'],
+    'नागपूर': ['नागपूर शहर', 'नागपूर ग्रामीण', 'कामठी', 'हिंगणा', 'उमरेड', 'कुही', 'भिवापूर', 'काटोल', 'नरखेड', 'सावनेर', 'कळमेश्वर', 'रामटेक', 'पारशिवणी', 'मौदा'],
+    'नाशिक': ['नाशिक', 'मालेगाव', 'सिन्नर', 'निफाड', 'दिंडोरी', 'इगतपुरी', 'चांदवड', 'कळवण', 'नांदगाव', 'सटाणा', 'सुरगाणा', 'त्र्यंबकेश्वर', 'देवळा', 'पेठ', 'येवला'],
+    'कोल्हापूर': ['करवीर', 'शिरोळ', 'हातकणंगले', 'कागल', 'राधानगरी', 'भुदरगड', 'आजरा', 'गडहिंग्लज', 'चंदगड', 'शाहूवाडी', 'पन्हाळा', 'गगनबावडा'],
+    'यवतमाळ': ['यवतमाळ', 'दारव्हा', 'दिग्रस', 'पुसद', 'उमरखेड', 'महागाव', 'आर्णी', 'नेर', 'केळापूर', 'घाटंजी', 'राळेगाव', 'कळंब', 'वणी', 'मारेगाव', 'झरी जामणी', 'बाभूळगाव'],
+    'बुलढाणा': ['बुलढाणा', 'चिखली', 'देऊळगाव राजा', 'जळगाव जामोद', 'संग्रामपूर', 'खामगाव', 'शेगाव', 'मलकापूर', 'मोताळा', 'नांदुरा', 'मेहकर', 'सिंदखेड राजा', 'लोणार'],
+    'वाशिम': ['वाशिम', 'मालेगाव', 'रिसोड', 'मंगरुळपीर', 'कारंजा', 'मानोरा'],
+    'अकोला': ['अकोला', 'अकोट', 'तेल्हारा', 'बाळापूर', 'पातूर', 'बार्शीटाकळी', 'मूर्तिजापूर']
+  };
+
+  function onDistrictChange() {
+    const dist = document.getElementById('district').value;
+    const talukas = districtTalukasMap[dist] || [];
+    const select = document.getElementById('taluka');
+    select.innerHTML = '';
+    talukas.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = t;
+      select.appendChild(opt);
+    });
+  }
+
+  function previewKycDoc() {
+    const file = document.getElementById('idProofFile').files[0];
+    const notice = document.getElementById('fileUploadNotice');
+    const docName = document.getElementById('uploadedDocName');
+    if (file) {
+      notice.classList.remove('hidden');
+      docName.textContent = `📄 फाईल निवडली: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+    } else {
+      notice.classList.add('hidden');
+    }
+  }
+
+  function getStoredAgents() {
+    try {
+      const stored = localStorage.getItem('gpmh_agents');
+      if (stored) return JSON.parse(stored);
+    } catch(e) {
+      console.error(e);
+    }
+    return null;
+  }
+
+  function submitAgentRegistration() {
+    const fullName = document.getElementById('fullName').value.trim();
+    const mobile = document.getElementById('mobileNumber').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    if (!fullName || fullName.length < 3) {
+      alert('कृपया आपले पूर्ण नाव भरा.');
+      return;
+    }
+
+    if (!/^[6-9]\d{9}$/.test(mobile)) {
+      alert('कृपया वैध १० अंकी मोबाईल क्रमांक भरा.');
+      return;
+    }
+
+    if (!email || !email.includes('@')) {
+      alert('कृपया वैध ईमेल पत्ता प्रविष्ट करा.');
+      return;
+    }
+
+    if (password.length < 8) {
+      alert('पासवर्ड किमान ८ अक्षरांचा असावा.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      alert('पासवर्ड आणि पुष्टी जुळत नाही.');
+      return;
+    }
+
+    const idType = document.getElementById('idProofType').value;
+    const idNum = document.getElementById('idProofNumber').value.trim();
+    if (!idNum) {
+      alert('कृपया ओळख पुरावा क्रमांक भरा.');
+      return;
+    }
+
+    const commRate = parseFloat(document.getElementById('requestedCommissionRate').value) || 25;
+    const agentCode = 'AGT-MH-' + Math.floor(1000 + Math.random() * 9000);
+
+    const newAgent = {
+      id: 'agt-' + Date.now(),
+      agentCode: agentCode,
+      fullName: fullName,
+      mobileNumber: mobile,
+      email: email,
+      idProofType: idType,
+      idProofNumber: idNum,
+      idProofImage: 'kyc_proof_' + idType.toLowerCase() + '.pdf',
+      address: document.getElementById('address').value.trim(),
+      village: document.getElementById('village').value.trim(),
+      taluka: document.getElementById('taluka').value,
+      district: document.getElementById('district').value,
+      state: 'महाराष्ट्र',
+      requestedCommissionRate: commRate,
+      approvedNewRate: null,
+      approvedRenewalRate: null,
+      password: password,
+      status: 'PENDING_APPROVAL',
+      registeredAt: new Date().toLocaleString('mr-IN'),
+      bankName: document.getElementById('bankName').value.trim(),
+      accountNumber: document.getElementById('accountNumber').value.trim(),
+      ifscCode: document.getElementById('ifscCode').value.trim().toUpperCase(),
+      upiId: document.getElementById('upiId').value.trim()
+    };
+
+    let agents = getStoredAgents() || [];
+    // Check duplicate phone
+    if (agents.some(a => a.mobileNumber === mobile)) {
+      alert('हा मोबाईल क्रमांक आधीच नोंदणीकृत आहे. कृपया लॉगिन करा.');
+      window.location.href = './agent_login.html';
+      return;
+    }
+
+    agents.unshift(newAgent);
+    localStorage.setItem('gpmh_agents', JSON.stringify(agents));
+
+    // Render Confirmation
+    document.getElementById('formContainer').classList.add('hidden');
+    document.getElementById('res-code').textContent = newAgent.agentCode;
+    document.getElementById('res-name').textContent = newAgent.fullName;
+    document.getElementById('res-phone').textContent = newAgent.mobileNumber;
+    document.getElementById('res-comm').textContent = newAgent.requestedCommissionRate + '% (मंजुरी प्रलंबित)';
+    document.getElementById('successCard').classList.remove('hidden');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    onDistrictChange();
+  });
+</script>
+
+</body>
+</html>
+

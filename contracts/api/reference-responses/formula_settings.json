@@ -1,0 +1,21 @@
+{
+  "isSuccess": true,
+  "statusCode": 200,
+  "title": "Formula Setting List",
+  "data": [
+    {
+      "id": 1,
+      "ratePeriodName": "2026-27 ते 2029-30",
+      "rateStartYear": 2026,
+      "rateEndYear": 2029,
+      "rateEffectiveDate": "2026-04-01T00:00:00",
+      "taxDivisor": 1000,
+      "applyLightingHealthOnOpenPlot": true,
+      "roundArea": true,
+      "ferfarAssessmentYear": 2026,
+      "serialStart": 1,
+      "isActive": true
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="mr" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GPMH मंजुरी व पडताळणी केंद्र (Review & Approval Dashboard)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Noto Sans Devanagari', system-ui, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+
+  <!-- Top Banner -->
+  <div class="mb-8 rounded-2xl bg-gradient-to-r from-[#0f6b61] via-[#0d564e] to-[#093c36] p-6 text-white shadow-xl">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <div class="flex items-center gap-3">
+          <span class="rounded-lg bg-white/20 px-3 py-1 text-xs font-bold uppercase tracking-wider backdrop-blur-sm">GPMH ERP 2.0</span>
+          <span class="text-xs font-semibold text-emerald-200">76 स्क्रीन संपूर्ण प्रोटोटाइप मंजुरी केंद्र</span>
+        </div>
+        <h1 class="mt-2 text-2xl sm:text-3xl font-black tracking-tight">ग्रामपंचायत व्यवस्थापन हब — पडताळणी व मंजुरी डॅशबोर्ड</h1>
+        <p class="mt-1 text-sm text-emerald-100 max-w-3xl">
+          सर्व 76 मॉड्यूल्स, वैधानिक नमुने १ ते ३३, कर आकारणी, वसुली व अहवाल परीक्षण. प्रत्येक स्क्रीन तपासून 'मंजूर करा' किंवा 'बदल सुचवा' पर्याय वापरा.
+        </p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="exportReviewDecisionsJSON()" class="rounded-xl bg-white/10 px-4 py-2.5 text-xs font-bold text-white backdrop-blur-sm border border-white/20 hover:bg-white/20 transition flex items-center gap-2">
+          📥 निर्णय एक्सपोर्ट (JSON)
+        </button>
+        <button onclick="exportReviewDecisionsCSV()" class="rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-bold text-slate-900 shadow-md hover:bg-amber-400 transition flex items-center gap-2">
+          📊 अहवाल डाऊनलोड (CSV)
+        </button>
+        <a href="./02_dashboard.html" class="rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-[#0f6b61] shadow-md hover:bg-slate-100 transition flex items-center gap-2">
+          🚀 मुख्य डॅशबोर्डवर जा
+        </a>
+      </div>
+    </div>
+
+    <!-- Live Metric Cards -->
+    <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div class="rounded-xl bg-white/10 p-4 backdrop-blur-md border border-white/10">
+        <p class="text-xs font-semibold text-emerald-200">एकूण स्क्रीन (Total Screens)</p>
+        <p class="mt-1 text-3xl font-black">72</p>
+        <p class="text-[11px] text-emerald-300">१००% स्क्रीन तयार</p>
+      </div>
+      <div class="rounded-xl bg-white/10 p-4 backdrop-blur-md border border-white/10">
+        <p class="text-xs font-semibold text-emerald-200">मंजूर स्क्रीन (Approved)</p>
+        <p id="stat-approved" class="mt-1 text-3xl font-black text-emerald-300">0</p>
+        <p class="text-[11px] text-emerald-300">ग्राहकाद्वारे मंजूर</p>
+      </div>
+      <div class="rounded-xl bg-white/10 p-4 backdrop-blur-md border border-white/10">
+        <p class="text-xs font-semibold text-emerald-200">बदल सुचवलेले (Changes)</p>
+        <p id="stat-changes" class="mt-1 text-3xl font-black text-rose-300">0</p>
+        <p class="text-[11px] text-rose-200">दुरुस्ती अपेक्षित</p>
+      </div>
+      <div class="rounded-xl bg-white/10 p-4 backdrop-blur-md border border-white/10">
+        <p class="text-xs font-semibold text-emerald-200">तपासणी प्रलंबित (Pending)</p>
+        <p id="stat-pending" class="mt-1 text-3xl font-black text-amber-300">72</p>
+        <p class="text-[11px] text-amber-200">निर्णय बाकी</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters & Search Toolbar -->
+  <div class="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex flex-wrap items-center gap-3 flex-1">
+      <div class="relative w-full sm:w-72">
+        <input id="search-input" oninput="filterScreens()" type="text" placeholder="स्क्रीन नाव, ID किंवा मॉड्यूल शोधा..." class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-9 pr-4 text-xs outline-none focus:border-[#0f6b61] focus:bg-white focus:ring-2 focus:ring-emerald-100">
+        <svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+      </div>
+
+      <select id="module-filter" onchange="filterScreens()" class="rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-700 outline-none focus:border-[#0f6b61]">
+        <option value="ALL">सर्व मॉड्यूल्स (All Modules)</option>
+        <option value="Properties">मालमत्ता व्यवस्थापन (Properties)</option>
+        <option value="Demand">मागणी व बिले (Demand)</option>
+        <option value="Collection">कर वसुली (Collection)</option>
+        <option value="Accounting">लेखा व रोख वही (Accounting)</option>
+        <option value="Citizens">नागरिक सेवा (Citizens)</option>
+        <option value="Works">विकासकामे व मालमत्ता (Works)</option>
+        <option value="Staff">कर्मचारी प्रशासन (Staff)</option>
+        <option value="Administration">कार्यालयीन प्रशासन (Admin)</option>
+        <option value="Digital">डिजिटल सेवा (Digital GP)</option>
+        <option value="Settings">सेटिंग्ज व मास्टर्स (Settings)</option>
+      </select>
+
+      <select id="status-filter" onchange="filterScreens()" class="rounded-xl border border-slate-200 bg-slate-50 py-2 px-3 text-xs font-semibold text-slate-700 outline-none focus:border-[#0f6b61]">
+        <option value="ALL">सर्व स्थिती (All Status)</option>
+        <option value="PENDING">तपासणी प्रलंबित (Pending)</option>
+        <option value="APPROVED">मंजूर (Approved)</option>
+        <option value="CHANGES_REQUESTED">बदल सुचवले (Changes Requested)</option>
+      </select>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button onclick="approveAllScreens()" class="rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800 hover:bg-emerald-100 transition">
+        ✓ सर्व मंजूर करा (Approve All)
+      </button>
+      <button onclick="resetAllReviews()" class="rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
+        रीसेट करा (Reset)
+      </button>
+    </div>
+  </div>
+
+  <!-- Master Screens Table -->
+  <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[900px] border-collapse text-left">
+        <thead class="bg-slate-50 border-b border-slate-200">
+          <tr>
+            <th class="px-4 py-3 text-xs font-bold uppercase text-slate-600">ID</th>
+            <th class="px-4 py-3 text-xs font-bold uppercase text-slate-600">स्क्रीन नाव (मराठी व इंग्रजी)</th>
+            <th class="px-4 py-3 text-xs font-bold uppercase text-slate-600">मॉड्यूल</th>
+            <th class="px-4 py-3 text-xs font-bold uppercase text-slate-600">वैधानिक संदर्भ</th>
+            <th class="px-4 py-3 text-xs font-bold uppercase text-slate-600">मंजुरी स्थिती</th>
+            <th class="px-4 py-3 text-xs font-bold uppercase text-slate-600 text-right">कारवाई</th>
+          </tr>
+        </thead>
+        <tbody id="screens-table-body" class="divide-y divide-slate-100">
+          <!-- Rendered via JS -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const screens = [{"id": "AUTH-001", "file": "01_login.html", "module": "Authentication", "name": "लॉगिन पृष्ठ (Secure Login & OTP)", "req": "REQ-ONB-007, REQ-ONB-011", "ref": "सुरक्षित लॉगिन व 2FA"}, {"id": "DASH-001", "file": "02_dashboard.html", "module": "Dashboard", "name": "मुख्य डॅशबोर्ड (Executive Dashboard)", "req": "REQ-ONB-008, REQ-TAX-001", "ref": "पंचायत मुख्य नियंत्रण कक्ष"}, {"id": "PROP-001", "file": "03_namuna_8_hub.html", "module": "Properties", "name": "नमुना ८ मालमत्ता हब (Namuna 8 Property Hub)", "req": "REQ-N8-001", "ref": "मिळकत यादी व शोध"}, {"id": "PROP-003", "file": "04_namuna_8_add_registration.html", "module": "Properties", "name": "नवीन मालमत्ता नोंदणी अर्ज (Property Add Form)", "req": "REQ-TAX-001, REQ-TAX-002", "ref": "भांडवली मूल्य आधारित नोंदणी"}, {"id": "PROP-002", "file": "05_namuna_8_update_list.html", "module": "Properties", "name": "नमुना ८ दुरुस्ती यादी (Property Update List)", "req": "REQ-N8-001", "ref": "दुरुस्ती व वार्षिक पुनर्मूल्यांकन"}, {"id": "PROP-006", "file": "06_namuna_8_view_property.html", "module": "Properties", "name": "मिळकत संपूर्ण तपशील (View Property Details)", "req": "REQ-TAX-002", "ref": "Property 360° ऑडिट लॉग"}, {"id": "PROP-007", "file": "07_namuna_8_edit_property.html", "module": "Properties", "name": "मिळकत संपादन (Edit Property)", "req": "REQ-TAX-001", "ref": "क्षेत्रफळ व वापर बदल"}, {"id": "CERT-001", "file": "08_namuna_8_statutory_print_extract.html", "module": "Certificates", "name": "नमुना ८ वैधानिक उतारा (Statutory Form 8-A Extract)", "req": "REQ-CRT-001", "ref": "A4 पोर्ट्रेट अधिकृत उतारा"}, {"id": "PROP-004", "file": "09_namuna_8_mutation_register.html", "module": "Properties", "name": "फेरफार नोंदवही (Mutation Register)", "req": "REQ-MUT-001 to 005", "ref": "वारस व खरेदी-विक्री फेरफार"}, {"id": "PROP-008", "file": "10_namuna_8_mutation_form.html", "module": "Properties", "name": "फेरफार अर्ज व सुनावणी (Mutation Application Form)", "req": "REQ-MUT-002", "ref": "१५ दिवसांची जाहीर नोटीस"}, {"id": "DEM-001", "file": "11_namuna_9_demand_register.html", "module": "Demand", "name": "नमुना ९ मागणी नोंदवही (Demand Register)", "req": "REQ-N9-001", "ref": "A3 लँडस्केप वार्षिक मागणी वही"}, {"id": "DEM-002", "file": "12_namuna_9ka_demand_bills.html", "module": "Demand", "name": "नमुना ९-क कर मागणी बिले (Demand Bills Manager)", "req": "REQ-N9-002", "ref": "बॅच बिल जनरेशन व वाटप"}, {"id": "DEM-003", "file": "13_namuna_9ka_bill_print_template.html", "module": "Demand", "name": "नमुना ९-क मागणी बिल प्रिंट (Demand Bill Print Template)", "req": "REQ-N9-002", "ref": "QR कोड बिल प्रिंटिंग"}, {"id": "COL-004", "file": "14_namuna_10_receipt_register.html", "module": "Collection", "name": "नमुना १० पावती नोंदवही (Receipt Register)", "req": "REQ-N10-001", "ref": "कर वसुली नोंदवही"}, {"id": "COL-001", "file": "15_namuna_10_collection_modal.html", "module": "Collection", "name": "नमुना १० कर वसुली काऊंटर व मोडल (Tax Collection POS Modal)", "req": "REQ-N10-001", "ref": "रोख व UPI थेट वसुली काऊंटर"}, {"id": "TAX-001", "file": "16_formula_settings_masters.html", "module": "Taxation", "name": "कर दर व सूत्र मास्टर्स (Tax Formula & Rate Settings)", "req": "REQ-TAX-001", "ref": "भांडवली मूल्य सूत्र व घसारा दर"}, {"id": "COL-002", "file": "17_namuna_10_dual_receipt_print.html", "module": "Collection", "name": "नमुना १० कर पावती (Dual Copy Landscape Print)", "req": "REQ-N10-002", "ref": "द्वि-प्रत लँडस्केप पावती"}, {"id": "CIT-001", "file": "18_citizen_register.html", "module": "Citizens", "name": "नागरिक नोंदवही (Citizen Register & 26-Col Excel)", "req": "REQ-MST-003", "ref": "२६ कॉलम बल्क डेटा इम्पोर्ट"}, {"id": "PROP-005", "file": "19_digital_nameplate_qr_print.html", "module": "Properties", "name": "डिजिटल मालमत्ता नामफलक व QR पाटी प्रिंट (Smart QR Plate Sheet)", "req": "REQ-QRP-001", "ref": "स्मार्ट QR पाटी शीट प्रिंट"}, {"id": "COL-003", "file": "20_misc_receipt_dual_print.html", "module": "Collection", "name": "नमुना ११ किरकोळ वसुली पावती (Misc Revenue Dual Print)", "req": "REQ-N11-001", "ref": "दाखले व इतर किरकोळ महसूल"}, {"id": "ONB-001", "file": "21_gp_onboarding_wizard.html", "module": "Onboarding", "name": "ग्रामपंचायत ऑनबोर्डिंग विझार्ड (GP Onboarding Wizard)", "req": "REQ-ONB-001", "ref": "५ टप्प्यांचा ऑनबोर्डिंग विझार्ड"}, {"id": "SUP-001", "file": "22_superadmin_dashboard.html", "module": "SuperAdmin", "name": "सुपरॲडमिन राज्य नियंत्रण कक्ष (SuperAdmin Dashboard)", "req": "REQ-SUP-001", "ref": "राज्यस्तरीय नियंत्रण कक्ष"}, {"id": "ACC-001", "file": "accounts_ns1to7_cashbook.html", "module": "Accounting", "name": "नमुना १ ते ७ रोख वही व खतावणी (Cash Book & Ledger)", "req": "REQ-ACC-001", "ref": "मुंबई ग्रामपंचायत लेखा संहिता २०११"}, {"id": "ACC-002", "file": "accounts_ns12_advances.html", "module": "Accounting", "name": "नमुना १२ अग्रीम नोंदवही (Advances Register)", "req": "REQ-ACC-001", "ref": "नमुना क्र. १२ वैधानिक नोंदवही"}, {"id": "ACC-003", "file": "accounts_ns14_investments.html", "module": "Accounting", "name": "नमुना १४ गुंतवणूक नोंदवही (Investments Register)", "req": "REQ-ACC-001", "ref": "नमुना क्र. १४ मुदत ठेवी"}, {"id": "ACC-004", "file": "accounts_ns17_deposits.html", "module": "Accounting", "name": "नमुना १७ अनामत नोंदवही (Security Deposits Register)", "req": "REQ-ACC-001", "ref": "नमुना क्र. १७ बयाणा व सुरक्षा"}, {"id": "ACC-005", "file": "accounts_ns18_loans.html", "module": "Accounting", "name": "नमुना १८ कर्ज नोंदवही (Loans & Borrowing Register)", "req": "REQ-ACC-001", "ref": "नमुना क्र. १८ शासकीय व बँक कर्जे"}, {"id": "ACC-006", "file": "accounts_ns25to30_ledgers.html", "module": "Accounting", "name": "नमुना २५ ते ३० वर्गीकृत खतावणी (Classified Ledgers)", "req": "REQ-ACC-001", "ref": "नमुना क्र. २५ ते ३० मुख्य व उपशीर्षके"}, {"id": "ACC-007", "file": "accounts_ns32_balance_sheet.html", "module": "Accounting", "name": "नमुना ३२ ताळेबंद व वार्षिक हिशोब (Balance Sheet)", "req": "REQ-ACC-001", "ref": "नमुना क्र. ३२ वैधानिक ताळेबंद"}, {"id": "ACC-008", "file": "accounts_receipts_payments.html", "module": "Accounting", "name": "जमा व खर्च दैनंदिनी (Daily Receipts & Payments Journal)", "req": "REQ-ACC-001", "ref": "दैनिक आर्थिक व्यवहार नोंद"}, {"id": "ACC-009", "file": "accounts_vouchers.html", "module": "Accounting", "name": "प्रमाणके व खर्चाचे व्हाउचर्स (Voucher Entry & Approval)", "req": "REQ-ACC-001", "ref": "डिजिटल व्हाउचर्स व देयक मंजुरी"}, {"id": "ACC-010", "file": "accounts_bank.html", "module": "Accounting", "name": "बँक खाती व मेळ जुळवणी (BRS Bank Reconciliation)", "req": "REQ-ACC-001", "ref": "Bank Reconciliation Statement (BRS)"}, {"id": "ACC-011", "file": "accounts_financial_statements.html", "module": "Accounting", "name": "आर्थिक विवरणपत्रे (Monthly & Annual Financial Statements)", "req": "REQ-ACC-001", "ref": "नमुना ३२ व पंचायत वित्तीय अहवाल"}, {"id": "ACC-012", "file": "accounts_audit.html", "module": "Accounting", "name": "लेखापरीक्षण व आक्षेप पूर्तता (Audit Compliance)", "req": "REQ-ACC-001", "ref": "Local Fund & AG Audit Compliance"}, {"id": "ACC-013", "file": "accounts_forms_hub.html", "module": "Accounting", "name": "सर्व नमुने १ ते ३३ वैधानिक नोंदवह्या केंद्र (All Namuna 1 to 33 Hub)", "req": "REQ-ACC-001", "ref": "महाराष्ट्र ग्रामपंचायत अधिनियम व लेखा संहिता"}, {"id": "CIT-002", "file": "citizen_applications.html", "module": "Citizens", "name": "नागरिक सेवा अर्ज व्यवस्थापन (Public Applications & Services)", "req": "REQ-CIT-001", "ref": "महाराष्ट्र लोकसेवा हक्क अधिनियम (RTS)"}, {"id": "CIT-003", "file": "citizen_status.html", "module": "Citizens", "name": "अर्जांची प्रत्यक्ष स्थिती व ट्रॅकर (RTS Application Tracking)", "req": "REQ-CIT-001", "ref": "Real-time Citizen Application Tracker"}, {"id": "CERT-002", "file": "citizen_certificates.html", "module": "Certificates", "name": "सर्व वैधानिक दाखले व प्रमाणपत्रे (Certificates & NOC Hub)", "req": "REQ-CERT-001", "ref": "अधिकृत ग्रामपंचायत दाखले निर्गती"}, {"id": "CIT-004", "file": "citizen_building_permission.html", "module": "Citizens", "name": "बांधकाम परवानगी व अकृषक मंजुरी (Building Permission Hub)", "req": "REQ-CIT-001", "ref": "महाराष्ट्र ग्रामपंचायत बांधकाम नियम"}, {"id": "CIT-005", "file": "citizen_fee_calculator.html", "module": "Citizens", "name": "ग्रामपंचायत सेवा शुल्क व कर गणक (Official Fee Calculator)", "req": "REQ-CIT-001", "ref": "कर व विकास शुल्क गणक यंत्र"}, {"id": "CIT-006", "file": "citizen_complaints.html", "module": "Citizens", "name": "नागरिक तक्रार निवारण कक्ष (Citizen Grievance Redressal)", "req": "REQ-CIT-001", "ref": "Grievance Redressal Portal"}, {"id": "WRK-001", "file": "works_ns15_register.html", "module": "Works", "name": "नमुना १५ विकासकामे नोंदवही (Works Master Register)", "req": "REQ-WRK-001", "ref": "नमुना क्र. १५ शासकीय विकासकामे"}, {"id": "WRK-002", "file": "works_ns16_measurement.html", "module": "Works", "name": "नमुना १६ मोजमाप वही (Measurement Book - MB)", "req": "REQ-WRK-001", "ref": "नमुना क्र. १६ अभियंता मोजमाप नोंद"}, {"id": "WRK-003", "file": "works_ns19_stock.html", "module": "Works", "name": "नमुना १९ सामग्री साठा वही (Material Stock Register)", "req": "REQ-WRK-001", "ref": "नमुना क्र. १९ ग्रामपंचायत साहित्य साठा"}, {"id": "WRK-004", "file": "works_ns20_estimates.html", "module": "Works", "name": "नमुना २० अंदाजपत्रक व तांत्रिक मंजुरी (Estimates & Sanctions)", "req": "REQ-WRK-001", "ref": "नमुना क्र. २० दरसूची व मंजुरी"}, {"id": "WRK-005", "file": "works_ns22_completion.html", "module": "Works", "name": "नमुना २२ काम पूर्णता प्रमाणपत्र (Work Completion Certificate)", "req": "REQ-WRK-001", "ref": "नमुना क्र. २२ पूर्णता दाखला"}, {"id": "WRK-006", "file": "works_ns23_tender.html", "module": "Works", "name": "नमुना २३ निविदा व दरपत्रक नोंदवही (Tender & Quotations)", "req": "REQ-WRK-001", "ref": "नमुना क्र. २३ ई-निविदा व लिलाव"}, {"id": "WRK-007", "file": "works_ns24_contractor.html", "module": "Works", "name": "नमुना २४ कंत्राटदार देयके नोंदवही (Contractor Bills & Payments)", "req": "REQ-WRK-001", "ref": "नमुना क्र. २४ देयक कपाती व अदागी"}, {"id": "WRK-008", "file": "works_ns33_assets.html", "module": "Works", "name": "नमुना ३३ स्थावर व जंगम मालमत्ता नोंदवही (GP Asset Register)", "req": "REQ-WRK-001", "ref": "नमुना क्र. ३३ ग्रामपंचायत मालकी मालमत्ता"}, {"id": "WRK-009", "file": "works_projects_progress.html", "module": "Works", "name": "विकासकामे प्रत्यक्ष प्रगती मॉनिटरिंग (Physical & Financial Progress)", "req": "REQ-WRK-001", "ref": "Geo-tagged Works Progress Dashboard"}, {"id": "WRK-010", "file": "works_funds_schemes.html", "module": "Works", "name": "१५ वा वित्त आयोग व शासकीय योजना निधी (Scheme Fund Tracking)", "req": "REQ-WRK-001", "ref": "PFMS & PRIASoft Grants Integration"}, {"id": "STF-001", "file": "staff_ns13_service_book.html", "module": "Staff", "name": "नमुना १३ कर्मचारी सेवापुस्तक (Staff Service Book)", "req": "REQ-STF-001", "ref": "नमुना क्र. १३ सेवा नोंदवही"}, {"id": "STF-002", "file": "staff_ns21_muster_roll.html", "module": "Staff", "name": "नमुना २१ रोजंदारी हजेरी नोंदवही (Muster Roll)", "req": "REQ-STF-001", "ref": "नमुना क्र. २१ दैनिक हजेरी व मजुरी"}, {"id": "STF-003", "file": "staff_ns31_pension.html", "module": "Staff", "name": "नमुना ३१ भविष्य निर्वाह निधी व उपदान (PF & Pension Register)", "req": "REQ-STF-001", "ref": "नमुना क्र. ३१ GPF / NPS व उपदान"}, {"id": "STF-004", "file": "staff_attendance_leave.html", "module": "Staff", "name": "कर्मचारी हजेरी व रजा व्यवस्थापन (Attendance & Leave System)", "req": "REQ-STF-001", "ref": "Biometric & Digital Attendance"}, {"id": "STF-005", "file": "staff_salary_payroll.html", "module": "Staff", "name": "मासिक वेतन व भत्ते देयके (Monthly Payroll & Allowance Processing)", "req": "REQ-STF-001", "ref": "ऑक्टोबर २०२६ वेतन देयक (Pay Bill)"}, {"id": "STF-006", "file": "staff_travel_allowance.html", "module": "Staff", "name": "प्रवास भत्ता देयके व मंजुरी (Travel Allowance - TA Bills)", "req": "REQ-STF-001", "ref": "शासकीय कर्तव्य प्रवास देयके"}, {"id": "ADM-001", "file": "office_inward_outward.html", "module": "Administration", "name": "आवक / जावक टपाल नोंदवही (Inward & Outward Register)", "req": "REQ-ADM-001", "ref": "अधिकृत शासकीय टपाल नोंद"}, {"id": "ADM-002", "file": "office_gram_sabha.html", "module": "Administration", "name": "ग्रामसभा कार्यवृत्त व उपस्थिती (Gram Sabha Proceedings)", "req": "REQ-ADM-001", "ref": "ग्रामसभा कार्यवृत्त व ठराव पुस्तक"}, {"id": "ADM-003", "file": "office_monthly_meeting.html", "module": "Administration", "name": "ग्रामपंचायत मासिक सभा व्यवस्थापन (Monthly Panchayat Meetings)", "req": "REQ-ADM-001", "ref": "मासिक सभा नोंदवही"}, {"id": "ADM-004", "file": "office_agenda_resolutions.html", "module": "Administration", "name": "विषयपत्रिका व ठराव नोंदवही (Agenda & Resolutions / Tharaav)", "req": "REQ-ADM-001", "ref": "वैधानिक ठराव वही (Resolution Book)"}, {"id": "ADM-005", "file": "office_orders_correspondence.html", "module": "Administration", "name": "शासकीय आदेश व पत्रव्यवहार (Govt Orders & Directives)", "req": "REQ-ADM-001", "ref": "मंत्रालय, जिल्हाधिकारी व ZP परिपत्रके"}, {"id": "DIG-001", "file": "digital_website_cms.html", "module": "Digital", "name": "ग्रामपंचायत सार्वजनिक संकेतस्थळ CMS (Public Website CMS)", "req": "REQ-DIG-001", "ref": "अधिकृत ग्रामपंचायत पब्लिक पोर्टल नियंत्रण"}, {"id": "DIG-002", "file": "digital_notices_news.html", "module": "Digital", "name": "सार्वजनिक सूचना व जाहीर फलक (Public Digital Notice Board)", "req": "REQ-DIG-001", "ref": "Digital Village Notice Board & News"}, {"id": "DIG-003", "file": "digital_gallery_media.html", "module": "Digital", "name": "छायाचित्र व व्हिडिओ दालन (Photo & Video Media Gallery)", "req": "REQ-DIG-001", "ref": "गाव विकास व उपक्रम मीडिया गॅलरी"}, {"id": "DIG-004", "file": "digital_mobile_app.html", "module": "Digital", "name": "नागरिक मोबाईल ॲप नियंत्रण (Mobile App Gateway Control)", "req": "REQ-DIG-001", "ref": "E-Grampanchayat Citizen Mobile App"}, {"id": "DIG-005", "file": "digital_citizen_guide.html", "module": "Digital", "name": "नागरिक हक्क सनद व मार्गदर्शिका (Citizen Charter & Services Guide)", "req": "REQ-DIG-001", "ref": "महाराष्ट्र लोकसेवा हक्क अधिनियम २०१५ सनद"}, {"id": "SET-001", "file": "settings_verification_audit.html", "module": "Settings", "name": "पडताळणी व लेखापरीक्षण लॉग (Verification & Audit Trails)", "req": "REQ-SET-001", "ref": "2-Person Rule Approval & Security Log"}, {"id": "SET-002", "file": "settings_security_password.html", "module": "Settings", "name": "सुरक्षा व पासवर्ड व्यवस्थापन (Security & Role Management)", "req": "REQ-SET-001", "ref": "RBAC & Role-Based Access Security"}, {"id": "SET-003", "file": "settings_preferences_lang.html", "module": "Settings", "name": "भाषा व प्रणाली पसंती (Preferences & Localization)", "req": "REQ-SET-001", "ref": "भाषा, वित्तीय वर्ष व फॉन्ट सेटिंग्ज"}, {"id": "HLP-001", "file": "help_user_guide_faq.html", "module": "Help", "name": "वापरकर्ता मार्गदर्शिका व FAQ (User Manuals & Tutorials)", "req": "REQ-HLP-001", "ref": "मार्गदर्शिका, प्रशिक्षण व्हिडिओ व वारंवार विचारले जाणारे प्रश्न"}, {"id": "HLP-002", "file": "help_support_ticket.html", "module": "Help", "name": "तांत्रिक सहाय्य व हेल्पडेस्क (Helpdesk & Support Ticketing)", "req": "REQ-HLP-001", "ref": "२४x७ तांत्रिक सहाय्य केंद्र"}, {"id": "AGT-001", "file": "agent_register.html", "module": "Agents", "name": "एजंट स्वयं-नोंदणी अर्ज (Agent Self-Registration)", "req": "REQ-AGT-001 to REQ-AGT-005", "ref": "१३-फील्ड्स स्वयं-नोंदणी व KYC अपलोड"}, {"id": "AGT-002", "file": "agent_login.html", "module": "Agents", "name": "विक्री प्रतिनिधी लॉगिन (Agent Secure Portal Login)", "req": "REQ-AGT-006, REQ-AGT-007", "ref": "स्थिती गेट (Pending / Active) पडताळणी"}, {"id": "AGT-003", "file": "agent_dashboard.html", "module": "Agents", "name": "एजंट डॅशबोर्ड व कमिशन पोर्टल (Agent Dashboard & Workspace)", "req": "REQ-AGT-008 to REQ-AGT-017", "ref": "८ KPI कार्ड्स, GP नोंदणी व कमिशन लेजर"}, {"id": "AGT-004", "file": "superadmin_agents.html", "module": "SuperAdmin", "name": "सुपरॲडमिन एजंट्स व सेटलमेंट हब (SuperAdmin Agent Governance & Settlement)", "req": "REQ-AGT-018 to REQ-AGT-030", "ref": "केवायसी मंजुरी, दर नियंत्रण व पेआउट व्हाउचर"}];
+
+    function getReviews() {
+      try {
+        return JSON.parse(localStorage.getItem('gpmh_prototype_reviews') || '{}');
+      } catch(e) {
+        return {};
+      }
+    }
+
+    function saveReviews(reviews) {
+      localStorage.setItem('gpmh_prototype_reviews', JSON.stringify(reviews));
+      renderTable();
+    }
+
+    function renderTable() {
+      const reviews = getReviews();
+      const tbody = document.getElementById('screens-table-body');
+      const search = (document.getElementById('search-input').value || '').toLowerCase();
+      const modFilter = document.getElementById('module-filter').value;
+      const statusFilter = document.getElementById('status-filter').value;
+
+      let approved = 0, changes = 0, pending = 0;
+      let html = '';
+
+      screens.forEach(s => {
+        const rev = reviews[s.id] || { status: 'PENDING' };
+        if (rev.status === 'APPROVED') approved++;
+        else if (rev.status === 'CHANGES_REQUESTED') changes++;
+        else pending++;
+
+        // Filter check
+        const matchesSearch = s.name.toLowerCase().includes(search) || s.id.toLowerCase().includes(search) || s.module.toLowerCase().includes(search);
+        const matchesMod = (modFilter === 'ALL' || s.module === modFilter);
+        const matchesStatus = (statusFilter === 'ALL' || rev.status === statusFilter);
+
+        if (!matchesSearch || !matchesMod || !matchesStatus) return;
+
+        let badge = '';
+        if (rev.status === 'APPROVED') {
+          badge = '<span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">✓ मंजूर (Approved)</span>';
+        } else if (rev.status === 'CHANGES_REQUESTED') {
+          badge = '<span class="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 border border-rose-200">✎ बदल सुचवले (Changes)</span>';
+        } else {
+          badge = '<span class="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 border border-amber-200">तपासणी प्रलंबित (Pending)</span>';
+        }
+
+        html += `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="whitespace-nowrap px-4 py-3 font-mono text-xs font-black text-[#0f6b61]">${s.id}</td>
+            <td class="px-4 py-3 text-xs font-semibold text-slate-900">
+              <a href="./${s.file}" class="hover:text-[#0f6b61] hover:underline">${s.name}</a>
+              <p class="text-[11px] font-mono text-slate-400">${s.file}</p>
+            </td>
+            <td class="whitespace-nowrap px-4 py-3 text-xs text-slate-600 font-medium">${s.module}</td>
+            <td class="px-4 py-3 text-xs text-slate-500">${s.ref}</td>
+            <td class="whitespace-nowrap px-4 py-3">${badge}</td>
+            <td class="whitespace-nowrap px-4 py-3 text-right">
+              <div class="inline-flex items-center gap-1.5">
+                <a href="./${s.file}" class="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700 hover:bg-slate-200">उघडा</a>
+                <button onclick="quickApprove('${s.id}')" class="rounded-lg bg-emerald-600 px-2.5 py-1 text-xs font-bold text-white hover:bg-emerald-700">✓ मंजूर</button>
+                <button onclick="quickChange('${s.id}')" class="rounded-lg bg-rose-600 px-2.5 py-1 text-xs font-bold text-white hover:bg-rose-700">✎ बदल</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+      document.getElementById('stat-approved').textContent = approved;
+      document.getElementById('stat-changes').textContent = changes;
+      document.getElementById('stat-pending').textContent = pending;
+    }
+
+    function quickApprove(id) {
+      const reviews = getReviews();
+      reviews[id] = { status: 'APPROVED', updatedAt: new Date().toISOString() };
+      saveReviews(reviews);
+    }
+
+    function quickChange(id) {
+      const comment = prompt('कृपया बदल सूचना तपशील लिहा (Enter change request):');
+      if (comment) {
+        const reviews = getReviews();
+        reviews[id] = { status: 'CHANGES_REQUESTED', comments: comment, updatedAt: new Date().toISOString() };
+        saveReviews(reviews);
+      }
+    }
+
+    function approveAllScreens() {
+      if (!confirm('तुम्हाला सर्व 76 स्क्रीन मंजूर करायच्या आहेत का?')) return;
+      const reviews = getReviews();
+      screens.forEach(s => {
+        reviews[s.id] = { status: 'APPROVED', updatedAt: new Date().toISOString(), comments: 'Batch approved.' };
+      });
+      saveReviews(reviews);
+    }
+
+    function resetAllReviews() {
+      if (!confirm('तुम्हाला सर्व मंजुरी नोंदी रीसेट करायच्या आहेत का?')) return;
+      localStorage.removeItem('gpmh_prototype_reviews');
+      renderTable();
+    }
+
+    function filterScreens() {
+      renderTable();
+    }
+
+    function exportReviewDecisionsJSON() {
+      const reviews = getReviews();
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(reviews, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "GPMH_Review_Decisions.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function exportReviewDecisionsCSV() {
+      const reviews = getReviews();
+      let csv = "Screen ID,File Name,Screen Name,Module,Review Status,Comments,Timestamp\n";
+      screens.forEach(s => {
+        const rev = reviews[s.id] || { status: 'PENDING', comments: '' };
+        csv += `"${s.id}","${s.file}","${s.name}","${s.module}","${rev.status}","${rev.comments || ''}","${rev.updatedAt || ''}"\n`;
+      });
+      const dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "GPMH_Screen_Approvals.csv");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    document.addEventListener('DOMContentLoaded', renderTable);
+  </script>
+</body>
+</html>

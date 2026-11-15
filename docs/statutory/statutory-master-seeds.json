@@ -1,0 +1,55 @@
+{
+  "formulaSettingsDefaults": {
+    "ratePeriodName": "2026-27 ते 2029-30",
+    "rateStartYear": 2026,
+    "rateEndYear": 2029,
+    "taxDivisor": 1000,
+    "applyLightingHealthOnOpenPlot": true,
+    "roundArea": true,
+    "noticeGraceDays": 15,
+    "earlyPaymentRebatePercent": 10.0,
+    "latePaymentPenaltyPercent": 10.0,
+    "fifoOrder": ["NOTICE_WARRANT_PENALTY", "OLDEST_ARREARS", "CURRENT_YEAR", "EXCESS_CREDIT"]
+  },
+  "constructionTypes": [
+    { "code": "HUT_MUD", "typeName": "झोपडी किंवा मातीची इमारत", "category": "HUT_MUD", "landAnnualValueRate": 760, "constructionReadyReckonerRate": 5852, "usageWeightageFactor": 1, "taxRate": 0.5 },
+    { "code": "STONE_BRICK_MUD", "typeName": "दगड विटा मातीची इमारत", "category": "STONE_BRICK_RCC", "landAnnualValueRate": 760, "constructionReadyReckonerRate": 10032, "usageWeightageFactor": 1, "taxRate": 0.8 },
+    { "code": "STONE_LIME_SEMI_PUCCA", "typeName": "दगड सिमेंट चुना अर्ध पक्के घर", "category": "STONE_BRICK_RCC", "landAnnualValueRate": 758, "constructionReadyReckonerRate": 14012, "usageWeightageFactor": 1, "taxRate": 1.0 },
+    { "code": "RCC_PUCCA", "typeName": "आर सी सी पक्के घर", "category": "STONE_BRICK_RCC", "landAnnualValueRate": 760, "constructionReadyReckonerRate": 18392, "usageWeightageFactor": 1, "taxRate": 1.5 },
+    { "code": "VACANT_SPACE", "typeName": "खाली जागा", "category": "OPEN_LAND", "landAnnualValueRate": 760, "constructionReadyReckonerRate": 2, "usageWeightageFactor": 0, "taxRate": 2.0 },
+    { "code": "TOWER", "typeName": "मनोरे", "category": "SPECIAL", "landAnnualValueRate": 760, "constructionReadyReckonerRate": 0, "usageWeightageFactor": 1, "taxRate": 8.0 },
+    { "code": "TOWER_OPEN_SPACE", "typeName": "मनोऱ्याची खुली जागा", "category": "OPEN_LAND", "landAnnualValueRate": 760, "constructionReadyReckonerRate": 0, "usageWeightageFactor": 0, "taxRate": 2.0 },
+    { "code": "CATTLE_SHED", "typeName": "जनावरांचा गोठा", "category": "HUT_MUD", "landAnnualValueRate": 760, "constructionReadyReckonerRate": 5852, "usageWeightageFactor": 1, "taxRate": 0.5 },
+    { "code": "TIN_SHED", "typeName": "पत्र्याचे शेड", "category": "HUT_MUD", "landAnnualValueRate": 760, "constructionReadyReckonerRate": 5852, "usageWeightageFactor": 1, "taxRate": 0.5 },
+    { "code": "BAKHAL_SPACE", "typeName": "बखळ जागा", "category": "OPEN_LAND", "landAnnualValueRate": 760, "constructionReadyReckonerRate": 0, "usageWeightageFactor": 0, "taxRate": 2.0 },
+    { "code": "OPEN_PLOT", "typeName": "खुली जागा", "category": "OPEN_LAND", "landAnnualValueRate": 760, "constructionReadyReckonerRate": 0, "usageWeightageFactor": 0, "taxRate": 2.0 },
+    { "code": "OTHER_COMMERCIAL", "typeName": "इतर व्यापारी / गोदाम बांधकाम", "category": "STONE_BRICK_RCC", "landAnnualValueRate": 760, "constructionReadyReckonerRate": 18392, "usageWeightageFactor": 1, "taxRate": 1.5 }
+  ],
+  "usageWeightages": [
+    { "code": "RESIDENTIAL", "usageName": "निवासी", "weightage": 1.0 },
+    { "code": "INDUSTRIAL", "usageName": "औद्योगिक", "weightage": 1.2 },
+    { "code": "COMMERCIAL", "usageName": "वाणिज्य", "weightage": 1.25 }
+  ],
+  "depreciationSlabs": [
+    { "ageFrom": 0, "ageTo": 2, "fromInclusive": true, "toInclusive": true, "hutMudPercent": 100, "stoneBrickRccPercent": 100 },
+    { "ageFrom": 2, "ageTo": 5, "fromInclusive": false, "toInclusive": true, "hutMudPercent": 95, "stoneBrickRccPercent": 95 },
+    { "ageFrom": 5, "ageTo": 10, "fromInclusive": false, "toInclusive": true, "hutMudPercent": 85, "stoneBrickRccPercent": 90 },
+    { "ageFrom": 10, "ageTo": 20, "fromInclusive": false, "toInclusive": true, "hutMudPercent": 75, "stoneBrickRccPercent": 80 },
+    { "ageFrom": 20, "ageTo": 30, "fromInclusive": false, "toInclusive": true, "hutMudPercent": 60, "stoneBrickRccPercent": 70 },
+    { "ageFrom": 30, "ageTo": 40, "fromInclusive": false, "toInclusive": true, "hutMudPercent": 45, "stoneBrickRccPercent": 60 },
+    { "ageFrom": 40, "ageTo": 50, "fromInclusive": false, "toInclusive": true, "hutMudPercent": 30, "stoneBrickRccPercent": 50 },
+    { "ageFrom": 50, "ageTo": 60, "fromInclusive": false, "toInclusive": true, "hutMudPercent": 20, "stoneBrickRccPercent": 40 },
+    { "ageFrom": 60, "ageTo": 100, "fromInclusive": false, "toInclusive": true, "hutMudPercent": 15, "stoneBrickRccPercent": 30 }
+  ],
+  "areaSlabTaxes": [
+    { "areaFrom": 1, "areaTo": 300, "lightingTax": 40, "healthTax": 40, "sanitationTax": 100, "toiletTax": 0 },
+    { "areaFrom": 301, "areaTo": 700, "lightingTax": 50, "healthTax": 50, "sanitationTax": 100, "toiletTax": 20 },
+    { "areaFrom": 701, "areaTo": 999999, "lightingTax": 100, "healthTax": 100, "sanitationTax": 100, "toiletTax": 0 }
+  ],
+  "waterTaxes": [
+    { "code": "NONE", "waterTypeName": "नाही", "amount": 0 },
+    { "code": "SPECIAL", "waterTypeName": "विशेष पाणी कर", "amount": 720 },
+    { "code": "GENERAL", "waterTypeName": "सामान्य पाणी कर", "amount": 720 }
+  ]
+}
+

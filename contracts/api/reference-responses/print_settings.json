@@ -1,0 +1,16 @@
+{
+  "isSuccess": true,
+  "statusCode": 200,
+  "title": "Print Setting List",
+  "data": [
+    {
+      "id": 1,
+      "showTip": true,
+      "showStamp": false,
+      "showChaturseema": true,
+      "showDate": true,
+      "namuna8TipText": "(टीप :- सदर मालमत्ता आकारणी नक्कल केवळ ग्रामपंचायत कर आकारणी बाबत असून इतर कोणत्याही हक्षाबावत हा दस्त कायदेशीर पुरावा सोगत नाही, 'नमूद मोजमापे तात्रिक दृष्ठण प्रमाणित तथा प्रमाणबद्ध केलेली नाहीत)"
+    }
+  ],
+  "errors": []
+}

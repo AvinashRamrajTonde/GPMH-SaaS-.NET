@@ -1,0 +1,26 @@
+{
+  "isSuccess": true,
+  "statusCode": 200,
+  "title": "Water Tax List",
+  "data": [
+    {
+      "id": 4,
+      "waterTypeName": "नाही",
+      "amount": 0,
+      "isActive": true
+    },
+    {
+      "id": 5,
+      "waterTypeName": "विशेष पाणी कर",
+      "amount": 720,
+      "isActive": true
+    },
+    {
+      "id": 6,
+      "waterTypeName": "सामान्य पाणी कर",
+      "amount": 720,
+      "isActive": true
+    }
+  ],
+  "errors": []
+}

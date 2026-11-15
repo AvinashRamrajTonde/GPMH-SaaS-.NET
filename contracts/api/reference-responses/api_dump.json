@@ -1,0 +1,45 @@
+{
+  "OPTIONS https://e-grampanchayatapi.lakshcampus.com/api/Admin/GetAllGramPanchayatLoginAsync": {
+    "status": 204,
+    "method": "OPTIONS",
+    "url": "https://e-grampanchayatapi.lakshcampus.com/api/Admin/GetAllGramPanchayatLoginAsync",
+    "body": null
+  },
+  "GET https://e-grampanchayatapi.lakshcampus.com/api/Admin/GetAllGramPanchayatLoginAsync": {
+    "status": 200,
+    "method": "GET",
+    "url": "https://e-grampanchayatapi.lakshcampus.com/api/Admin/GetAllGramPanchayatLoginAsync",
+    "body": {
+      "isSuccess": true,
+      "statusCode": 200,
+      "title": "Gram Panchayat List",
+      "data": [
+        {
+          "gramPanchayatMasterId": 1001,
+          "gramPanchayatAddId": 1001,
+          "village_Panchayat": "खडकी"
+        },
+        {
+          "gramPanchayatMasterId": 1,
+          "gramPanchayatAddId": 1,
+          "village_Panchayat": "चिंचोली खुर्द"
+        }
+      ],
+      "errors": []
+    }
+  },
+  "OPTIONS https://e-grampanchayatapi.lakshcampus.com/api/Admin/GramPanchayatLoginAsync?gramPanchayatAddId=1&userName=Rajesh&password=Rajesh%40123": {
+    "status": 204,
+    "method": "OPTIONS",
+    "url": "https://e-grampanchayatapi.lakshcampus.com/api/Admin/GramPanchayatLoginAsync?gramPanchayatAddId=1&userName=Rajesh&password=Rajesh%40123",
+    "body": null
+  },
+  "GET https://e-grampanchayatapi.lakshcampus.com/api/Admin/GramPanchayatLoginAsync?gramPanchayatAddId=1&userName=Rajesh&password=Rajesh%40123": {
+    "status": 401,
+    "method": "GET",
+    "url": "https://e-grampanchayatapi.lakshcampus.com/api/Admin/GramPanchayatLoginAsync?gramPanchayatAddId=1&userName=Rajesh&password=Rajesh%40123",
+    "body": {
+      "message": "Gram Panchayat not found."
+    }
+  }
+}

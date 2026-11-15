@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>नवीन ग्रामपंचायत थेट प्रोव्हिजनिंग — ई-ग्रामपंचायत ERP सुपरॲडमिन</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Noto Sans Devanagari', system-ui, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    @media print {
+      .no-print, #offline-nav-bar, header, .form-container {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      #print-slip {
+        display: block !important;
+        position: static !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+
+<!-- OFFLINE NAVIGATION BAR -->
+<div class="no-print" id="offline-nav-bar" style="background:#f1f5f9; border-bottom:1px solid #cbd5e1; padding:5px 12px; font-family:'Noto Sans Devanagari',system-ui,sans-serif; font-size:11.5px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px; z-index:999999; position:relative;">
+  <div style="font-weight:800; font-size:11.5px; color:#0f6b61; display:flex; align-items:center; gap:5px;">
+    <span style="background:#0f6b61; color:#fff; border-radius:4px; padding:2px 5px; font-size:9.5px;">GPMH</span>
+    <span>ई-ग्रामपंचायत ERP (सुपरॲडमिन प्रोव्हिजनिंग)</span>
+    <a href="./review_dashboard.html" style="display:inline-block; padding:4px 9px; margin:1.5px 2px; font-size:10.5px; border-radius:5px; text-decoration:none; border:1px solid #d97706; background:#fef3c7; color:#92400e; font-weight:700;">⭐ मंजुरी केंद्र</a>
+  </div>
+  <div style="display:flex; flex-wrap:wrap; align-items:center; gap:4px;">
+    <a href="./22_superadmin_dashboard.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">← सुपरॲडमिन डॅशबोर्ड</a>
+    <a href="./02_dashboard.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">गाव डॅशबोर्ड</a>
+    <a href="./21_gp_onboarding_wizard.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">ऑनबोर्डिंग विझार्ड</a>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40 px-4 py-3 shadow-lg">
+  <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-600 flex items-center justify-center font-extrabold text-white text-base shadow-md">
+        👑
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base font-extrabold text-white tracking-wide">सुपरॲडमिन: नवीन ग्रामपंचायत थेट प्रोव्हिजनिंग</h1>
+          <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
+            INSTANT PROVISIONING
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-400">नोंदणी तपशील + भरणा तपशील → टेनंट थेट ACTIVE (सक्रिय)</p>
+      </div>
+    </div>
+    <a href="./22_superadmin_dashboard.html" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+      <span>← डिरेक्टरीकडे परत जा</span>
+    </a>
+  </div>
+</header>
+
+<main class="max-w-5xl mx-auto w-full px-4 py-6 flex-1 space-y-6">
+
+  <!-- Breadcrumb -->
+  <div class="flex items-center gap-2 text-xs text-slate-400">
+    <a href="./22_superadmin_dashboard.html" class="hover:text-amber-400 transition">सुपरॲडमिन नियंत्रण कक्ष</a>
+    <span>/</span>
+    <span class="text-slate-200 font-semibold">नवीन GP थेट प्रोव्हिजनिंग</span>
+  </div>
+
+  <!-- Form Container Card -->
+  <div class="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden form-container">
+    
+    <!-- Hero / Workflow Bar -->
+    <div class="p-6 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-800">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <span>🏛️ नवीन ग्रामपंचायत थेट नोंदणी व टेनंट ॲक्टिव्हेशन</span>
+          </h2>
+          <p class="text-xs text-slate-300 mt-1">
+            सुपरॲडमिन द्वारे नोंदणी करताना भरणा तपशील (Payment Mode & Amount) अनिवार्य असून नोंदणी होताच टेनंट थेट <b>ACTIVE</b> होतो.
+          </p>
+        </div>
+        <div class="flex items-center gap-2 bg-emerald-950/60 border border-emerald-500/30 px-3.5 py-2 rounded-xl text-xs font-semibold text-emerald-300">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>OTP व पडताळणी बायपास (Instant Active)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notice Banner -->
+    <div class="mx-6 mt-6 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-200 text-xs leading-relaxed flex items-start gap-3">
+      <span class="text-xl">ℹ️</span>
+      <div>
+        <strong class="font-bold text-amber-300 block mb-0.5">डिकपल्ड ऑनबोर्डिंग व पुढील पायऱ्या:</strong>
+        या फॉर्मद्वारे प्राथमिक ग्रामपंचायत नोंदणी व वर्गणी भरणा पूर्ण होईल. उर्वरित आवश्यक सेटअप (२. कार्यकारिणी व स्वाक्षरी, ३. आकारणी वर्ष व कर दर, ४. बँक खाती व डायनॅमिक UPI QR, ५. कर सूत्रे) हे ग्रामसेवकाने त्यांच्या लॉगिनवर डॅशबोर्ड चेकलिस्टद्वारे पूर्ण करावयाचे आहे.
+      </div>
+    </div>
+
+    <form id="provisionForm" onsubmit="event.preventDefault(); submitFullProvision();" class="p-6 space-y-6 text-xs text-slate-200">
+      
+      <!-- Section 1: Standard 11 Registration Fields -->
+      <div class="space-y-4">
+        <div class="flex items-center gap-2 pb-2 border-b border-slate-800 text-slate-200 font-bold text-sm">
+          <span class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 inline-flex items-center justify-center text-xs font-mono">१</span>
+          <span>ग्रामपंचायत नोंदणीचे ११ अधिकृत फील्ड्स (1.1 Registration Input Fields)</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- 1. LGD Code -->
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">१. एल.जी.डी. कोड (LGD Code) <span class="text-rose-400">*</span></label>
+            <input type="text" id="p-lgdCode" maxlength="6" placeholder="उदा. 271234" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 font-mono text-emerald-400 font-bold focus:border-emerald-500 focus:outline-none"/>
+            <span class="text-[10px] text-slate-500 mt-1 block">६ अंकी LGD क्रमांक (^\d{6}$)</span>
+          </div>
+
+          <!-- 2. Marathi GP Name -->
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">२. ग्रामपंचायतीचे नाव (मराठी) <span class="text-rose-400">*</span></label>
+            <input type="text" id="p-nameMr" placeholder="उदा. ग्रामपंचायत वरुड खुर्द" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-white focus:border-emerald-500 focus:outline-none"/>
+            <span class="text-[10px] text-slate-500 mt-1 block">नोंदवही व पावत्यांवरील अधिकृत नाव</span>
+          </div>
+
+          <!-- 3. English GP Name -->
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">३. GP Name (English) <span class="text-rose-400">*</span></label>
+            <input type="text" id="p-nameEn" placeholder="उदा. Gram Panchayat Warud Khurd" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-white focus:border-emerald-500 focus:outline-none"/>
+            <span class="text-[10px] text-slate-500 mt-1 block">SMS, अहवाल व डोमेनसाठी नाव</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- 4. District -->
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">४. जिल्हा (District) <span class="text-rose-400">*</span></label>
+            <select id="p-district" onchange="onDistrictChange()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-white focus:border-emerald-500 focus:outline-none">
+              <option value="अमरावती" selected="">अमरावती (Amravati)</option>
+              <option value="अहिल्यानगर">अहिल्यानगर (अहमदनगर)</option>
+              <option value="पुणे">पुणे</option>
+              <option value="नागपूर">नागपूर</option>
+              <option value="नाशिक">नाशिक</option>
+              <option value="कोल्हापूर">कोल्हापूर</option>
+              <option value="यवतमाळ">यवतमाळ</option>
+              <option value="बुलढाणा">बुलढाणा</option>
+              <option value="वाशिम">वाशिम</option>
+              <option value="अकोला">अकोला</option>
+            </select>
+          </div>
+
+          <!-- 5. Taluka -->
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">५. तालुका / पं.स. (Taluka) <span class="text-rose-400">*</span></label>
+            <select id="p-taluka" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-white focus:border-emerald-500 focus:outline-none">
+              <!-- Dynamic -->
+            </select>
+          </div>
+
+          <!-- 6. Pincode -->
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">६. पिनकोड (Pincode) <span class="text-rose-400">*</span></label>
+            <input type="text" id="p-pincode" maxlength="6" placeholder="उदा. 444705" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 font-mono text-white focus:border-emerald-500 focus:outline-none"/>
+            <span class="text-[10px] text-slate-500 mt-1 block">६ अंकी टपाल पिनकोड</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- 7. Admin Name -->
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">७. प्रशासक / ग्रामसेवक नाव <span class="text-rose-400">*</span></label>
+            <input type="text" id="p-adminName" placeholder="उदा. राजेश वानखडे" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-white focus:border-emerald-500 focus:outline-none"/>
+          </div>
+
+          <!-- 8. Admin Phone -->
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">८. मोबाईल नंबर (लॉगिन आयडी) <span class="text-rose-400">*</span></label>
+            <input type="tel" id="p-adminPhone" maxlength="10" placeholder="उदा. 9822334455" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 font-mono text-amber-300 font-bold focus:border-emerald-500 focus:outline-none"/>
+            <span class="text-[10px] text-slate-500 mt-1 block">ग्रामसेवकाचा अधिकृत लॉगिन आयडी</span>
+          </div>
+
+          <!-- 9. Admin Email -->
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">९. अधिकृत शासकीय ईमेल <span class="text-rose-400">*</span></label>
+            <input type="email" id="p-adminEmail" placeholder="उदा. warud.gp@gov.in" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-white focus:border-emerald-500 focus:outline-none"/>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- 10. Password -->
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">१०. प्रारंभिक पासवर्ड <span class="text-rose-400">*</span></label>
+            <div class="relative">
+              <input type="text" id="p-password" value="Maha@12345" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 font-mono text-white focus:border-emerald-500 focus:outline-none"/>
+              <button type="button" onclick="generatePassword()" class="absolute right-2.5 top-2.5 text-[10px] bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded text-slate-300 border border-slate-700">🎲 नवीन</button>
+            </div>
+            <span class="text-[10px] text-slate-500 mt-1 block">किमान ८ अक्षरे (अप्परकेस, लोअरकेस, अंक, विशेष चिन्ह)</span>
+          </div>
+
+          <!-- 11. Confirm Password -->
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">११. पासवर्ड पुष्टी (Confirm Password) <span class="text-rose-400">*</span></label>
+            <input type="text" id="p-confirmPassword" value="Maha@12345" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 font-mono text-white focus:border-emerald-500 focus:outline-none"/>
+            <span class="text-[10px] text-slate-500 mt-1 block">दोन्ही पासवर्ड तंतोतंत जुळणे आवश्यक आहे</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Mandatory Payment Details -->
+      <div class="space-y-4 pt-4 border-t border-slate-800">
+        <div class="flex items-center gap-2 pb-2 border-b border-slate-800 text-amber-300 font-bold text-sm">
+          <span class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 inline-flex items-center justify-center text-xs font-mono">२</span>
+          <span>भरणा व वर्गणी तपशील (Payment Details — Mandatory for SuperAdmin Provisioning)</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-slate-950/80 p-4 rounded-xl border border-amber-500/30">
+          <!-- Payment Mode -->
+          <div>
+            <label class="block font-bold text-amber-200 mb-1">पेमेंट मोड (Payment Mode) <span class="text-rose-400">*</span></label>
+            <select id="p-paymentMode" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2.5 text-white font-semibold focus:border-amber-500 focus:outline-none">
+              <option value="UPI" selected="">ऑनलाईन UPI / QR कोड (SBI / PhonePe / GPay)</option>
+              <option value="NEFT_RTGS">बँक ट्रान्सफर (NEFT / RTGS)</option>
+              <option value="CASH">रोख पावती (Cash at ZP Counter)</option>
+              <option value="CHEQUE">शासकीय धनादेश (GP Account Payee Cheque)</option>
+              <option value="TREASURY">शासकीय अनुदान कपात (Treasury / 15th FC)</option>
+            </select>
+          </div>
+
+          <!-- Amount -->
+          <div>
+            <label class="block font-bold text-amber-200 mb-1">भरलेली रक्कम (₹ Amount) <span class="text-rose-400">*</span></label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-2.5 font-mono text-slate-400 font-bold text-sm">₹</span>
+              <input type="number" id="p-amount" value="6000" min="1" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-8 pr-3.5 py-2.5 font-mono text-emerald-400 font-bold text-sm focus:border-amber-500 focus:outline-none"/>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-1 block">वार्षिक वर्गणी (किमान ₹1 अनिवार्य)</span>
+          </div>
+
+          <!-- Duration -->
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">वर्गणी कालावधी (Subscription Duration) <span class="text-rose-400">*</span></label>
+            <select id="p-duration" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2.5 text-white focus:border-amber-500 focus:outline-none">
+              <option value="365" selected="">१ वर्ष (365 दिवस - प्रमाणक)</option>
+              <option value="730">२ वर्षे (730 दिवस)</option>
+              <option value="1095">३ वर्षे (1095 दिवस)</option>
+            </select>
+          </div>
+
+          <!-- Reference / UTR -->
+          <div class="md:col-span-2">
+            <label class="block font-bold text-slate-300 mb-1">UTR / पावती क्र. / धनादेश क्रमांक (Reference / Receipt No.)</label>
+            <input type="text" id="p-paymentRef" placeholder="उदा. UTR-202611140099 किंवा REC-5541" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2.5 font-mono text-white focus:border-amber-500 focus:outline-none"/>
+          </div>
+
+          <!-- Payment Date -->
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">भरणा तारीख</label>
+            <input type="date" id="p-paymentDate" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3.5 py-2.5 text-white focus:border-amber-500 focus:outline-none"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="pt-4 flex flex-wrap items-center justify-between gap-4 border-t border-slate-800">
+        <a href="./22_superadmin_dashboard.html" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition">
+          ← रद्द करा (Cancel)
+        </a>
+        <button type="submit" class="px-7 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold shadow-lg transition transform active:scale-95 flex items-center gap-2">
+          <span>✓ ग्रामपंचायत थेट ACTIVE प्रोव्हिजन करा (Provision Tenant)</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Success Card (Shown on Submit) -->
+  <div id="successCard" class="hidden bg-slate-900 border border-emerald-500/40 rounded-2xl shadow-2xl p-8 space-y-6 max-w-2xl mx-auto">
+    <div class="text-center space-y-2">
+      <div class="w-16 h-16 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 rounded-full flex items-center justify-center mx-auto text-3xl font-bold shadow-inner">
+        ✓
+      </div>
+      <h3 class="text-xl font-bold text-white">🎉 ग्रामपंचायत यशस्वीरित्या प्रोव्हिजन झाली!</h3>
+      <p class="text-xs text-emerald-300 font-semibold">ही ग्रामपंचायत त्वरित <span class="underline">ACTIVE</span> करण्यात आली आहे.</p>
+    </div>
+
+    <div class="bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-3 font-mono text-xs">
+      <div class="flex justify-between border-b border-slate-800 pb-2">
+        <span class="text-slate-400 font-sans">ग्रामपंचायत नाव:</span>
+        <b class="text-white font-sans text-sm" id="res-name">—</b>
+      </div>
+      <div class="flex justify-between border-b border-slate-800 pb-2">
+        <span class="text-slate-400 font-sans">LGD कोड:</span>
+        <b class="text-emerald-400 font-bold" id="res-lgd">—</b>
+      </div>
+      <div class="flex justify-between border-b border-slate-800 pb-2">
+        <span class="text-slate-400 font-sans">लॉगिन आयडी (Username):</span>
+        <b class="text-amber-300 font-bold text-sm" id="res-phone">—</b>
+      </div>
+      <div class="flex justify-between border-b border-slate-800 pb-2">
+        <span class="text-slate-400 font-sans">पासवर्ड:</span>
+        <b class="text-slate-200" id="res-password">—</b>
+      </div>
+      <div class="flex justify-between border-b border-slate-800 pb-2">
+        <span class="text-slate-400 font-sans">वर्गणी वैधता (Valid Until):</span>
+        <b class="text-sky-400 font-bold" id="res-validity">—</b>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-slate-400 font-sans">भरणा तपशील:</span>
+        <b class="text-emerald-300 font-bold" id="res-payment">—</b>
+      </div>
+    </div>
+
+    <div class="bg-indigo-950/40 border border-indigo-800/50 rounded-xl p-3.5 text-xs text-indigo-200 leading-relaxed">
+      <strong class="text-indigo-300 block mb-1 font-bold">📋 उर्वरित आवश्यक ऑनबोर्डिंग पायऱ्या:</strong>
+      ग्रामसेवकाने वरील क्रेडेन्शियलसह लॉगिन केल्यावर डॅशबोर्डवरील चेकलिस्ट मधून पुढील पायऱ्या पूर्ण करावयाच्या आहेत:
+      <span class="block mt-1 text-slate-300">• २. कार्यकारिणी व स्वाक्षरी • ३. आकारणी वर्ष व दर • ४. बँक खाती व QR • ५. कर सूत्रे</span>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 pt-2">
+      <button onclick="copyCredentials()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+        <span>📋 क्रेडेन्शियल कॉपी करा</span>
+      </button>
+      <button onclick="window.print()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+        <span>🖨️ पावती प्रिंट करा</span>
+      </button>
+    </div>
+
+    <div class="flex gap-3 pt-2">
+      <a href="./22_superadmin_dashboard.html" class="flex-1 px-5 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-bold text-center transition">
+        ← डॅशबोर्ड डिरेक्टरीकडे जा
+      </a>
+      <a href="./02_dashboard.html" class="flex-1 px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold text-center transition flex items-center justify-center gap-1.5">
+        <span>🔑 या GP मध्ये लॉगिन करा ↗</span>
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  const districtTalukasMap = {
+    'अमरावती': ['अंजनगाव सुर्जी', 'अचलपूर', 'अमरावती', 'चांदूर बाजार', 'चांदूर रेल्वे', 'चिखलदरा', 'दर्यापूर', 'धामणगाव रेल्वे', 'धारणी', 'मोर्शी', 'नांदगाव खंडेश्वर', 'भातकुली', 'तिवसा', 'वरुड'],
+    'अहिल्यानगर': ['संगमनेर', 'अकोले', 'कोपरगाव', 'राहाता', 'श्रीरामपूर', 'नेवासा', 'शेवगाव', 'पाथर्डी', 'जामखेड', 'कर्जत', 'श्रीगोंदा', 'पारनेर', 'अहमदनगर'],
+    'पुणे': ['बारामती', 'हवेली', 'पुणे शहर', 'शिरूर', 'दौंड', 'इंदापूर', 'भोर', 'वेल्हे', 'पुरंदर', 'जुन्नर', 'आंबेगाव', 'खेड', 'मावळ', 'मुळशी'],
+    'नागपूर': ['नागपूर शहर', 'नागपूर ग्रामीण', 'कामठी', 'हिंगणा', 'उमरेड', 'कुही', 'भिवापूर', 'काटोल', 'नरखेड', 'सावनेर', 'कळमेश्वर', 'रामटेक', 'पारशिवणी', 'मौदा'],
+    'नाशिक': ['नाशिक', 'मालेगाव', 'सिन्नर', 'निफाड', 'दिंडोरी', 'इगतपुरी', 'चांदवड', 'कळवण', 'नांदगाव', 'सटाणा', 'सुरगाणा', 'त्र्यंबकेश्वर', 'देवळा', 'पेठ', 'येवला'],
+    'कोल्हापूर': ['करवीर', 'शिरोळ', 'हातकणंगले', 'कागल', 'राधानगरी', 'भुदरगड', 'आजरा', 'गडहिंग्लज', 'चंदगड', 'शाहूवाडी', 'पन्हाळा', 'गगनबावडा'],
+    'यवतमाळ': ['यवतमाळ', 'दारव्हा', 'दिग्रस', 'पुसद', 'उमरखेड', 'महागाव', 'आर्णी', 'नेर', 'केळापूर', 'घाटंजी', 'राळेगाव', 'कळंब', 'वणी', 'मारेगाव', 'झरी जामणी', 'बाभूळगाव'],
+    'बुलढाणा': ['बुलढाणा', 'चिखली', 'देऊळगाव राजा', 'जळगाव जामोद', 'संग्रामपूर', 'खामगाव', 'शेगाव', 'मलकापूर', 'मोताळा', 'नांदुरा', 'मेहकर', 'सिंदखेड राजा', 'लोणार'],
+    'वाशिम': ['वाशिम', 'मालेगाव', 'रिसोड', 'मंगरुळपीर', 'कारंजा', 'मानोरा'],
+    'अकोला': ['अकोला', 'अकोट', 'तेल्हारा', 'बाळापूर', 'पातूर', 'बार्शीटाकळी', 'मूर्तिजापूर']
+  };
+
+  function onDistrictChange() {
+    const dist = document.getElementById('p-district').value;
+    const talukas = districtTalukasMap[dist] || [];
+    const select = document.getElementById('p-taluka');
+    select.innerHTML = '';
+    talukas.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = t;
+      select.appendChild(opt);
+    });
+  }
+
+  function generatePassword() {
+    const pwd = 'Maha@' + Math.floor(1000 + Math.random() * 9000);
+    document.getElementById('p-password').value = pwd;
+    document.getElementById('p-confirmPassword').value = pwd;
+  }
+
+  function submitFullProvision() {
+    const lgd = document.getElementById('p-lgdCode').value.trim();
+    if (!/^\d{6}$/.test(lgd)) {
+      alert('एल.जी.डी. कोड नक्की ६ अंकांचा असावा.');
+      return;
+    }
+
+    const nameMr = document.getElementById('p-nameMr').value.trim();
+    if (!nameMr || nameMr.length < 3) {
+      alert('ग्रामपंचायतीचे मराठी नाव (किमान ३ अक्षरे) प्रविष्ट करा.');
+      return;
+    }
+
+    const nameEn = document.getElementById('p-nameEn').value.trim();
+    if (!nameEn || nameEn.length < 3) {
+      alert('GP Name in English is required.');
+      return;
+    }
+
+    const district = document.getElementById('p-district').value;
+    const taluka = document.getElementById('p-taluka').value;
+    const pincode = document.getElementById('p-pincode').value.trim();
+    if (!/^\d{6}$/.test(pincode)) {
+      alert('पिनकोड नक्की ६ अंकांचा असावा.');
+      return;
+    }
+
+    const adminName = document.getElementById('p-adminName').value.trim();
+    if (!adminName) {
+      alert('प्रशासक / ग्रामसेवकाचे नाव प्रविष्ट करा.');
+      return;
+    }
+
+    const adminPhone = document.getElementById('p-adminPhone').value.trim();
+    if (!/^[6-9]\d{9}$/.test(adminPhone)) {
+      alert('मोबाईल नंबर (लॉगिन आयडी) नक्की १० अंकांचा असावा.');
+      return;
+    }
+
+    const adminEmail = document.getElementById('p-adminEmail').value.trim();
+    if (!adminEmail || !adminEmail.includes('@')) {
+      alert('वैध अधिकृत शासकीय ईमेल प्रविष्ट करा.');
+      return;
+    }
+
+    const password = document.getElementById('p-password').value;
+    const confirmPassword = document.getElementById('p-confirmPassword').value;
+    if (password.length < 8) {
+      alert('पासवर्ड किमान ८ अक्षरांचा असावा.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      alert('पासवर्ड आणि पासवर्ड पुष्टी जुळत नाही.');
+      return;
+    }
+
+    // Validate Mandatory Payment
+    const paymentMode = document.getElementById('p-paymentMode').value;
+    const amount = parseFloat(document.getElementById('p-amount').value);
+    if (!paymentMode) {
+      alert('पेमेंट मोड (Payment Mode) अनिवार्य आहे.');
+      return;
+    }
+    if (!amount || amount <= 0) {
+      alert('भरणा रक्कम (Amount) अनिवार्य आहे.');
+      return;
+    }
+
+    const durationDays = parseInt(document.getElementById('p-duration').value, 10);
+    const expDate = new Date();
+    expDate.setDate(expDate.getDate() + durationDays);
+    const expDateStr = expDate.toISOString().split('T')[0];
+
+    const paymentRef = document.getElementById('p-paymentRef').value.trim() || ('PROV-' + Date.now().toString().slice(-6));
+
+    // Save to localStorage
+    let villages = [];
+    try {
+      const stored = localStorage.getItem('gpmh_superadmin_villages');
+      if (stored) villages = JSON.parse(stored);
+    } catch(e) {
+      console.error(e);
+    }
+
+    const newGp = {
+      lgdCode: lgd,
+      nameMr: nameMr,
+      nameEn: nameEn,
+      district: district,
+      taluka: taluka,
+      pincode: pincode,
+      adminName: adminName,
+      adminPhone: adminPhone,
+      adminEmail: adminEmail,
+      propertiesCount: 0,
+      annualCollection: "₹0",
+      status: "ACTIVE", // Direct ACTIVE tenant provisioned!
+      subscriptionExpires: expDateStr,
+      paymentMode: paymentMode,
+      amountPaid: amount,
+      paymentRef: paymentRef,
+      password: password,
+      isDeleted: false,
+      provisionedAt: new Date().toISOString(),
+      setupProgress: {
+        step1: true,
+        step2: false,
+        step3: false,
+        step4: false,
+        step5: false
+      }
+    };
+
+    villages.unshift(newGp);
+    localStorage.setItem('gpmh_superadmin_villages', JSON.stringify(villages));
+
+    // Render result
+    document.getElementById('res-name').textContent = `${newGp.nameMr} (${newGp.nameEn})`;
+    document.getElementById('res-lgd').textContent = newGp.lgdCode;
+    document.getElementById('res-phone').textContent = newGp.adminPhone;
+    document.getElementById('res-password').textContent = newGp.password;
+    document.getElementById('res-validity').textContent = newGp.subscriptionExpires;
+    document.getElementById('res-payment').textContent = `${newGp.paymentMode} • ₹ ${newGp.amountPaid.toLocaleString('en-IN')}`;
+
+    document.querySelector('.form-container').classList.add('hidden');
+    document.getElementById('successCard').classList.remove('hidden');
+  }
+
+  function copyCredentials() {
+    const lgd = document.getElementById('res-lgd').textContent;
+    const name = document.getElementById('res-name').textContent;
+    const phone = document.getElementById('res-phone').textContent;
+    const pwd = document.getElementById('res-password').textContent;
+    const valid = document.getElementById('res-validity').textContent;
+
+    const text = `=== ई-ग्रामपंचायत ERP लॉगिन क्रेडेन्शियल ===\nग्रामपंचायत: ${name}\nLGD कोड: ${lgd}\nलॉगिन आयडी: ${phone}\nपासवर्ड: ${pwd}\nवैधता: ${valid}\n(उर्वरित आवश्यक सेटअप डॅशबोर्डवर उपलब्ध आहे)`;
+    navigator.clipboard.writeText(text);
+    alert('📋 क्रेडेन्शियल्स क्लिपबोर्डवर यशस्वीरित्या कॉपी झाले आहेत!');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    onDistrictChange();
+    document.getElementById('p-paymentDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('p-lgdCode').value = '27' + Math.floor(1000 + Math.random() * 9000);
+    document.getElementById('p-paymentRef').value = 'UTR-' + Date.now().toString().slice(-8);
+  });
+</script>
+
+</body>
+</html>

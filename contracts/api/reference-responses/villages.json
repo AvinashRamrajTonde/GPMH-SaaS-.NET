@@ -1,0 +1,22 @@
+{
+  "isSuccess": true,
+  "statusCode": 200,
+  "title": "Villages retrieved successfully",
+  "data": [
+    {
+      "id": 1,
+      "gramPanchayatId": 0,
+      "villageName": "चिंचोली खुर्द",
+      "isActive": true,
+      "createdOn": "2026-11-06T20:17:44.5520847Z"
+    },
+    {
+      "id": 2,
+      "gramPanchayatId": 0,
+      "villageName": "रहिमापूर",
+      "isActive": true,
+      "createdOn": "2026-11-06T20:17:44.5520887Z"
+    }
+  ],
+  "errors": []
+}

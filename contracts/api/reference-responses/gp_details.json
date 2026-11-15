@@ -1,0 +1,42 @@
+{
+  "isSuccess": true,
+  "statusCode": 200,
+  "title": "Gram Panchayat Details",
+  "data": {
+    "id": 1,
+    "village_Panchayat": "चिंचोली खुर्द",
+    "lgdCode": "123455",
+    "state": "Maharashtra",
+    "jhilla_Parishad": "अमरावती",
+    "block_Panchayat": "अंजनगाव सुर्जी",
+    "pincode": "444602",
+    "address": "Amravati",
+    "sarpanchName": "Ramesh Patil",
+    "contactNumber": "9876543218",
+    "email": "monikatayde2527@gmail.com",
+    "grampanchayat_Adhikari": "Rahul Deshmukh",
+    "userName": "Rajesh",
+    "password": "Rajesh@1234",
+    "waterQRFilePath": null,
+    "generalQRFilePath": null,
+    "isActive": true,
+    "createdOn": "2026-10-30T11:35:38.3565503",
+    "villages": [
+      {
+        "id": 1,
+        "gramPanchayatId": 1,
+        "villageName": "चिंचोली खुर्द",
+        "isActive": true,
+        "createdOn": "2026-10-30T11:35:38.356473"
+      },
+      {
+        "id": 2,
+        "gramPanchayatId": 1,
+        "villageName": "रहिमापूर",
+        "isActive": true,
+        "createdOn": "2026-10-30T11:35:38.3565039"
+      }
+    ]
+  },
+  "errors": []
+}

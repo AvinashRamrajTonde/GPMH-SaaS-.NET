@@ -1,0 +1,76 @@
+{
+  "isSuccess": true,
+  "statusCode": 200,
+  "title": "Gram Panchayat List",
+  "data": [
+    {
+      "id": 1,
+      "assessmentYear": "2010-11"
+    },
+    {
+      "id": 2,
+      "assessmentYear": "2011-12"
+    },
+    {
+      "id": 3,
+      "assessmentYear": "2012-13"
+    },
+    {
+      "id": 4,
+      "assessmentYear": "2013-14"
+    },
+    {
+      "id": 5,
+      "assessmentYear": "2014-15"
+    },
+    {
+      "id": 6,
+      "assessmentYear": "2015-16"
+    },
+    {
+      "id": 7,
+      "assessmentYear": "2016-17"
+    },
+    {
+      "id": 8,
+      "assessmentYear": "2017-18"
+    },
+    {
+      "id": 9,
+      "assessmentYear": "2018-19"
+    },
+    {
+      "id": 10,
+      "assessmentYear": "2019-20"
+    },
+    {
+      "id": 11,
+      "assessmentYear": "2020-21"
+    },
+    {
+      "id": 12,
+      "assessmentYear": "2021-22"
+    },
+    {
+      "id": 13,
+      "assessmentYear": "2022-23"
+    },
+    {
+      "id": 14,
+      "assessmentYear": "2023-24"
+    },
+    {
+      "id": 15,
+      "assessmentYear": "2024-25"
+    },
+    {
+      "id": 16,
+      "assessmentYear": "2025-26"
+    },
+    {
+      "id": 17,
+      "assessmentYear": "2026-27"
+    }
+  ],
+  "errors": []
+}

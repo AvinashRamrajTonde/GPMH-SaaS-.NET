@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+
+<html lang="mr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ग्रामपंचायत ऑनबोर्डिंग विझार्ड — ई-ग्रामपंचायत ERP</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    body {
+      font-family: 'Noto Sans Devanagari', system-ui, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .step-active {
+      border-color: #0f6b61;
+      color: #0f6b61;
+      background-color: #f0fdf4;
+    }
+    .step-done {
+      border-color: #10b981;
+      background-color: #10b981;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+<!-- OFFLINE NAVIGATION BAR INJECTED FOR INSTANT PREVIEW -->
+<style>@media print { #offline-nav-bar { display: none !important; } }</style>
+<div class="no-print" id="offline-nav-bar" style="background:#f1f5f9; border-bottom:1px solid #cbd5e1; padding:5px 12px; font-family:'Noto Sans Devanagari',system-ui,sans-serif; font-size:11.5px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px; z-index:999999; position:relative;">
+<div style="font-weight:800; font-size:11.5px; color:#0f6b61; display:flex; align-items:center; gap:5px;">
+<span style="background:#0f6b61; color:#fff; border-radius:4px; padding:2px 5px; font-size:9.5px;">GPMH</span>
+<span>ई-ग्रामपंचायत ERP (७२ स्क्रीन संपूर्ण प्रणाली)</span>
+<a href="./review_dashboard.html" style="display:inline-block; padding:4px 9px; margin:1.5px 2px; font-size:10.5px; border-radius:5px; text-decoration:none; border:1px solid #d97706; background:#fef3c7; color:#92400e; font-weight:700; transition:all 0.2s;">⭐ मंजुरी केंद्र (Review Hub)</a>
+</div>
+<div style="display:flex; flex-wrap:wrap; align-items:center; gap:4px;">
+<a href="./02_dashboard.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">डॅशबोर्ड</a>
+<a href="./03_namuna_8_hub.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">नमुना ८</a>
+<a href="./11_namuna_9_demand_register.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">नमुना ९</a>
+<a href="./14_namuna_10_receipt_register.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">नमुना १०</a>
+<a href="./accounts_ns1to7_cashbook.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">रोख वही (१-७)</a>
+<a href="./accounts_forms_hub.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">सर्व नमुने (१-३३)</a>
+<a href="./works_ns15_register.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">विकासकामे (१५)</a>
+<a href="./citizen_applications.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">नागरिक सेवा</a>
+</div>
+</div>
+<!-- INTERACTIVE DEMO TOP BANNER -->
+<div class="bg-gradient-to-r from-emerald-800 to-teal-900 text-white px-4 py-2 text-xs flex flex-wrap items-center justify-between gap-2 shadow-sm">
+<div class="flex items-center gap-2">
+<span class="bg-emerald-500 text-white font-extrabold px-1.5 py-0.5 rounded text-[10px]">ONBOARDING</span>
+<span class="font-semibold">नवीन ग्रामपंचायत सेटअप विझार्ड — ५ सोप्या टप्प्यांत संपूर्ण संगणकीकरण</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1 rounded text-xs transition flex items-center gap-1 shadow-sm" onclick="autoFillDemo()">
+<span>⚡ चिंचोली खुर्द चाचणी डेटा भरा (Auto-fill Demo)</span>
+</button>
+<a class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1 rounded text-xs transition" href="./02_dashboard.html">
+      डॅशबोर्डकडे जा
+    </a>
+</div>
+</div>
+<div class="max-w-5xl mx-auto w-full px-4 py-8 flex-1">
+<!-- Header -->
+<div class="mb-8 text-center">
+<div class="inline-flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full text-emerald-800 text-xs font-bold mb-2">
+      🏛️ महाराष्ट्र शासन ग्रामविकास विभाग मानकांनुसार
+    </div>
+<h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">ग्रामपंचायत डिजिटल ऑनबोर्डिंग व पायाभूत सेटअप</h1>
+<p class="text-slate-600 text-sm mt-1">
+      कर आकारणी, नमुना ८ ते १० सुरू करण्यापूर्वी ग्रामपंचायतीची अधिकृत माहिती, बँक खाती व कर सूत्रे अचूक नोंदवा.
+    </p>
+</div>
+<!-- Stepper Header with Clickable Tabs -->
+<div class="bg-white border border-slate-200 rounded-2xl p-3 sm:p-5 mb-8 shadow-sm">
+<div class="grid grid-cols-5 gap-2 sm:gap-3 text-center" role="tablist">
+<!-- Step 1 -->
+<button type="button" role="tab" id="step-indicator-1" onclick="jumpToStep(1)" class="step-nav-btn flex flex-col items-center p-2.5 rounded-xl border-2 transition-all cursor-pointer bg-emerald-50 border-emerald-600 text-emerald-900 shadow-sm" title="टप्पा १: ग्रामपंचायत माहिती">
+<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 border-emerald-700 bg-emerald-700 text-white transition shadow-sm mb-1.5">
+          १
+        </div>
+<span class="text-[11px] sm:text-xs font-bold text-emerald-800">ग्रामपंचायत माहिती</span>
+</button>
+<!-- Step 2 -->
+<button type="button" role="tab" id="step-indicator-2" onclick="jumpToStep(2)" class="step-nav-btn flex flex-col items-center p-2.5 rounded-xl border-2 transition-all cursor-pointer border-slate-200 hover:bg-slate-50 text-slate-600" title="टप्पा २: कार्यकारिणी व स्वाक्षरी">
+<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 border-slate-300 bg-slate-100 text-slate-600 transition mb-1.5">
+          २
+        </div>
+<span class="text-[11px] sm:text-xs font-semibold text-slate-600">कार्यकारिणी व स्वाक्षरी</span>
+</button>
+<!-- Step 3 -->
+<button type="button" role="tab" id="step-indicator-3" onclick="jumpToStep(3)" class="step-nav-btn flex flex-col items-center p-2.5 rounded-xl border-2 transition-all cursor-pointer border-slate-200 hover:bg-slate-50 text-slate-600" title="टप्पा ३: आकारणी वर्ष">
+<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 border-slate-300 bg-slate-100 text-slate-600 transition mb-1.5">
+          ३
+        </div>
+<span class="text-[11px] sm:text-xs font-semibold text-slate-600">आकारणी वर्ष</span>
+</button>
+<!-- Step 4 -->
+<button type="button" role="tab" id="step-indicator-4" onclick="jumpToStep(4)" class="step-nav-btn flex flex-col items-center p-2.5 rounded-xl border-2 transition-all cursor-pointer border-slate-200 hover:bg-slate-50 text-slate-600" title="टप्पा ४: बँक खाती व QR">
+<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 border-slate-300 bg-slate-100 text-slate-600 transition mb-1.5">
+          ४
+        </div>
+<span class="text-[11px] sm:text-xs font-semibold text-slate-600">बँक खाती व QR</span>
+</button>
+<!-- Step 5 -->
+<button type="button" role="tab" id="step-indicator-5" onclick="jumpToStep(5)" class="step-nav-btn flex flex-col items-center p-2.5 rounded-xl border-2 transition-all cursor-pointer border-slate-200 hover:bg-slate-50 text-slate-600" title="टप्पा ५: कर सूत्रे व सक्रियता">
+<div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 border-slate-300 bg-slate-100 text-slate-600 transition mb-1.5">
+          ५
+        </div>
+<span class="text-[11px] sm:text-xs font-semibold text-slate-600">कर सूत्रे व सक्रियता</span>
+</button>
+</div>
+<!-- Progress bar -->
+<div class="w-full bg-slate-200 h-2.5 rounded-full mt-4 overflow-hidden">
+<div class="bg-gradient-to-r from-emerald-600 to-teal-600 h-full transition-all duration-300" id="progressBar" style="width: 20%;"></div>
+</div>
+</div>
+<!-- Wizard Form Card -->
+<div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 sm:p-8">
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- STEP 1: ग्रामपंचायत प्रोफाइल व LGD कोड                          -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="step-panel space-y-6" id="step-1">
+<div class="border-b border-slate-200 pb-3 flex justify-between items-center">
+<div>
+<h2 class="text-lg font-bold text-slate-800">टप्पा १: ग्रामपंचायतीची मूळ माहिती व एल.जी.डी. कोड पडताळणी</h2>
+<p class="text-xs text-slate-500">शासकीय लोकल गव्हर्नमेंट डिरेक्टरी (LGD) कोड व भौगोलिक अधिकारक्षेत्र</p>
+</div>
+<span class="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">टप्पा १ / ५</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">LGD कोड (Local Govt Directory) <span class="text-rose-500">*</span></label>
+<div class="flex gap-2">
+<input class="w-full text-sm font-mono border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" id="lgdCode" placeholder="उदा. 123455" type="text" value="123455"/>
+<button class="bg-emerald-700 text-white font-bold text-xs px-3 py-2 rounded-lg hover:bg-emerald-600 shrink-0" onclick="verifyLgd()" type="button">पडताळा</button>
+</div>
+<span class="text-[10px] text-emerald-600 mt-1 block">✓ LGD कोड प्रमाणित (ग्रामविकास मंत्रालय)</span>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">ग्रामपंचायतीचे नाव (मराठीत) <span class="text-rose-500">*</span></label>
+<input class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-semibold" id="gpNameMr" placeholder="उदा. ग्रामपंचायत चिंचोली खुर्द" type="text" value="ग्रामपंचायत चिंचोली खुर्द"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">ग्रामपंचायतीचे नाव (इंग्रजीत) <span class="text-rose-500">*</span></label>
+<input class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-semibold" id="gpNameEn" placeholder="e.g. Gram Panchayat Chincholi Khurd" type="text" value="Gram Panchayat Chincholi Khurd"/>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">जिल्हा (District) <span class="text-rose-500">*</span></label>
+<select class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" id="district">
+<option selected="" value="अमरावती">अमरावती (Amravati)</option>
+<option value="अहिल्यानगर">अहिल्यानगर (अहमदनगर)</option>
+<option value="पुणे">पुणे (Pune)</option>
+<option value="नागपूर">नागपूर (Nagpur)</option>
+<option value="नाशिक">नाशिक (Nashik)</option>
+<option value="छत्रपती संभाजीनगर">छत्रपती संभाजीनगर</option>
+<option value="कोल्हापूर">कोल्हापूर (Kolhapur)</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">तालुका / पं.स. (Taluka) <span class="text-rose-500">*</span></label>
+<select class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none font-medium" id="taluka" name="taluka" required>
+<option value="अंजनगाव सुर्जी" selected>अंजनगाव सुर्जी (Anjangaon Surji)</option>
+<option value="अचलपूर">अचलपूर (Achalpur)</option>
+<option value="अमरावती">अमरावती (Amravati)</option>
+<option value="चांदूर बाजार">चांदूर बाजार (Chandur Bazar)</option>
+<option value="चांदूर रेल्वे">चांदूर रेल्वे (Chandur Railway)</option>
+<option value="चिखलदरा">चिखलदरा (Chikhaldara)</option>
+<option value="दर्यापूर">दर्यापूर (Daryapur)</option>
+<option value="धामणगाव रेल्वे">धामणगाव रेल्वे (Dhamangaon Railway)</option>
+<option value="धारणी">धारणी (Dharni)</option>
+<option value="मोर्शी">मोर्शी (Morshi)</option>
+<option value="भातकुली">भातकुली (Bhatkuli)</option>
+<option value="नांदगाव खंडेश्वर">नांदगाव खंडेश्वर (Nandgaon Khandeshwar)</option>
+<option value="तिवसा">तिवसा (Tivsa)</option>
+<option value="वरुड">वरुड (Warud)</option>
+<option value="इतर">इतर (Other / Manually Enter)</option>
+</select>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">पिनकोड (Pincode) <span class="text-rose-500">*</span></label>
+<input class="w-full text-sm font-mono border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" id="pincode" type="text" value="444705"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">एकूण वॉर्ड संख्या (No. of Wards) <span class="text-rose-500">*</span></label>
+<input class="w-full text-sm font-mono border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" id="totalWards" max="15" min="1" type="number" value="6"/>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">लोकसंख्या (Census Population)</label>
+<input class="w-full text-sm font-mono border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" id="population" type="number" value="3250"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">अधिकृत शासकीय ईमेल</label>
+<input class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" id="gpEmail" type="email" value="gpchincholi.amr@gov.in"/>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">कार्यालयीन हेल्पलाईन मोबाईल <span class="text-rose-500">*</span></label>
+<input class="w-full text-sm font-mono border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" id="gpPhone" type="tel" value="9822012345"/>
+</div>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">कार्यालयीन पूर्ण पत्ता</label>
+<textarea class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" id="gpAddress" rows="2">मु. पो. चिंचोली खुर्द, ता. अंजनगाव सुर्जी, जि. अमरावती — ४४४७०५.</textarea>
+</div>
+<div class="border-t border-slate-200 pt-3 mt-4">
+  <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">प्रशासकीय नोंदणी अधिकारी (Registering Officer)</h3>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <label class="block text-xs font-bold text-slate-700 mb-1">प्रशासक / ग्रामसेवक नाव <span class="text-rose-500">*</span></label>
+      <input class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" id="adminName" type="text" value="श्री. अमोल बाबुराव देशमुख"/>
+    </div>
+    <div>
+      <label class="block text-xs font-bold text-slate-700 mb-1">मोबाईल नंबर (लॉगिन आयडी) <span class="text-rose-500">*</span></label>
+      <input class="w-full text-sm font-mono border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" id="adminPhone" type="tel" value="9822012345"/>
+    </div>
+    <div>
+      <label class="block text-xs font-bold text-slate-700 mb-1">अधिकृत शासकीय ईमेल <span class="text-rose-500">*</span></label>
+      <input class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:outline-none" id="adminEmail" type="email" value="gramsevak.chincholi@gov.in"/>
+    </div>
+  </div>
+</div>
+
+</div>
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- STEP 2: कार्यकारिणी मंडळ व डिजिटल स्वाक्षरी                      -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="step-panel hidden space-y-6" id="step-2">
+<div class="border-b border-slate-200 pb-3 flex justify-between items-center">
+<div>
+<h2 class="text-lg font-bold text-slate-800">टप्पा २: कार्यकारिणी मंडळ, अधिकारी व डिजिटल स्वाक्षरी</h2>
+<p class="text-xs text-slate-500">पावत्या, दाखले व उताऱ्यावर छापल्या जाणाऱ्या पदाधिकाऱ्यांची अधिकृत माहिती</p>
+</div>
+<span class="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">टप्पा २ / ५</span>
+</div>
+<!-- Key Officers Table -->
+<div class="space-y-4">
+<!-- Gramsevak -->
+<div class="p-4 bg-emerald-50/60 border border-emerald-200 rounded-xl">
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-emerald-900 bg-emerald-100 px-2.5 py-0.5 rounded">
+              👨‍💼 ग्रामसेवक / ग्रामविकास अधिकारी (मुख्य प्रशासक)
+            </span>
+<span class="text-[11px] text-emerald-700 font-semibold">नमुना ८, ९, १० साठी अधिकृत स्वाक्षरीकर्ता</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+<div>
+<label class="block text-[11px] font-bold text-slate-700 mb-0.5">पूर्ण नाव (मराठी)</label>
+<input class="w-full text-sm border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none bg-white" id="gramsevakName" type="text" value="संजय गजाननराव देशमुख"/>
+</div>
+<div>
+<label class="block text-[11px] font-bold text-slate-700 mb-0.5">मोबाईल नंबर (लॉगिन आयडी)</label>
+<input class="w-full text-sm font-mono border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none bg-white" id="gramsevakMobile" type="tel" value="9422881122"/>
+</div>
+<div>
+<label class="block text-[11px] font-bold text-slate-700 mb-0.5">डिजिटल सही (Signature Upload)</label>
+<div class="flex items-center gap-2">
+<input class="text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500" type="file"/>
+<span class="text-[10px] text-emerald-700 font-mono">✓ देशमुख_सही.png</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sarpanch -->
+<div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-slate-800 bg-slate-200 px-2.5 py-0.5 rounded">
+              👑 सरपंच (लोकप्रतिनिधी प्रमुख)
+            </span>
+<span class="text-[11px] text-slate-500">कालावधी: २०२४ ते २०२९</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+<div>
+<label class="block text-[11px] font-bold text-slate-700 mb-0.5">पूर्ण नाव (मराठी)</label>
+<input class="w-full text-sm border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none bg-white" id="sarpanchName" type="text" value="सौ. वंदनाताई रमेशराव ठाकरे"/>
+</div>
+<div>
+<label class="block text-[11px] font-bold text-slate-700 mb-0.5">मोबाईल नंबर</label>
+<input class="w-full text-sm font-mono border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none bg-white" id="sarpanchMobile" type="tel" value="9822334411"/>
+</div>
+<div>
+<label class="block text-[11px] font-bold text-slate-700 mb-0.5">डिजिटल सही (पर्यायी)</label>
+<input class="text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-slate-700 file:text-white hover:file:bg-slate-600" type="file"/>
+</div>
+</div>
+</div>
+<!-- Clerk / DEO -->
+<div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+<div class="flex items-center justify-between mb-2">
+<span class="text-xs font-bold text-slate-800 bg-slate-200 px-2.5 py-0.5 rounded">
+              💻 संगणक परिचालक / लिपिक (DEO / Tax Collector)
+            </span>
+<span class="text-[11px] text-slate-500">कर वसुली व डेटा एंट्री ऑपरेटर</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+<div>
+<label class="block text-[11px] font-bold text-slate-700 mb-0.5">पूर्ण नाव</label>
+<input class="w-full text-sm border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none bg-white" id="deoName" type="text" value="अमित सुरेशराव वानखडे"/>
+</div>
+<div>
+<label class="block text-[11px] font-bold text-slate-700 mb-0.5">मोबाईल नंबर</label>
+<input class="w-full text-sm font-mono border border-slate-300 rounded px-2.5 py-1.5 focus:outline-none bg-white" id="deoMobile" type="tel" value="9766554433"/>
+</div>
+<div>
+<label class="block text-[11px] font-bold text-slate-700 mb-0.5">वसुली कारकून स्वाक्षरी</label>
+<span class="text-xs text-slate-400">नमुना १० व ११ पावतीवर छापली जाईल</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- STEP 3: कर आकारणी व आर्थिक वर्ष                                -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="step-panel hidden space-y-6" id="step-3">
+<div class="border-b border-slate-200 pb-3 flex justify-between items-center">
+<div>
+<h2 class="text-lg font-bold text-slate-800">टप्पा ३: कर आकारणी वर्ष (Assessment Year) व आर्थिक वर्ष</h2>
+<p class="text-xs text-slate-500">नमुना ८ आकारणी, नमुना ९ मागणी आणि नमुना १० पावत्यांसाठी सक्रिय वर्ष</p>
+</div>
+<span class="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">टप्पा ३ / ५</span>
+</div>
+<div class="bg-amber-50 border border-amber-200 p-4 rounded-xl text-xs text-amber-900 leading-relaxed mb-4">
+        ⚠️ <b>महत्त्वाची सूचना:</b> महाराष्ट्र ग्रामपंचायत कर व फी नियम १९६० नुसार कर आकारणी दर ४ वर्षांनी पुनर्मूल्यांकन (Revision) होते. चालू कर आकारणी वर्ष व आर्थिक वर्ष काळजीपूर्वक निश्चित करा.
+      </div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="p-4 border border-emerald-300 bg-emerald-50/50 rounded-xl space-y-3">
+<div class="flex items-center justify-between">
+<span class="font-bold text-sm text-emerald-950">चालू कर आकारणी वर्ष (Assessment Year)</span>
+<span class="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">सक्रिय (ACTIVE)</span>
+</div>
+<div>
+<label class="block text-xs font-bold text-slate-700 mb-1">आकारणी वर्ष कोड</label>
+<input class="w-full text-sm font-mono font-bold bg-white border border-slate-300 rounded px-3 py-2" readonly="" type="text" value="2026-27"/>
+</div>
+<div class="grid grid-cols-2 gap-2 text-xs">
+<div>
+<span class="text-slate-500">सुरुवात दिनांक:</span>
+<b class="block font-mono text-slate-800">01/04/2026</b>
+</div>
+<div>
+<span class="text-slate-500">समाप्ती दिनांक:</span>
+<b class="block font-mono text-slate-800">31/03/2027</b>
+</div>
+</div>
+<p class="text-[11px] text-slate-600">नमुना ८, ९, ९-क आणि नमुना १० मधील सर्व नोंदी या वर्षानुसार ट्रॅक होतील.</p>
+</div>
+<div class="p-4 border border-slate-200 bg-slate-50 rounded-xl space-y-3">
+<div class="flex items-center justify-between">
+<span class="font-bold text-sm text-slate-800">आगामी / मागील वर्षे व्यवस्थापन</span>
+<span class="text-xs text-slate-500">इतिहास व पुनर्नोंदणी</span>
+</div>
+<div class="space-y-1 text-xs">
+<div class="flex justify-between items-center py-1.5 border-b border-slate-200">
+<span class="font-mono font-semibold">2025-26</span>
+<span class="text-slate-500">मागील वर्ष (थकबाकी संदर्भ)</span>
+<span class="text-emerald-700 font-bold">बंद (Closed)</span>
+</div>
+<div class="flex justify-between items-center py-1.5 border-b border-slate-200">
+<span class="font-mono font-semibold">2024-25</span>
+<span class="text-slate-500">मागील वर्ष २</span>
+<span class="text-slate-400">आर्काइव्ह</span>
+</div>
+</div>
+<button class="text-xs font-bold text-emerald-700 hover:underline pt-2 block" type="button">
+            + मागील वर्षांची थकबाकी कॅरी-फॉरवर्ड सेटिंग्ज
+          </button>
+</div>
+</div>
+</div>
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- STEP 4: वैधानिक बँक खाती व UPI QR                               -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="step-panel hidden space-y-6" id="step-4">
+<div class="border-b border-slate-200 pb-3 flex justify-between items-center">
+<div>
+<h2 class="text-lg font-bold text-slate-800">टप्पा ४: ग्रामपंचायत वैधानिक बँक खाती व डिजिटल पेमेंट UPI QR</h2>
+<p class="text-xs text-slate-500">कर वसुलीची रक्कम थेट ग्रामपंचायत अधिकृत खात्यात जमा होण्यासाठी सेटिंग</p>
+</div>
+<span class="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">टप्पा ४ / ५</span>
+</div>
+<!-- Account 1: Gram Nidhi -->
+<div class="p-4 border-2 border-emerald-600/60 bg-emerald-50/40 rounded-xl space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-emerald-600"></span>
+<b class="text-sm text-emerald-950">१. ग्रामनिधी मुख्य खाते (General Tax Collection Account)</b>
+</div>
+<span class="bg-emerald-600 text-white font-bold text-[10px] px-2 py-0.5 rounded">डिफॉल्ट कर संकलन</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+<div>
+<label class="block font-bold text-slate-700 mb-1">बँकेचे नाव</label>
+<input class="w-full border border-slate-300 rounded px-2.5 py-1.5 bg-white font-semibold" type="text" value="बँक ऑफ महाराष्ट्र"/>
+</div>
+<div>
+<label class="block font-bold text-slate-700 mb-1">शाखा (Branch)</label>
+<input class="w-full border border-slate-300 rounded px-2.5 py-1.5 bg-white" type="text" value="अंजनगाव सुर्जी मुख्य शाखा"/>
+</div>
+<div>
+<label class="block font-bold text-slate-700 mb-1">खाते क्रमांक (A/C No)</label>
+<input class="w-full font-mono border border-slate-300 rounded px-2.5 py-1.5 bg-white font-bold" type="text" value="60124859021"/>
+</div>
+<div>
+<label class="block font-bold text-slate-700 mb-1">IFSC कोड</label>
+<input class="w-full font-mono border border-slate-300 rounded px-2.5 py-1.5 bg-white font-bold" type="text" value="MAHB0000142"/>
+</div>
+</div>
+</div>
+<!-- Account 2: 15th Finance Commission -->
+<div class="p-4 border border-slate-200 bg-slate-50 rounded-xl space-y-3">
+<div class="flex items-center justify-between">
+<b class="text-sm text-slate-800">२. १५ वा वित्त आयोग खाते (15th Finance Commission - Tied/Untied)</b>
+<span class="text-xs text-slate-500 font-mono">शासकीय अनुदान खाते</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+<div>
+<label class="block font-bold text-slate-700 mb-1">बँकेचे नाव</label>
+<input class="w-full border border-slate-300 rounded px-2.5 py-1.5 bg-white" type="text" value="स्टेट बँक ऑफ इंडिया (SBI)"/>
+</div>
+<div>
+<label class="block font-bold text-slate-700 mb-1">शाखा</label>
+<input class="w-full border border-slate-300 rounded px-2.5 py-1.5 bg-white" type="text" value="अंजनगाव"/>
+</div>
+<div>
+<label class="block font-bold text-slate-700 mb-1">खाते क्रमांक</label>
+<input class="w-full font-mono border border-slate-300 rounded px-2.5 py-1.5 bg-white" type="text" value="39847102934"/>
+</div>
+<div>
+<label class="block font-bold text-slate-700 mb-1">IFSC कोड</label>
+<input class="w-full font-mono border border-slate-300 rounded px-2.5 py-1.5 bg-white" type="text" value="SBIN0001092"/>
+</div>
+</div>
+</div>
+
+<!-- DYNAMIC UPI QR GENERATION FROM UPI ID (NO STATIC IMAGE UPLOAD) -->
+<div class="p-5 border-2 border-indigo-200 bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 rounded-2xl shadow-sm">
+  <div class="flex flex-col md:flex-row md:items-start justify-between gap-5">
+    <div class="flex-1 space-y-3">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="rounded-lg bg-indigo-700 text-white px-2 py-0.5 text-[10px] font-bold">NPCI UPI VPA</span>
+          <b class="text-sm text-indigo-950">ग्रामपंचायत बँक अधिकृत UPI ID (डायनॅमिक QR जनरेटर)</b>
+        </div>
+        <p class="text-xs text-slate-600">
+          स्थिर QR कोड इमेज अपलोड करण्याची आवश्यकता नाही. आपण नोंदवलेल्या अधिकृत UPI ID वरून प्रणाली नमुना ९-क मागणी बिले व नमुना १० पावत्यांसाठी प्रमाणभूत QR आपोआप तयार करते.
+        </p>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">ग्रामपंचायत बँक UPI VPA ID <span class="text-rose-500">*</span></label>
+        <div class="relative">
+          <input id="bankUpiId" type="text" value="gpchincholi@sbi" oninput="updateDynamicUpiQr()" class="w-full text-sm font-mono font-bold border border-slate-300 rounded-lg px-3 py-2 bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="उदा. gpchincholi@sbi किंवा gpamravati@mahb">
+          <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-emerald-700">✓ वैध VPA</span>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-[11px] font-semibold text-slate-500">चाचणीसाठी UPI ID निवडा:</span>
+        <button type="button" onclick="setUpiPreset('gpchincholi@sbi')" class="rounded-md border border-indigo-300 bg-white px-2.5 py-1 text-[11px] font-mono font-bold text-indigo-700 hover:bg-indigo-50 transition">gpchincholi@sbi (SBI)</button>
+        <button type="button" onclick="setUpiPreset('gpchincholi@mahb')" class="rounded-md border border-indigo-300 bg-white px-2.5 py-1 text-[11px] font-mono font-bold text-indigo-700 hover:bg-indigo-50 transition">gpchincholi@mahb (BoM)</button>
+      </div>
+
+      <div class="rounded-xl bg-slate-100/90 p-3 border border-slate-200">
+        <span class="text-[10px] font-bold uppercase text-slate-500 block mb-0.5">जनरेट होणारा NPCI UPI URI Payload:</span>
+        <code id="upiPayloadPreview" class="text-[11px] font-mono font-bold text-emerald-800 break-all">upi://pay?pa=gpchincholi@sbi&pn=Gram%20Panchayat%20Chincholi%20Khurd&cu=INR&tn=Grampanchayat%20Tax</code>
+      </div>
+    </div>
+
+    <!-- Live Dynamic QR Code Box -->
+    <div class="flex flex-col items-center justify-center p-4 bg-white border border-indigo-200 rounded-xl shadow-xs shrink-0 w-full md:w-48 text-center">
+      <div id="dynamicQrContainer" class="w-32 h-32 flex items-center justify-center bg-slate-50 border border-slate-200 rounded-lg p-2">
+        <svg id="dynamicQrSvg" class="w-full h-full text-slate-900" viewBox="0 0 100 100" fill="currentColor">
+          <rect x="5" y="5" width="25" height="25" fill="#0f172a" rx="3"/>
+          <rect x="9" y="9" width="17" height="17" fill="#ffffff" rx="2"/>
+          <rect x="13" y="13" width="9" height="9" fill="#0f6b61" rx="1"/>
+
+          <rect x="70" y="5" width="25" height="25" fill="#0f172a" rx="3"/>
+          <rect x="74" y="9" width="17" height="17" fill="#ffffff" rx="2"/>
+          <rect x="78" y="13" width="9" height="9" fill="#0f6b61" rx="1"/>
+
+          <rect x="5" y="70" width="25" height="25" fill="#0f172a" rx="3"/>
+          <rect x="9" y="74" width="17" height="17" fill="#ffffff" rx="2"/>
+          <rect x="13" y="78" width="9" height="9" fill="#0f6b61" rx="1"/>
+
+          <rect x="35" y="10" width="6" height="6" fill="#0f172a"/>
+          <rect x="45" y="15" width="6" height="6" fill="#0f172a"/>
+          <rect x="55" y="10" width="6" height="6" fill="#0f172a"/>
+          <rect x="35" y="25" width="6" height="6" fill="#0f172a"/>
+          <rect x="45" y="35" width="10" height="10" fill="#0f6b61"/>
+          <rect x="60" y="30" width="6" height="6" fill="#0f172a"/>
+          <rect x="15" y="45" width="6" height="6" fill="#0f172a"/>
+          <rect x="25" y="55" width="6" height="6" fill="#0f172a"/>
+          <rect x="40" y="55" width="6" height="6" fill="#0f172a"/>
+          <rect x="55" y="50" width="6" height="6" fill="#0f172a"/>
+          <rect x="75" y="45" width="6" height="6" fill="#0f172a"/>
+          <rect x="85" y="55" width="6" height="6" fill="#0f172a"/>
+          <rect x="40" y="75" width="6" height="6" fill="#0f172a"/>
+          <rect x="55" y="80" width="6" height="6" fill="#0f172a"/>
+          <rect x="70" y="75" width="6" height="6" fill="#0f172a"/>
+          <rect x="80" y="85" width="6" height="6" fill="#0f172a"/>
+        </svg>
+      </div>
+      <span id="qrStatusText" class="mt-2 text-[10.5px] font-bold text-emerald-700">✓ डायनॅमिक QR सक्रिय</span>
+      <span class="text-[9.5px] text-slate-500">PhonePe / GPay / BHIM</span>
+    </div>
+  </div>
+</div>
+
+</div>
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- STEP 5: सूत्र आकारणी व रेडीरेकनर सीडिंग                         -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="step-panel hidden space-y-6" id="step-5">
+<div class="border-b border-slate-200 pb-3 flex justify-between items-center">
+<div>
+<h2 class="text-lg font-bold text-slate-800">टप्पा ५: कर आकारणी सूत्रे, रेडीरेकनर दर सीडिंग व सक्रियता</h2>
+<p class="text-xs text-slate-500">महाराष्ट्र शासन नियमानुसार १२ बांधकाम प्रकार, घसारा व स्लॅब कर स्वयंचलित जोडणी</p>
+</div>
+<span class="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-md">टप्पा ५ / ५</span>
+</div>
+<!-- Master Seeding Summary Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+<div class="p-3 border border-slate-200 rounded-xl bg-slate-50">
+<div class="flex justify-between items-center mb-1">
+<b class="text-slate-800">१२ बांधकाम प्रकार</b>
+<span class="text-emerald-700 font-bold">✓ तयार</span>
+</div>
+<p class="text-slate-500 text-[11px]">आरसीसी (₹१,२००), दगड-विटा (₹८००), माती कौलारू (₹५००), टीन शेड (₹४००)...</p>
+</div>
+<div class="p-3 border border-slate-200 rounded-xl bg-slate-50">
+<div class="flex justify-between items-center mb-1">
+<b class="text-slate-800">९ घसारा स्लॅब्स</b>
+<span class="text-emerald-700 font-bold">✓ तयार</span>
+</div>
+<p class="text-slate-500 text-[11px]">०-५ वर्षे (१०%), ६-१० वर्षे (२०%), ११-२० वर्षे (३०%)... ७०% कमाल घसारा.</p>
+</div>
+<div class="p-3 border border-slate-200 rounded-xl bg-slate-50">
+<div class="flex justify-between items-center mb-1">
+<b class="text-slate-800">क्षेत्रफळ स्लॅब कर</b>
+<span class="text-emerald-700 font-bold">✓ तयार</span>
+</div>
+<p class="text-slate-500 text-[11px]">आरोग्य कर (₹२०), दिवाबत्ती कर (₹२०), सफाई कर (₹४०) प्रति मिळकत स्लॅब दर.</p>
+</div>
+<div class="p-3 border border-slate-200 rounded-xl bg-slate-50">
+<div class="flex justify-between items-center mb-1">
+<b class="text-slate-800">पाणीपट्टी दर</b>
+<span class="text-emerald-700 font-bold">✓ तयार</span>
+</div>
+<p class="text-slate-500 text-[11px]">सामान्य पाणीपट्टी, विशेष नळ (१/२" घरगुती ₹१,२००, ३/४" व्यावसायिक ₹३,०००).</p>
+</div>
+</div>
+<!-- Ready to Launch Celebration Box -->
+<div class="p-6 bg-gradient-to-br from-emerald-50 via-teal-50 to-white border-2 border-emerald-600 rounded-2xl text-center space-y-3 shadow-sm">
+<div class="w-14 h-14 mx-auto rounded-full bg-emerald-600 text-white flex items-center justify-center text-2xl shadow-md">
+          ✓
+        </div>
+<h3 class="text-xl font-extrabold text-emerald-950">सर्व पायाभूत माहिती यशस्वीरीत्या पडताळली!</h3>
+<p class="text-slate-700 text-xs max-w-xl mx-auto leading-relaxed">
+          'ग्रामपंचायत चिंचोली खुर्द (LGD: 123455)' चे डिजिटल ऑनबोर्डिंग पूर्ण झाले आहे. आपण आता नमुना ८ मध्ये थेट मिळकती नोंदवू शकता, नमुना ९ मागणी तयार करू शकता व नमुना १० कर पावत्या देऊ शकता.
+        </p>
+<div class="pt-2">
+<button class="bg-emerald-700 hover:bg-emerald-600 active:scale-95 text-white font-extrabold text-sm px-8 py-3 rounded-xl shadow-lg transition flex items-center gap-2 mx-auto" onclick="completeOnboarding()" type="button">
+<span>🚀 ऑनबोर्डिंग पूर्ण करा व डॅशबोर्डवर जा</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Navigation Buttons Footer -->
+<div class="border-t border-slate-200 pt-6 mt-6 flex justify-between items-center">
+<button class="px-5 py-2 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 font-bold text-xs transition disabled:opacity-40" disabled="" id="prevBtn" onclick="prevStep()" type="button">
+        ← मागील टप्पा
+      </button>
+<div class="text-xs font-semibold text-slate-500" id="stepCounterText">
+        टप्पा १ पैकी ५ (ग्रामपंचायत माहिती)
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="saveCurrentStepProgress()" class="px-4 py-2 rounded-xl border border-emerald-400 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 font-bold text-xs transition flex items-center gap-1.5">
+          <span>💾 हा टप्पा जतन करा</span>
+        </button>
+        <button type="button" onclick="saveAndReturnToDashboard()" class="px-4 py-2 rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-100 font-bold text-xs transition flex items-center gap-1.5">
+          <span>🏠 डॅशबोर्डवर परत जा</span>
+        </button>
+      </div>
+
+<button class="px-6 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5" id="nextBtn" onclick="nextStep()" type="button">
+<span>पुढील टप्पा →</span>
+</button>
+</div>
+</div>
+</div>
+<script>
+let currentStep = 1;
+const totalSteps = 5;
+
+const stepTitles = [
+  "टप्पा १ पैकी ५ (ग्रामपंचायत माहिती)",
+  "टप्पा २ पैकी ५ (कार्यकारिणी व स्वाक्षरी)",
+  "टप्पा ३ पैकी ५ (आकारणी वर्ष)",
+  "टप्पा ४ पैकी ५ (बँक खाती व QR)",
+  "टप्पा ५ पैकी ५ (कर सूत्रे व सक्रियता)"
+];
+
+const marathiDigits = ["१", "२", "३", "४", "५"];
+
+const districtTalukasMap = {
+  "अमरावती": ["अंजनगाव सुर्जी", "अचलपूर", "अमरावती", "चांदूर बाजार", "चांदूर रेल्वे", "चिखलदरा", "दर्यापूर", "धामणगाव रेल्वे", "धारणी", "मोर्शी", "भातकुली", "नांदगाव खंडेश्वर", "तिवसा", "वरुड"],
+  "अकोला": ["अकोला", "अकोट", "बाळापूर", "बार्शीटाकळी", "मूर्तिजापूर", "पातूर", "तेल्हारा"],
+  "यवतमाळ": ["यवतमाळ", "आर्णी", "बाभूळगाव", "दारव्हा", "दिग्रस", "घाटंजी", "केळापूर", "महागाव", "मारेगाव", "नेर", "पुसद", "राळेगाव", "उमरखेड", "वणी", "झरी जामणी"],
+  "बुलढाणा": ["बुलढाणा", "चिखली", "देऊळगाव राजा", "जळगाव जामोद", "खामगाव", "लोणार", "मलकापूर", "मोताळा", "नांदुरा", "संग्रामपूर", "शेगाव", "सिंदखेड राजा"],
+  "वाशीम": ["वाशीम", "कारंजा", "मालेगाव", "मंगरुळपीर", "मानोरा", "रिसोड"],
+  "नागपूर": ["नागपूर शहर", "नागपूर ग्रामीण", "कामठी", "हिंगणा", "काटोल", "नरखेड", "सावनेर", "कळमेश्वर", "रामटेक", "पारशिवनी", "मौदा", "उमरेड", "कुही", "भिवापूर"],
+  "पुणे": ["पुणे शहर", "हवेली", "खेड", "आंबेगाव", "जुन्नर", "शिरूर", "दौंड", "इंदापूर", "बारामती", "पुरंदर", "भोर", "वेल्हे", "मुळशी", "मावळ"],
+  "नाशिक": ["नाशिक", "इगतपुरी", "दिंडोरी", "पेठ", "त्र्यंबकेश्वर", "कळवण", "देवळा", "सुरगाणा", "बागलाण", "मालेगाव", "नांदगाव", "चांदवड", "निफाड", "येवला", "सिन्नर"],
+  "छत्रपती संभाजीनगर": ["छत्रपती संभाजीनगर", "कन्नड", "सोयगाव", "सिल्लोड", "फुलंब्री", "गंगापूर", "वैजापूर", "पैठण"],
+  "अहिल्यानगर": ["अहिल्यानगर", "राहाता", "शिर्डी", "संगमनेर", "कोपरगाव", "अकोले", "श्रीरामपूर", "नेवासा", "शेवगाव", "पाथर्डी", "जामखेड", "कर्जत", "श्रीगोंदा", "पारनेर"],
+  "कोल्हापूर": ["करवीर", "कागल", "पन्हाळा", "शाहूवाडी", "शिरोळ", "हातकणंगले", "राधानगरी", "गगनबावडा", "भुदरगड", "गडहिंग्लज", "आजरा", "चंदगड"]
+};
+
+function updateTalukaDropdown(districtName, selectedTaluka) {
+  const talukaSelect = document.getElementById('taluka');
+  if (!talukaSelect) return;
+  const list = districtTalukasMap[districtName] || ["अंजनगाव सुर्जी", "अमरावती", "इतर"];
+  talukaSelect.innerHTML = '';
+  list.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = t;
+    if (selectedTaluka && t === selectedTaluka) opt.selected = true;
+    else if (!selectedTaluka && t === "अंजनगाव सुर्जी") opt.selected = true;
+    talukaSelect.appendChild(opt);
+  });
+  const otherOpt = document.createElement('option');
+  otherOpt.value = "इतर";
+  otherOpt.textContent = "इतर (Other / Manually Enter)";
+  talukaSelect.appendChild(otherOpt);
+}
+
+function handleDistrictChange(districtName) {
+  updateTalukaDropdown(districtName);
+}
+
+function updateStepUI() {
+  for (let i = 1; i <= totalSteps; i++) {
+    const panel = document.getElementById('step-' + i);
+    const indicator = document.getElementById('step-indicator-' + i);
+    if (!panel || !indicator) continue;
+
+    const icon = indicator.querySelector('div');
+    const label = indicator.querySelector('span');
+
+    if (i === currentStep) {
+      panel.classList.remove('hidden');
+      panel.style.display = 'block';
+      if (icon) {
+        icon.className = "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 border-emerald-700 bg-emerald-700 text-white transition shadow-sm mb-1";
+        icon.textContent = marathiDigits[i - 1];
+      }
+      if (label) label.className = "text-[11px] sm:text-xs font-bold text-emerald-800";
+    } else if (i < currentStep) {
+      panel.classList.add('hidden');
+      panel.style.display = 'none';
+      if (icon) {
+        icon.className = "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 border-emerald-600 bg-emerald-600 text-white transition mb-1";
+        icon.textContent = "✓";
+      }
+      if (label) label.className = "text-[11px] sm:text-xs font-semibold text-emerald-700";
+    } else {
+      panel.classList.add('hidden');
+      panel.style.display = 'none';
+      if (icon) {
+        icon.className = "w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs border-2 border-slate-300 bg-slate-100 text-slate-600 transition mb-1";
+        icon.textContent = marathiDigits[i - 1];
+      }
+      if (label) label.className = "text-[11px] sm:text-xs font-semibold text-slate-500";
+    }
+  }
+
+  const progressPercent = (currentStep / totalSteps) * 100;
+  const progressBar = document.getElementById('progressBar');
+  if (progressBar) progressBar.style.width = progressPercent + '%';
+
+  const prevBtn = document.getElementById('prevBtn');
+  if (prevBtn) prevBtn.disabled = (currentStep === 1);
+
+  const nextBtn = document.getElementById('nextBtn');
+  if (nextBtn) {
+    if (currentStep === totalSteps) nextBtn.classList.add('hidden');
+    else nextBtn.classList.remove('hidden');
+  }
+
+  const stepCounterText = document.getElementById('stepCounterText');
+  if (stepCounterText) stepCounterText.textContent = stepTitles[currentStep - 1];
+}
+
+function jumpToStep(stepNum) {
+  if (stepNum >= 1 && stepNum <= totalSteps) {
+    currentStep = stepNum;
+    try {
+      localStorage.setItem('gpmh_wizard_target_step', stepNum.toString());
+    } catch(e) {}
+    updateStepUI();
+    window.scrollTo({ top: 140, behavior: 'smooth' });
+  }
+}
+
+function nextStep() {
+  if (currentStep < totalSteps) {
+    jumpToStep(currentStep + 1);
+  }
+}
+
+function prevStep() {
+  if (currentStep > 1) {
+    jumpToStep(currentStep - 1);
+  }
+}
+
+function updateDynamicUpiQr() {
+  const vpaInput = document.getElementById('bankUpiId');
+  const vpa = (vpaInput ? vpaInput.value : 'gpchincholi@sbi').trim();
+  const gpNameInput = document.getElementById('gpNameEn');
+  const gpName = encodeURIComponent(gpNameInput ? gpNameInput.value : 'Gram Panchayat Chincholi Khurd');
+  const uri = 'upi://pay?pa=' + vpa + '&pn=' + gpName + '&cu=INR&tn=Grampanchayat%20Tax';
+  
+  const previewEl = document.getElementById('upiPayloadPreview');
+  if (previewEl) previewEl.textContent = uri;
+
+  const qrStatus = document.getElementById('qrStatusText');
+  if (qrStatus) {
+    if (vpa.includes('@')) {
+      qrStatus.textContent = '✓ डायनॅमिक QR सक्रिय (' + vpa + ')';
+      qrStatus.className = 'mt-2 text-[10.5px] font-bold text-emerald-700';
+    } else {
+      qrStatus.textContent = '⚠️ अमान्य UPI ID (उदा. abc@bank)';
+      qrStatus.className = 'mt-2 text-[10.5px] font-bold text-rose-600';
+    }
+  }
+}
+
+function setUpiPreset(preset) {
+  const upiInput = document.getElementById('bankUpiId');
+  if (upiInput) {
+    upiInput.value = preset;
+    updateDynamicUpiQr();
+  }
+}
+
+function getSetupProgress() {
+  try {
+    const saved = localStorage.getItem('gpmh_onboarding_setup');
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  return { step1: true, step2: false, step3: false, step4: false, step5: false };
+}
+
+function saveCurrentStepProgress() {
+  const progress = getSetupProgress();
+  progress['step' + currentStep] = true;
+  if (currentStep === 4) {
+    const upiInput = document.getElementById('bankUpiId');
+    if (upiInput) progress.upiId = upiInput.value;
+  }
+  try {
+    localStorage.setItem('gpmh_onboarding_setup', JSON.stringify(progress));
+  } catch(e) {}
+  alert('✓ टप्पा ' + currentStep + ' ची माहिती यशस्वीरीत्या जतन झाली आहे!');
+}
+
+function saveAndReturnToDashboard() {
+  saveCurrentStepProgress();
+  window.location.href = './02_dashboard.html';
+}
+
+async function verifyLgd() {
+  const lgdInput = document.getElementById('lgdCode');
+  const code = lgdInput ? lgdInput.value.trim() : '';
+  if (!code) {
+    alert('कृपया ६-अंकी LGD कोड टाका (उदा. 171391 सोनीमोहा).');
+    return;
+  }
+  try {
+    const res = await fetch(`https://api.grampanchayatmh.in/api/v1/panchayat/${encodeURIComponent(code)}`);
+    const json = await res.json();
+    if (json.success && json.data) {
+      const d = json.data;
+      if (document.getElementById('gpNameMr')) document.getElementById('gpNameMr').value = d.gp_name_mr || d.gp_name_en;
+      if (document.getElementById('gpNameEn')) document.getElementById('gpNameEn').value = d.gp_name_en;
+      const distSelect = document.getElementById('district');
+      if (distSelect) {
+        let matched = false;
+        for (const opt of distSelect.options) {
+          if (opt.value.includes(d.district) || opt.text.includes(d.district)) {
+            opt.selected = true;
+            matched = true;
+            break;
+          }
+        }
+        if (!matched) {
+          distSelect.add(new Option(d.district, d.district, true, true));
+        }
+      }
+      if (typeof updateTalukaDropdown === 'function') {
+        updateTalukaDropdown(d.district, d.tehsil);
+      }
+      if (document.getElementById('taluka')) document.getElementById('taluka').value = d.tehsil;
+      if (document.getElementById('pincode')) document.getElementById('pincode').value = d.pincode || '';
+      alert(`✓ LGD कोड ${d.lgd_code} पडताळला गेला!\nगाव: ${d.gp_name_mr} (${d.gp_name_en})\nतालुका: ${d.tehsil}, जिल्हा: ${d.district}\nपिनकोड: ${d.pincode}`);
+    } else {
+      alert(`❌ LGD कोड ${code} सापडला नाही. कृपया वैध LGD कोड तपासा.`);
+    }
+  } catch (e) {
+    alert(`API त्रुटी: ${e.message}`);
+  }
+}
+
+function autoFillDemo() {
+  if (document.getElementById('lgdCode')) document.getElementById('lgdCode').value = "123455";
+  if (document.getElementById('gpNameMr')) document.getElementById('gpNameMr').value = "ग्रामपंचायत चिंचोली खुर्द";
+  if (document.getElementById('gpNameEn')) document.getElementById('gpNameEn').value = "Gram Panchayat Chincholi Khurd";
+  if (document.getElementById('district')) {
+    document.getElementById('district').value = "अमरावती";
+    updateTalukaDropdown("अमरावती", "अंजनगाव सुर्जी");
+  }
+  if (document.getElementById('taluka')) document.getElementById('taluka').value = "अंजनगाव सुर्जी";
+  if (document.getElementById('pincode')) document.getElementById('pincode').value = "444705";
+  if (document.getElementById('totalWards')) document.getElementById('totalWards').value = "6";
+  if (document.getElementById('population')) document.getElementById('population').value = "3250";
+  if (document.getElementById('gpEmail')) document.getElementById('gpEmail').value = "gpchincholi.amr@gov.in";
+  if (document.getElementById('gpPhone')) document.getElementById('gpPhone').value = "9822012345";
+  alert('⚡ चिंचोली खुर्द ग्रामपंचायतीचा संपूर्ण अधिकृत चाचणी डेटा भरला गेला आहे!');
+}
+
+function completeOnboarding() {
+  alert('अभिनंदन! 🎉\nग्रामपंचायत चिंचोली खुर्द ऑनबोर्डिंग यशस्वीरीत्या पूर्ण झाली.\nआपण आता मुख्य डॅशबोर्डवर जात आहात.');
+  window.location.href = "./02_dashboard.html";
+}
+
+function initWizardFlow() {
+  const params = new URLSearchParams(window.location.search);
+  let step = parseInt(params.get('step'));
+  if (!step || isNaN(step)) {
+    try {
+      step = parseInt(localStorage.getItem('gpmh_wizard_target_step'));
+    } catch(e) {}
+  }
+  if (step >= 1 && step <= totalSteps) {
+    currentStep = step;
+  } else {
+    currentStep = 1;
+  }
+
+  const distSelect = document.getElementById('district');
+  if (distSelect) {
+    distSelect.addEventListener('change', function() {
+      handleDistrictChange(this.value);
+    });
+    updateTalukaDropdown(distSelect.value || "अमरावती", "अंजनगाव सुर्जी");
+  }
+
+  updateStepUI();
+  updateDynamicUpiQr();
+
+  // Auto-populate from registered GP if available
+  try {
+    const reg = JSON.parse(localStorage.getItem('gpmh_registered_gp'));
+    if (reg) {
+      if (reg.lgdCode && document.getElementById('lgdCode')) document.getElementById('lgdCode').value = reg.lgdCode;
+      if (reg.nameMr && document.getElementById('gpNameMr')) document.getElementById('gpNameMr').value = reg.nameMr;
+      if (reg.nameEn && document.getElementById('gpNameEn')) document.getElementById('gpNameEn').value = reg.nameEn;
+      if (reg.district && document.getElementById('district')) {
+        document.getElementById('district').value = reg.district;
+        updateTalukaDropdown(reg.district, reg.taluka);
+      }
+      if (reg.taluka && document.getElementById('taluka')) document.getElementById('taluka').value = reg.taluka;
+      if (reg.pincode && document.getElementById('pincode')) document.getElementById('pincode').value = reg.pincode;
+      if (reg.adminName && document.getElementById('adminName')) document.getElementById('adminName').value = reg.adminName;
+      if (reg.adminPhone && document.getElementById('adminPhone')) document.getElementById('adminPhone').value = reg.adminPhone;
+      if (reg.adminEmail && document.getElementById('adminEmail')) document.getElementById('adminEmail').value = reg.adminEmail;
+    }
+  } catch(e) {}
+}
+
+window.addEventListener('DOMContentLoaded', initWizardFlow);
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  initWizardFlow();
+}
+
+window.jumpToStep = jumpToStep;
+window.nextStep = nextStep;
+window.prevStep = prevStep;
+window.verifyLgd = verifyLgd;
+window.autoFillDemo = autoFillDemo;
+window.setUpiPreset = setUpiPreset;
+window.updateDynamicUpiQr = updateDynamicUpiQr;
+window.saveCurrentStepProgress = saveCurrentStepProgress;
+window.saveAndReturnToDashboard = saveAndReturnToDashboard;
+window.completeOnboarding = completeOnboarding;
+</script>
+
+<!-- GPMH PROTOTYPE REVIEW BAR INJECTION -->
+<div id="gpmh-review-floating-bar" class="no-print" style="position:fixed;bottom:0;left:0;right:0;height:56px;background:#ffffff;border-top:3px solid #0f6b61;box-shadow:0 -4px 15px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:9999999;font-family:'Noto Sans Devanagari',system-ui,sans-serif;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span style="background:#0f6b61;color:#ffffff;padding:3px 8px;border-radius:4px;font-weight:700;font-size:12px;">ONB-001</span>
+    <span style="font-weight:600;color:#0f172a;font-size:13px;">ग्रामपंचायत ऑनबोर्डिंग विझार्ड (GP Onboarding Wizard)</span>
+    <span id="screen-review-badge" style="padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;background:#f1f5f9;color:#475569;">तपासणी प्रलंबित</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button onclick="approveCurrentScreen('ONB-001')" style="background:#059669;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;">
+      ✓ मंजूर करा (Approve)
+    </button>
+    <button onclick="openChangeRequestModal('ONB-001')" style="background:#dc2626;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;">
+      ✎ बदल सुचवा (Request Changes)
+    </button>
+    <a href="./review_dashboard.html" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;">
+      📊 मंजुरी डॅशबोर्ड (Review Matrix)
+    </a>
+  </div>
+</div>
+
+<div id="change-request-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.6);z-index:10000000;align-items:center;justify-content:center;font-family:'Noto Sans Devanagari',system-ui,sans-serif;">
+  <div style="background:#fff;border-radius:8px;padding:24px;width:90%;max-width:540px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid #e2e8f0;padding-bottom:10px;">
+      <h3 style="margin:0;font-size:16px;font-weight:700;color:#0f172a;">बदल सूचना नोंदवा (Submit Change Request)</h3>
+      <button onclick="closeChangeRequestModal()" style="border:none;background:transparent;font-size:18px;cursor:pointer;color:#64748b;">✕</button>
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;">बदलाचे स्वरूप (Change Category)</label>
+      <select id="change-category" style="width:100%;padding:8px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;">
+        <option value="UI/Layout">लेआउट / दृश्य स्वरूप (UI / Layout)</option>
+        <option value="Workflow">कार्यप्रवाह बदल (Workflow / Logic)</option>
+        <option value="Marathi Terms">मराठी शब्दांकन / वैधानिक दुरुस्ती (Statutory Terms)</option>
+        <option value="Validation">फॉर्म व्हॅलिडेशन / फील्ड्स (Fields & Validation)</option>
+        <option value="Print Format">प्रिंट / उतारा फॉरमॅट (Print / Extract Layout)</option>
+      </select>
+    </div>
+    <div style="margin-bottom:18px;">
+      <label style="display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;">तपशीलवार सूचना (Detailed Comments)</label>
+      <textarea id="change-comments" rows="4" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;resize:vertical;" placeholder="कृपया अपेक्षित बदलांची माहिती येथे लिहा..."></textarea>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;">
+      <button onclick="closeChangeRequestModal()" style="background:#e2e8f0;color:#334155;border:none;padding:7px 16px;border-radius:6px;font-size:13px;cursor:pointer;">रद्द करा (Cancel)</button>
+      <button onclick="submitChangeRequest('ONB-001')" style="background:#dc2626;color:#fff;border:none;padding:7px 18px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">बदल सबमिट करा (Submit Request)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function getReviews() {
+    try {
+      return JSON.parse(localStorage.getItem('gpmh_prototype_reviews') || '{}');
+    } catch(e) {
+      return {};
+    }
+  }
+
+  function updateReviewBadge(screenId) {
+    const reviews = getReviews();
+    const badge = document.getElementById('screen-review-badge');
+    if (!badge) return;
+    const item = reviews[screenId];
+    if (!item || item.status === 'PENDING') {
+      badge.style.background = '#fef3c7';
+      badge.style.color = '#92400e';
+      badge.textContent = 'तपासणी प्रलंबित (Pending Review)';
+    } else if (item.status === 'APPROVED') {
+      badge.style.background = '#dcfce7';
+      badge.style.color = '#15803d';
+      badge.textContent = '✓ मंजूर (Approved)';
+    } else if (item.status === 'CHANGES_REQUESTED') {
+      badge.style.background = '#fee2e2';
+      badge.style.color = '#b91c1c';
+      badge.textContent = '✎ बदल सुचवले (Changes Requested)';
+    }
+  }
+
+  function approveCurrentScreen(screenId) {
+    const reviews = getReviews();
+    reviews[screenId] = {
+      status: 'APPROVED',
+      updatedAt: new Date().toISOString(),
+      comments: 'Screen visually inspected and approved.'
+    };
+    localStorage.setItem('gpmh_prototype_reviews', JSON.stringify(reviews));
+    updateReviewBadge(screenId);
+    alert('स्क्रीन ' + screenId + ' यशस्वीरित्या मंजूर केली गेली आहे! (Screen Approved)');
+  }
+
+  function openChangeRequestModal(screenId) {
+    const modal = document.getElementById('change-request-modal');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  function closeChangeRequestModal() {
+    const modal = document.getElementById('change-request-modal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function submitChangeRequest(screenId) {
+    const cat = document.getElementById('change-category').value;
+    const comments = document.getElementById('change-comments').value.trim();
+    if (!comments) {
+      alert('कृपया बदल सूचना तपशील लिहा.');
+      return;
+    }
+    const reviews = getReviews();
+    reviews[screenId] = {
+      status: 'CHANGES_REQUESTED',
+      category: cat,
+      comments: comments,
+      updatedAt: new Date().toISOString()
+    };
+    localStorage.setItem('gpmh_prototype_reviews', JSON.stringify(reviews));
+    closeChangeRequestModal();
+    updateReviewBadge(screenId);
+    alert('बदल सूचना नोंदवली गेली आहे! (Change Request Recorded)');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateReviewBadge('ONB-001');
+  });
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-populate from registered GP if available
+    try {
+      const reg = JSON.parse(localStorage.getItem('gpmh_registered_gp'));
+      if (reg) {
+        if (reg.lgdCode && document.getElementById('lgdCode')) document.getElementById('lgdCode').value = reg.lgdCode;
+        if (reg.nameMr && document.getElementById('gpNameMr')) document.getElementById('gpNameMr').value = reg.nameMr;
+        if (reg.nameEn && document.getElementById('gpNameEn')) document.getElementById('gpNameEn').value = reg.nameEn;
+        if (reg.district && document.getElementById('district')) document.getElementById('district').value = reg.district;
+        if (reg.taluka && document.getElementById('taluka')) document.getElementById('taluka').value = reg.taluka;
+        if (reg.pincode && document.getElementById('pincode')) document.getElementById('pincode').value = reg.pincode;
+        if (reg.adminName && document.getElementById('adminName')) document.getElementById('adminName').value = reg.adminName;
+        if (reg.adminPhone && document.getElementById('adminPhone')) document.getElementById('adminPhone').value = reg.adminPhone;
+        if (reg.adminEmail && document.getElementById('adminEmail')) document.getElementById('adminEmail').value = reg.adminEmail;
+      }
+    } catch(e) {}
+
+  // 1. Submenu Accordion Toggle
+  const subMenuButtons = document.querySelectorAll('aside nav > div > div > button');
+  subMenuButtons.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const parentRow = btn.closest('.group');
+      const container = parentRow ? parentRow.parentElement : btn.parentElement;
+      const subMenu = container.querySelector('.grid');
+      const chevron = parentRow ? parentRow.querySelector('svg.lucide-chevron-down') : null;
+      const expandBtn = parentRow ? parentRow.querySelector('button[aria-expanded]') : null;
+
+      if (subMenu) {
+        const isCollapsed = subMenu.classList.contains('grid-rows-[0fr]') || subMenu.style.gridTemplateRows === '0fr';
+        if (isCollapsed) {
+          subMenu.classList.remove('grid-rows-[0fr]', 'opacity-0');
+          subMenu.classList.add('grid-rows-[1fr]', 'opacity-100');
+          if (chevron) chevron.classList.add('rotate-180');
+          if (expandBtn) expandBtn.setAttribute('aria-expanded', 'true');
+        } else {
+          subMenu.classList.remove('grid-rows-[1fr]', 'opacity-100');
+          subMenu.classList.add('grid-rows-[0fr]', 'opacity-0');
+          if (chevron) chevron.classList.remove('rotate-180');
+          if (expandBtn) expandBtn.setAttribute('aria-expanded', 'false');
+        }
+      }
+    });
+  });
+
+  // 2. Desktop Sidebar Collapse Toggle
+  const collapseBtn = document.querySelector('header button[aria-label="आकुंचन करा"]');
+  const aside = document.querySelector('aside');
+  if (collapseBtn && aside) {
+    collapseBtn.addEventListener('click', function() {
+      const isExpanded = aside.classList.contains('lg:w-[260px]');
+      if (isExpanded) {
+        aside.classList.remove('lg:w-[260px]');
+        aside.classList.add('lg:w-[72px]');
+        document.querySelectorAll('aside .truncate, aside .text-[11px], aside span.truncate').forEach(el => el.classList.add('lg:hidden'));
+        collapseBtn.setAttribute('aria-expanded', 'false');
+      } else {
+        aside.classList.remove('lg:w-[72px]');
+        aside.classList.add('lg:w-[260px]');
+        document.querySelectorAll('aside .truncate, aside .text-[11px], aside span.truncate').forEach(el => el.classList.remove('lg:hidden'));
+        collapseBtn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  }
+
+  // 3. Mobile Hamburger & Backdrop Toggle
+  const menuBtn = document.querySelector('header button[aria-label="मेनू"]');
+  const closeAsideBtn = document.querySelector('aside button[aria-label="बंद करा"]');
+  const backdrop = document.querySelector('#root > div > div.fixed.inset-0.z-30');
+
+  function openMobileMenu() {
+    if (aside) aside.classList.remove('-translate-x-full');
+    if (backdrop) {
+      backdrop.classList.remove('pointer-events-none', 'opacity-0');
+      backdrop.classList.add('pointer-events-auto', 'opacity-100');
+    }
+  }
+
+  function closeMobileMenu() {
+    if (aside) aside.classList.add('-translate-x-full');
+    if (backdrop) {
+      backdrop.classList.add('pointer-events-none', 'opacity-0');
+      backdrop.classList.remove('pointer-events-auto', 'opacity-100');
+    }
+  }
+
+  if (menuBtn) menuBtn.addEventListener('click', openMobileMenu);
+  if (closeAsideBtn) closeAsideBtn.addEventListener('click', closeMobileMenu);
+  if (backdrop) backdrop.addEventListener('click', closeMobileMenu);
+
+  // 4. Auto-Expand and Highlight Current Route
+  const currentPath = window.location.pathname.split('/').pop() || '02_dashboard.html';
+  const allLinks = document.querySelectorAll('aside nav a');
+  allLinks.forEach(a => {
+    const href = a.getAttribute('href');
+    if (href && (href.endsWith(currentPath) || (currentPath === 'index.html' && href.endsWith('02_dashboard.html')))) {
+      a.classList.add('bg-primary-50', 'font-semibold', 'text-primary-700');
+      a.setAttribute('aria-current', 'page');
+      const parentSub = a.closest('.grid');
+      if (parentSub) {
+        parentSub.classList.remove('grid-rows-[0fr]', 'opacity-0');
+        parentSub.classList.add('grid-rows-[1fr]', 'opacity-100');
+        const parentContainer = parentSub.parentElement;
+        const chevron = parentContainer ? parentContainer.querySelector('svg.lucide-chevron-down') : null;
+        if (chevron) chevron.classList.add('rotate-180');
+        const expandBtn = parentContainer ? parentContainer.querySelector('button[aria-expanded]') : null;
+        if (expandBtn) expandBtn.setAttribute('aria-expanded', 'true');
+      }
+    }
+  });
+
+  // 5. Font Sizing (A-, A, A+)
+  const btnAminus = document.querySelector('header button[aria-label="A-"]');
+  const btnA = document.querySelector('header button[aria-label="A"]');
+  const btnAplus = document.querySelector('header button[aria-label="A+"]');
+  if (btnAminus) btnAminus.addEventListener('click', () => document.documentElement.style.fontSize = '14px');
+  if (btnA) btnA.addEventListener('click', () => document.documentElement.style.fontSize = '16px');
+  if (btnAplus) btnAplus.addEventListener('click', () => document.documentElement.style.fontSize = '18px');
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>एजंट व्यवस्थापन व कमिशन सेटलमेंट — ई-ग्रामपंचायत ERP राज्य नियंत्रण कक्ष</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Noto Sans Devanagari', system-ui, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    @media print {
+      .no-print, #offline-nav-bar, header, nav, .action-cell, .filter-bar, button {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      .printable-card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        background: white !important;
+        color: black !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+
+<!-- OFFLINE NAVIGATION BAR -->
+<div class="no-print" id="offline-nav-bar" style="background:#f1f5f9; border-bottom:1px solid #cbd5e1; padding:5px 12px; font-family:'Noto Sans Devanagari',system-ui,sans-serif; font-size:11.5px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px; z-index:999999; position:relative;">
+  <div style="font-weight:800; font-size:11.5px; color:#0f6b61; display:flex; align-items:center; gap:5px;">
+    <span style="background:#0f6b61; color:#fff; border-radius:4px; padding:2px 5px; font-size:9.5px;">GPMH</span>
+    <span>ई-ग्रामपंचायत ERP (सुपरॲडमिन एजंट व्यवस्थापन केंद्र • MOD-AGT)</span>
+    <a href="./review_dashboard.html" style="display:inline-block; padding:4px 9px; margin:1.5px 2px; font-size:10.5px; border-radius:5px; text-decoration:none; border:1px solid #d97706; background:#fef3c7; color:#92400e; font-weight:700;">⭐ मंजुरी केंद्र</a>
+  </div>
+  <div style="display:flex; flex-wrap:wrap; align-items:center; gap:4px;">
+    <a href="./22_superadmin_dashboard.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">सुपरॲडमिन डॅशबोर्ड</a>
+    <a href="./superadmin_add_gp.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">+ नवीन GP थेट प्रोव्हिजन</a>
+    <a href="./agent_dashboard.html" style="padding:2px 8px; border-radius:4px; background:#fef3c7; color:#92400e; text-decoration:none; font-weight:700; border:1px solid #f59e0b;">एजंट पोर्टल (Agent Portal)</a>
+    <a href="./agent_login.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">एजंट लॉगिन</a>
+    <a href="./agent_register.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">नवीन एजंट अर्ज</a>
+  </div>
+</div>
+
+<!-- TOP SUPERADMIN HEADER -->
+<header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40 px-4 py-3 shadow-lg">
+  <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+    
+    <!-- Branding -->
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-600 flex items-center justify-center font-extrabold text-white text-lg shadow-md">
+        👑
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base font-extrabold text-white tracking-wide">ई-ग्रामपंचायत ERP • एजंट व्यवस्थापन व कमिशन केंद्र</h1>
+          <span class="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
+            SUPER ADMIN CONSOLE
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-400">विक्री प्रतिनिधी मंजुरी, कमिशन दर नियंत्रण, सेटलमेंट व पेआउट व्यवस्थापन</p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-2.5">
+      <button onclick="openAddAgentModal()" class="px-3.5 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-lg shadow-md transition transform active:scale-95 flex items-center gap-1.5 border border-emerald-400/30">
+        <span>➕ नवीन एजंट जोडा (Add Agent)</span>
+      </button>
+      <a href="./22_superadmin_dashboard.html" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs rounded-lg border border-slate-700 transition flex items-center gap-1">
+        <span>🏛️ मुख्य डॅशबोर्ड ↗</span>
+      </a>
+    </div>
+
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 space-y-6">
+
+  <!-- ============================================================ -->
+  <!-- 1. STATEWIDE AGENT KPI CARDS                                 -->
+  <!-- ============================================================ -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+    
+    <!-- KPI 1: Total Agents -->
+    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
+      <div class="flex justify-between items-start mb-1.5">
+        <span class="text-xs font-semibold text-slate-400">एकूण एजंट नोंदणी</span>
+        <span class="text-base">👥</span>
+      </div>
+      <div class="text-2xl font-extrabold text-white mono" id="kpi-total-agents">३</div>
+      <div class="mt-1 text-[11px] text-slate-400">राज्यभरात नोंदणीकृत</div>
+    </div>
+
+    <!-- KPI 2: Pending KYC Approvals (Highlighted) -->
+    <div class="bg-slate-900 border border-amber-500/40 p-4 rounded-xl shadow-sm relative overflow-hidden bg-amber-950/10">
+      <div class="flex justify-between items-start mb-1.5">
+        <span class="text-xs font-bold text-amber-300">पडताळणी प्रलंबित अर्ज</span>
+        <span class="text-xs bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-bold animate-pulse" id="kpi-pending-badge">१ नवीन</span>
+      </div>
+      <div class="text-2xl font-extrabold text-amber-400 mono" id="kpi-pending-agents">१</div>
+      <div class="mt-1 text-[11px] text-amber-200/80">KYC व दर मंजुरी प्रतीक्षेत</div>
+    </div>
+
+    <!-- KPI 3: Active Agents -->
+    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
+      <div class="flex justify-between items-start mb-1.5">
+        <span class="text-xs font-semibold text-slate-400">सक्रिय कार्यरत एजंट</span>
+        <span class="text-xs bg-emerald-500/10 text-emerald-400 font-bold px-1.5 py-0.5 rounded">सक्रिय</span>
+      </div>
+      <div class="text-2xl font-extrabold text-emerald-400 mono" id="kpi-active-agents">२</div>
+      <div class="mt-1 text-[11px] text-slate-400">ऑनबोर्डिंग करण्यास पात्र</div>
+    </div>
+
+    <!-- KPI 4: Total Commission Disbursed -->
+    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm">
+      <div class="flex justify-between items-start mb-1.5">
+        <span class="text-xs font-semibold text-slate-400">एकूण वितरित कमिशन</span>
+        <span class="text-base">💳</span>
+      </div>
+      <div class="text-2xl font-extrabold text-sky-400 mono" id="kpi-disbursed-comm">₹ ७,०००</div>
+      <div class="mt-1 text-[11px] text-slate-400">थेट बँक/UPI द्वारे जमा</div>
+    </div>
+
+    <!-- KPI 5: Pending Commission Settlements -->
+    <div class="bg-slate-900 border border-rose-500/30 p-4 rounded-xl shadow-sm bg-rose-950/10">
+      <div class="flex justify-between items-start mb-1.5">
+        <span class="text-xs font-bold text-rose-300">देय / बाकी कमिशन</span>
+        <span class="text-xs bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded font-mono">देय</span>
+      </div>
+      <div class="text-2xl font-extrabold text-rose-400 mono" id="kpi-pending-comm">₹ ८,२००</div>
+      <div class="mt-1 text-[11px] text-rose-200/80">सेटलमेंट योग्य बाकी शिल्लक</div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 2. NAVIGATION TABS                                           -->
+  <!-- ============================================================ -->
+  <div class="border-b border-slate-800 flex flex-wrap gap-2 text-xs sm:text-sm font-semibold">
+    <button onclick="switchTab('all_agents')" id="tab-btn-all_agents" class="px-4 py-2.5 border-b-2 border-amber-500 text-amber-400 flex items-center gap-1.5 transition font-bold">
+      <span>👥 सर्व एजंट डिरेक्टरी (All Agents)</span>
+      <span class="bg-slate-800 text-slate-300 text-xs px-2 py-0.5 rounded-full mono" id="tab-badge-all">३</span>
+    </button>
+    <button onclick="switchTab('kyc_queue')" id="tab-btn-kyc_queue" class="px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">
+      <span>🛡️ केवायसी व दर मंजुरी रांग (KYC Approvals)</span>
+      <span class="bg-amber-500/20 text-amber-300 text-xs px-2 py-0.5 rounded-full mono font-bold" id="tab-badge-kyc">१ नवीन</span>
+    </button>
+    <button onclick="switchTab('settlements')" id="tab-btn-settlements" class="px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">
+      <span>💰 कमिशन सेटलमेंट केंद्र (Settlement Hub)</span>
+      <span class="bg-emerald-500/20 text-emerald-300 text-xs px-2 py-0.5 rounded-full mono font-bold">पेआउट</span>
+    </button>
+    <button onclick="switchTab('settlement_history')" id="tab-btn-settlement_history" class="px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">
+      <span>🧾 सेटलमेंट इतिहास व पावत्या (History & Vouchers)</span>
+    </button>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 1: ALL REGISTERED AGENTS DIRECTORY                       -->
+  <!-- ============================================================ -->
+  <div id="tab-all_agents" class="tab-pane space-y-4">
+    
+    <!-- Filter Toolbar -->
+    <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-3 filter-bar">
+      <div class="flex items-center flex-wrap gap-2.5 flex-1 min-w-[280px]">
+        <div class="relative flex-1 min-w-[200px]">
+          <input type="text" id="agentSearchInput" onkeyup="filterAgentsTable()" placeholder="एजंट नाव, कोड, मोबाईल, तालुका किंवा जिल्हा शोधा..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500"/>
+          <svg class="w-4 h-4 text-slate-500 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+        <select id="agentDistrictFilter" onchange="filterAgentsTable()" class="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-amber-500">
+          <option value="">सर्व जिल्हे (All Districts)</option>
+          <option value="अमरावती">अमरावती</option>
+          <option value="पुणे">पुणे</option>
+          <option value="नागपूर">नागपूर</option>
+          <option value="अहिल्यानगर">अहिल्यानगर</option>
+        </select>
+        <select id="agentStatusFilter" onchange="filterAgentsTable()" class="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-amber-500">
+          <option value="">सर्व स्थिती (All Status)</option>
+          <option value="ACTIVE">सक्रिय (Active)</option>
+          <option value="PENDING_APPROVAL">पडताळणी प्रलंबित (Pending Approval)</option>
+          <option value="INACTIVE">निष्क्रिय (Inactive)</option>
+          <option value="REJECTED">नाकारलेले (Rejected)</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="openAddAgentModal()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow transition flex items-center gap-1.5">
+          <span>+ नवीन एजंट जोडा</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Agents Table -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 font-semibold">
+            <tr>
+              <th class="px-4 py-3">एजंट आयडी व नाव</th>
+              <th class="px-4 py-3">संपर्क माहिती</th>
+              <th class="px-4 py-3">जिल्हा व तालुका</th>
+              <th class="px-4 py-3">कमिशन दर (नवीन / नूतनीकरण)</th>
+              <th class="px-4 py-3">जोडलेल्या GPs</th>
+              <th class="px-4 py-3">वितरित कमिशन</th>
+              <th class="px-4 py-3">देय कमिशन</th>
+              <th class="px-4 py-3">खाते स्थिती</th>
+              <th class="px-4 py-3 text-right">कृती</th>
+            </tr>
+          </thead>
+          <tbody id="agentsTableBody" class="divide-y divide-slate-800/60 font-sans">
+            <!-- Populated via script -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 2: PENDING KYC APPROVALS QUEUE                           -->
+  <!-- ============================================================ -->
+  <div id="tab-kyc_queue" class="tab-pane hidden space-y-4">
+    
+    <div class="bg-slate-900 border border-amber-500/30 p-5 rounded-xl space-y-2 bg-gradient-to-r from-amber-950/20 via-slate-900 to-slate-900">
+      <div class="flex items-center justify-between">
+        <h3 class="text-sm font-bold text-amber-300 flex items-center gap-2">
+          <span>🛡️ नवीन एजंट नोंदणी व ओळखपत्र (KYC) पडताळणी रांग</span>
+        </h3>
+        <span class="text-xs bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full font-mono font-bold" id="kycQueueCount">
+          १ अर्ज प्रलंबित
+        </span>
+      </div>
+      <p class="text-xs text-slate-400 max-w-3xl leading-relaxed">
+        नवीन विक्री प्रतिनिधींनी सादर केलेल्या आधार किंवा पॅन कागदपत्रांची पडताळणी करून त्यांची नवीन नोंदणी व वार्षिक नूतनीकरण कमिशन टक्केवारी निश्चित करा. मंजुरीनंतरच एजंटला प्रणालीमध्ये लॉगिन करता येईल.
+      </p>
+    </div>
+
+    <!-- KYC Cards Container -->
+    <div id="kycCardsContainer" class="space-y-4">
+      <!-- Populated via script -->
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 3: COMMISSION SETTLEMENT HUB                             -->
+  <!-- ============================================================ -->
+  <div id="tab-settlements" class="tab-pane hidden space-y-6">
+    
+    <!-- Settlement Overview Banner -->
+    <div class="bg-gradient-to-r from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-500/30 p-5 rounded-2xl flex flex-wrap items-center justify-between gap-4">
+      <div class="space-y-1">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <span>💰 कमिशन पेआउट सेटलमेंट केंद्र (Commission Settlement Hub)</span>
+        </h3>
+        <p class="text-xs text-slate-300 max-w-2xl">
+          आपण एजंटनिहाय देय कमिशन कधीही, कोणत्याही मर्यादेशिवाय (<b class="text-emerald-400">Any Amount Payout</b>) थेट UPI, बँक ट्रान्सफर (NEFT) किंवा रोख स्वरूपात वितरित करू शकता.
+        </p>
+      </div>
+      <button onclick="openExecuteSettlementModal()" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl shadow-lg transition transform active:scale-95 flex items-center gap-2 cursor-pointer border border-emerald-400/30">
+        <span>💸 नवीन कमिशन सेटलमेंट करा</span>
+      </button>
+    </div>
+
+    <!-- Agent Payable Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="agentSettlementCards">
+      <!-- Populated via script -->
+    </div>
+
+    <!-- Unsettled Commission Items Table -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm space-y-3 p-4">
+      <div class="flex items-center justify-between">
+        <h4 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+          <span>📋 राज्यभरातील प्रलंबित व देय कमिशन नोंदी (Unsettled Commission Queue)</span>
+        </h4>
+        <span class="text-xs text-slate-400">एकूण देय: <b class="text-rose-400 mono" id="totalGlobalPayable">₹ ८,२००</b></span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 font-semibold">
+            <tr>
+              <th class="px-4 py-2.5">व्यवहार आयडी</th>
+              <th class="px-4 py-2.5">एजंट नाव</th>
+              <th class="px-4 py-2.5">ग्रामपंचायत</th>
+              <th class="px-4 py-2.5">प्रकार</th>
+              <th class="px-4 py-2.5">व्यवसाय रक्कम</th>
+              <th class="px-4 py-2.5">दर (%)</th>
+              <th class="px-4 py-2.5">कमिशन रक्कम</th>
+              <th class="px-4 py-2.5">स्थिती</th>
+              <th class="px-4 py-2.5 text-right">कृती</th>
+            </tr>
+          </thead>
+          <tbody id="unsettledItemsTableBody" class="divide-y divide-slate-800/60 font-sans">
+            <!-- Populated via script -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 4: SETTLEMENT & PAYMENT HISTORY                          -->
+  <!-- ============================================================ -->
+  <div id="tab-settlement_history" class="tab-pane hidden space-y-4">
+    <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl flex justify-between items-center">
+      <div>
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <span>🧾 कमिशन सेटलमेंट व पेआउट इतिहास</span>
+        </h3>
+        <p class="text-xs text-slate-400 mt-0.5">
+          सुपरॲडमिन द्वारे आतापर्यंत पूर्ण केलेल्या सर्व कमिशन वितरणाचा संपूर्ण लेखाजोखा व पावत्या.
+        </p>
+      </div>
+      <button onclick="window.print()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1.5">
+        <span>🖨️ प्रिंट अहवाल</span>
+      </button>
+    </div>
+
+    <!-- Settlement History Table -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 font-semibold">
+            <tr>
+              <th class="px-4 py-3">व्हाउचर क्र. (Voucher)</th>
+              <th class="px-4 py-3">प्रदान दिनांक</th>
+              <th class="px-4 py-3">एजंट नाव व कोड</th>
+              <th class="px-4 py-3">वितरित रक्कम</th>
+              <th class="px-4 py-3">प्रदान माध्यम</th>
+              <th class="px-4 py-3">बँक / UTR संदर्भ</th>
+              <th class="px-4 py-3">समाविष्ट नोंदी</th>
+              <th class="px-4 py-3">स्थिती</th>
+              <th class="px-4 py-3 text-right">कृती</th>
+            </tr>
+          </thead>
+          <tbody id="settlementHistoryTableBody" class="divide-y divide-slate-800/60 font-sans">
+            <!-- Populated via script -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ============================================================ -->
+<!-- MODAL 1: ADD NEW AGENT MANUALLY                              -->
+<!-- ============================================================ -->
+<div id="addAgentModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl p-6 space-y-4 text-xs max-h-[92vh] overflow-y-auto">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+      <h3 class="text-base font-bold text-white flex items-center gap-2">
+        <span>➕ नवीन विक्री प्रतिनिधी (Agent) जोडा</span>
+      </h3>
+      <button onclick="closeAddAgentModal()" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+    </div>
+
+    <form id="manualAgentForm" onsubmit="event.preventDefault(); handleSaveManualAgent();" class="space-y-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">एजंट पूर्ण नाव <span class="text-rose-400">*</span></label>
+          <input type="text" id="m_fullName" placeholder="उदा. अमोल विठ्ठलराव देशमुख" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-amber-500 focus:outline-none"/>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">मोबाईल नंबर (लॉगिन आयडी) <span class="text-rose-400">*</span></label>
+          <input type="tel" id="m_mobileNumber" maxlength="10" pattern="^[6-9]\d{9}$" placeholder="१० अंकी मोबाईल" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 font-mono text-amber-300 font-bold focus:border-amber-500 focus:outline-none"/>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">ईमेल पत्ता <span class="text-rose-400">*</span></label>
+          <input type="email" id="m_email" placeholder="agent@example.com" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-amber-500 focus:outline-none"/>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">ओळखपत्र प्रकार व क्रमांक <span class="text-rose-400">*</span></label>
+          <div class="flex gap-2">
+            <select id="m_idType" class="bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-2 py-2 text-xs">
+              <option value="AADHAAR">आधार कार्ड</option>
+              <option value="PAN">पॅन कार्ड</option>
+            </select>
+            <input type="text" id="m_idNumber" placeholder="क्रमांक प्रविष्ट करा" required class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 font-mono text-white focus:border-amber-500 focus:outline-none"/>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">जिल्हा <span class="text-rose-400">*</span></label>
+          <select id="m_district" required class="w-full bg-slate-950 border border-slate-700 text-slate-200 rounded-lg px-3 py-2">
+            <option value="अमरावती" selected="">अमरावती</option>
+            <option value="पुणे">पुणे</option>
+            <option value="नागपूर">नागपूर</option>
+            <option value="अहिल्यानगर">अहिल्यानगर</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">तालुका <span class="text-rose-400">*</span></label>
+          <input type="text" id="m_taluka" placeholder="उदा. अचलपूर" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-amber-500 focus:outline-none"/>
+        </div>
+
+        <div class="sm:col-span-2">
+          <label class="block font-bold text-slate-300 mb-1">रहिवासी पत्ता</label>
+          <input type="text" id="m_address" placeholder="संपूर्ण पत्ता प्रविष्ट करा" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-amber-500 focus:outline-none"/>
+        </div>
+
+        <!-- Commission Configuration -->
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+          <label class="block font-bold text-emerald-400 mb-1">नवीन नोंदणी कमिशन दर (%) <span class="text-rose-400">*</span></label>
+          <input type="number" id="m_newRate" value="25.0" step="0.5" min="5" max="50" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 font-mono text-emerald-400 font-bold focus:border-emerald-500 focus:outline-none"/>
+          <p class="text-[10px] text-slate-500">उदा. ₹10,000 वर ₹2,500</p>
+        </div>
+
+        <div class="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
+          <label class="block font-bold text-sky-400 mb-1">वार्षिक नूतनीकरण कमिशन दर (%) <span class="text-rose-400">*</span></label>
+          <input type="number" id="m_renewalRate" value="15.0" step="0.5" min="5" max="40" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 font-mono text-sky-400 font-bold focus:border-sky-500 focus:outline-none"/>
+          <p class="text-[10px] text-slate-500">दरवर्षी प्रत्येक नूतनीकरणावर</p>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">प्रारंभिक पासवर्ड</label>
+          <input type="text" id="m_password" value="Agent@123" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 font-mono text-amber-300 focus:border-amber-500 focus:outline-none"/>
+        </div>
+
+        <div class="flex items-center gap-2 pt-6">
+          <input type="checkbox" id="m_autoApprove" checked class="w-4 h-4 rounded text-emerald-600 bg-slate-900 border-slate-700"/>
+          <label for="m_autoApprove" class="font-bold text-slate-200">खाते तात्काळ सक्रिय करा (Auto-Approve Active)</label>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+        <button type="button" onclick="closeAddAgentModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">
+          रद्द करा
+        </button>
+        <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition shadow">
+          एजंट खाते जतन करा
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL 2: APPROVE KYC & CONFIGURE COMMISSION RATES            -->
+<!-- ============================================================ -->
+<div id="approveKycModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-slate-900 border border-emerald-500/40 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-4 text-xs">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+      <h3 class="text-base font-bold text-white flex items-center gap-2">
+        <span>✅ एजंट अर्ज व ओळखपत्र (KYC) मंजुरी</span>
+      </h3>
+      <button onclick="closeApproveKycModal()" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+    </div>
+
+    <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2 text-xs">
+      <div class="flex justify-between"><span class="text-slate-400">एजंट नाव:</span> <b class="text-white" id="appAgentName">—</b></div>
+      <div class="flex justify-between"><span class="text-slate-400">मोबाईल क्रमांक:</span> <b class="text-amber-300 font-mono" id="appAgentMobile">—</b></div>
+      <div class="flex justify-between"><span class="text-slate-400">जिल्हा व तालुका:</span> <b class="text-slate-200" id="appAgentLocation">—</b></div>
+      <div class="flex justify-between"><span class="text-slate-400">मागणी केलेले कमिशन:</span> <b class="text-emerald-400 font-mono font-bold" id="appAgentReqRate">—</b></div>
+    </div>
+
+    <form id="approveKycForm" onsubmit="event.preventDefault(); confirmApproveKyc();" class="space-y-4">
+      <input type="hidden" id="appAgentId"/>
+
+      <div class="p-3 bg-slate-950 rounded-xl border border-emerald-500/30 space-y-3">
+        <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+          सुपरॲडमिन मंजूर कमिशन दर (Official Approved Rates)
+        </h4>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">नवीन नोंदणी कमिशन (%)</label>
+            <input type="number" id="appNewRate" value="25.0" step="0.5" min="5" max="50" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 font-mono text-emerald-400 font-bold focus:border-emerald-500 focus:outline-none"/>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-300 mb-1">वार्षिक नूतनीकरण कमिशन (%)</label>
+            <input type="number" id="appRenewalRate" value="15.0" step="0.5" min="5" max="40" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 font-mono text-sky-400 font-bold focus:border-sky-500 focus:outline-none"/>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-300 mb-1">मंजुरी आदेश क्रमांक / टिप्पणी (Order Remarks)</label>
+        <input type="text" id="appRemarks" value="शासकीय पडताळणीअंती एजंट अधिकृत मान्यता आदेश क्र. AGT/2026/012" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-emerald-500 focus:outline-none"/>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+        <button type="button" onclick="closeApproveKycModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">
+          रद्द करा
+        </button>
+        <button type="submit" class="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-lg shadow">
+          अर्ज मंजूर व सक्रिय करा ✓
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL 3: COMMISSION SETTLEMENT PAYOUT (ANY AMOUNT THRESHOLD)  -->
+<!-- ============================================================ -->
+<div id="settlementModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-slate-900 border border-emerald-500/40 w-full max-w-xl rounded-2xl shadow-2xl p-6 space-y-4 text-xs max-h-[92vh] overflow-y-auto">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+      <h3 class="text-base font-bold text-white flex items-center gap-2">
+        <span>💸 कमिशन पेआउट सेटलमेंट (Execute Payout)</span>
+      </h3>
+      <button onclick="closeSettlementModal()" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+    </div>
+
+    <form id="settlementForm" onsubmit="event.preventDefault(); handleExecuteSettlement();" class="space-y-4">
+      <div>
+        <label class="block font-bold text-slate-300 mb-1">एजंट निवडा (Select Agent) <span class="text-rose-400">*</span></label>
+        <select id="settleAgentSelect" onchange="onSettleAgentChanged()" required class="w-full bg-slate-950 border border-slate-700 text-white rounded-lg px-3 py-2 text-xs font-semibold focus:border-emerald-500 focus:outline-none">
+          <!-- Populated dynamically -->
+        </select>
+      </div>
+
+      <!-- Agent Balance Snapshot -->
+      <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 grid grid-cols-2 gap-4">
+        <div>
+          <span class="text-slate-400 text-[11px] block">एकूण देय कमिशन शिल्लक:</span>
+          <b class="text-rose-400 font-mono text-base font-extrabold" id="settlePayableBalance">₹ ५,०००.००</b>
+        </div>
+        <div class="text-right">
+          <span class="text-slate-400 text-[11px] block">बँक / UPI माहिती:</span>
+          <b class="text-emerald-400 font-mono text-xs block" id="settleBankUpiText">mahesh.deshmukh@okhdfcbank</b>
+        </div>
+      </div>
+
+      <!-- Payout Amount (ANY AMOUNT PER USER POLICY) -->
+      <div>
+        <div class="flex justify-between items-center mb-1">
+          <label class="font-bold text-slate-300">
+            प्रत्यक्ष वितरण रक्कम (Payout Amount ₹) <span class="text-rose-400">*</span>
+          </label>
+          <span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-mono font-bold">
+            धोरण: कोणतीही मर्यादा नाही (Any Amount Allowed)
+          </span>
+        </div>
+        <div class="relative">
+          <span class="absolute left-3 top-2 text-slate-400 font-mono">₹</span>
+          <input type="number" id="settleAmountInput" step="1" min="1" required class="w-full bg-slate-950 border border-slate-700 rounded-lg pl-8 pr-3 py-2 font-mono text-amber-300 font-extrabold text-base focus:border-emerald-500 focus:outline-none"/>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1">आपण पूर्ण किंवा अंशतः (Partial Payment) रक्कम भरू शकता.</p>
+      </div>
+
+      <!-- Payment Mode & Reference -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">प्रदान माध्यम (Payment Mode) <span class="text-rose-400">*</span></label>
+          <select id="settlePaymentMode" required class="w-full bg-slate-950 border border-slate-700 text-white rounded-lg px-3 py-2 focus:border-emerald-500 focus:outline-none">
+            <option value="UPI">UPI (Google Pay / PhonePe / BHIM)</option>
+            <option value="NEFT_RTGS">बँक ट्रान्सफर (NEFT / RTGS / IMPS)</option>
+            <option value="CASH">रोख रक्कम (Cash Payment)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">UTR / बँक संदर्भ क्रमांक <span class="text-rose-400">*</span></label>
+          <input type="text" id="settleReferenceNo" placeholder="उदा. UPI/429103918291 किंवा UTR" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 font-mono text-white focus:border-emerald-500 focus:outline-none"/>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">प्रदान दिनांक (Payment Date) <span class="text-rose-400">*</span></label>
+          <input type="date" id="settleDate" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-emerald-500 focus:outline-none"/>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">बँक पावती दस्तऐवज (Receipt Upload)</label>
+          <input type="file" id="settleReceiptFile" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-2 py-1.5 text-[11px] text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:bg-slate-800 file:text-slate-200"/>
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-bold text-slate-300 mb-1">सेटलमेंट शेरा / टिप्पणी (Remarks)</label>
+        <input type="text" id="settleRemarks" placeholder="उदा. नोव्हेंबर २०२६ नवीन ऑनबोर्डिंग कमिशन वाटप" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-emerald-500 focus:outline-none"/>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-3 border-t border-slate-800">
+        <button type="button" onclick="closeSettlementModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">
+          रद्द करा
+        </button>
+        <button type="submit" class="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-lg shadow flex items-center gap-1.5">
+          <span>वितरण निश्चित करा (Disburse Payout)</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MODAL 4: VIEW AGENT PROFILE & KYC INSPECTION                 -->
+<!-- ============================================================ -->
+<div id="agentProfileModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-slate-900 border border-slate-700 w-full max-w-xl rounded-2xl shadow-2xl p-6 space-y-4 text-xs max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+      <h3 class="text-base font-bold text-white flex items-center gap-2">
+        <span>👤 एजंट सविस्तर माहिती व दस्तऐवज</span>
+      </h3>
+      <button onclick="closeProfileModal()" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+    </div>
+
+    <div class="space-y-4" id="profileModalContent">
+      <!-- Injected dynamically -->
+    </div>
+
+    <div class="flex justify-end pt-3 border-t border-slate-800">
+      <button onclick="closeProfileModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg">
+        बंद करा
+      </button>
+    </div>
+  </div>
+</div>
+
+<footer class="py-4 text-center text-xs text-slate-500 border-t border-slate-800/60 no-print">
+  ई-ग्रामपंचायत ERP • राज्य नियंत्रण कक्ष • सुपरॲडमिन एजंट व्यवस्थापन व कमिशन वितरण प्रणाली
+</footer>
+
+<!-- SCRIPT LOGIC -->
+<script>
+  const defaultAgents = [
+    {
+      id: "agt-1",
+      agentCode: "AGT-MH-0101",
+      fullName: "महेश विठ्ठलराव देशमुख",
+      mobileNumber: "9822112233",
+      email: "mahesh.deshmukh@gmail.com",
+      idProofType: "AADHAAR",
+      idProofNumber: "9823-4412-8890",
+      idProofImage: "aadhaar_mahesh_deshmukh.pdf",
+      address: "प्लॉट क्र. १२, शिवाजी नगर, अचलपूर रोड",
+      village: "अचलपूर",
+      taluka: "अचलपूर",
+      district: "अमरावती",
+      state: "महाराष्ट्र",
+      requestedCommissionRate: 25.0,
+      approvedNewRate: 25.0,
+      approvedRenewalRate: 15.0,
+      password: "Agent@123",
+      status: "ACTIVE",
+      registeredAt: "2026-10-15 11:30 AM",
+      approvedAt: "2026-10-16 02:00 PM",
+      bankName: "State Bank of India",
+      accountNumber: "30992817261",
+      ifscCode: "SBIN0000301",
+      upiId: "mahesh.deshmukh@okhdfcbank"
+    },
+    {
+      id: "agt-2",
+      agentCode: "AGT-MH-0102",
+      fullName: "सचिन प्रभाकर जोशी",
+      mobileNumber: "9890445566",
+      email: "sachin.joshi@pune-it.com",
+      idProofType: "PAN",
+      idProofNumber: "ABCDE1234F",
+      idProofImage: "pan_sachin_joshi.pdf",
+      address: "रानडे गल्ली, बारामती",
+      village: "बारामती",
+      taluka: "बारामती",
+      district: "पुणे",
+      state: "महाराष्ट्र",
+      requestedCommissionRate: 30.0,
+      approvedNewRate: 20.0,
+      approvedRenewalRate: 10.0,
+      password: "Agent@123",
+      status: "ACTIVE",
+      registeredAt: "2026-10-20 04:15 PM",
+      approvedAt: "2026-10-21 10:00 AM",
+      bankName: "Bank of Maharashtra",
+      accountNumber: "60119283746",
+      ifscCode: "MAHB0000122",
+      upiId: "sachinjoshi@ybl"
+    },
+    {
+      id: "agt-3",
+      agentCode: "AGT-MH-0103",
+      fullName: "संदीप नारायण वानखडे",
+      mobileNumber: "9422889900",
+      email: "sandeep.wankhade@yahoo.com",
+      idProofType: "AADHAAR",
+      idProofNumber: "8812-7734-1192",
+      idProofImage: "aadhaar_sandeep.pdf",
+      address: "वारुड मेन रोड, अंजनगाव सुर्जी",
+      village: "अंजनगाव सुर्जी",
+      taluka: "अंजनगाव सुर्जी",
+      district: "अमरावती",
+      state: "महाराष्ट्र",
+      requestedCommissionRate: 25.0,
+      approvedNewRate: null,
+      approvedRenewalRate: null,
+      password: "Agent@123",
+      status: "PENDING_APPROVAL",
+      registeredAt: "2026-11-13 09:45 AM",
+      bankName: "HDFC Bank",
+      accountNumber: "50100293847",
+      ifscCode: "HDFC0000411",
+      upiId: "sandeepwankhade@sbi"
+    }
+  ];
+
+  const defaultCommissions = [
+    {
+      id: "COMM-2026-001",
+      agentId: "agt-1",
+      gpLgd: "271234",
+      gpName: "चिंचोली खुर्द",
+      type: "NEW_REGISTRATION",
+      dealAmount: 10000,
+      rate: 25.0,
+      commissionAmount: 2500,
+      status: "PAID",
+      date: "2026-10-18",
+      settlementId: "SET-2026-001",
+      settlementDate: "2026-10-31"
+    },
+    {
+      id: "COMM-2026-002",
+      agentId: "agt-1",
+      gpLgd: "271255",
+      gpName: "शिरजगाव कसबा",
+      type: "NEW_REGISTRATION",
+      dealAmount: 10000,
+      rate: 25.0,
+      commissionAmount: 2500,
+      status: "PAID",
+      date: "2026-10-25",
+      settlementId: "SET-2026-001",
+      settlementDate: "2026-10-31"
+    },
+    {
+      id: "COMM-2026-003",
+      agentId: "agt-1",
+      gpLgd: "271260",
+      gpName: "भातकुली बुद्रुक",
+      type: "NEW_REGISTRATION",
+      dealAmount: 10000,
+      rate: 25.0,
+      commissionAmount: 2500,
+      status: "PAYABLE",
+      date: "2026-11-05",
+      settlementId: null,
+      settlementDate: null
+    },
+    {
+      id: "COMM-2026-004",
+      agentId: "agt-1",
+      gpLgd: "271270",
+      gpName: "चांदूर रेल्वे ग्रामीण",
+      type: "NEW_REGISTRATION",
+      dealAmount: 10000,
+      rate: 25.0,
+      commissionAmount: 2500,
+      status: "PAYABLE",
+      date: "2026-11-10",
+      settlementId: null,
+      settlementDate: null
+    },
+    {
+      id: "COMM-2026-005",
+      agentId: "agt-1",
+      gpLgd: "271280",
+      gpName: "अचलपूर ग्रामीण",
+      type: "RENEWAL",
+      dealAmount: 8000,
+      rate: 15.0,
+      commissionAmount: 1200,
+      status: "PENDING",
+      date: "2026-11-12",
+      settlementId: null,
+      settlementDate: null
+    },
+    {
+      id: "COMM-2026-006",
+      agentId: "agt-2",
+      gpLgd: "272101",
+      gpName: "सुपे",
+      type: "NEW_REGISTRATION",
+      dealAmount: 10000,
+      rate: 20.0,
+      commissionAmount: 2000,
+      status: "PAID",
+      date: "2026-10-28",
+      settlementId: "SET-2026-002",
+      settlementDate: "2026-11-02"
+    },
+    {
+      id: "COMM-2026-007",
+      agentId: "agt-2",
+      gpLgd: "272105",
+      gpName: "वडगाव निंबाळकर",
+      type: "NEW_REGISTRATION",
+      dealAmount: 10000,
+      rate: 20.0,
+      commissionAmount: 2000,
+      status: "PAYABLE",
+      date: "2026-11-08",
+      settlementId: null,
+      settlementDate: null
+    }
+  ];
+
+  const defaultSettlements = [
+    {
+      id: "SET-2026-001",
+      agentId: "agt-1",
+      date: "2026-10-31",
+      amount: 5000,
+      paymentMode: "UPI",
+      referenceNo: "UPI/329482910281/SBI",
+      itemsCount: 2,
+      status: "COMPLETED",
+      remarks: "ऑक्टोबर २०२६ महिन्याचे नवीन GP ऑनबोर्डिंग कमिशन सेटलमेंट."
+    },
+    {
+      id: "SET-2026-002",
+      agentId: "agt-2",
+      date: "2026-11-02",
+      amount: 2000,
+      paymentMode: "NEFT_RTGS",
+      referenceNo: "MAHB202611029910",
+      itemsCount: 1,
+      status: "COMPLETED",
+      remarks: "सुपे GP यशस्वी पडताळणीनंतरचे कमिशन."
+    }
+  ];
+
+  function getLocalData(key, fallback) {
+    try {
+      const data = localStorage.getItem(key);
+      if (data) return JSON.parse(data);
+    } catch(e) {
+      console.error(e);
+    }
+    localStorage.setItem(key, JSON.stringify(fallback));
+    return fallback;
+  }
+
+  function setLocalData(key, val) {
+    localStorage.setItem(key, JSON.stringify(val));
+  }
+
+  // Tab Switcher
+  function switchTab(tabId) {
+    const tabs = ['all_agents', 'kyc_queue', 'settlements', 'settlement_history'];
+    tabs.forEach(t => {
+      const pane = document.getElementById('tab-' + t);
+      const btn = document.getElementById('tab-btn-' + t);
+      if (pane) {
+        if (t === tabId) {
+          pane.classList.remove('hidden');
+        } else {
+          pane.classList.add('hidden');
+        }
+      }
+      if (btn) {
+        if (t === tabId) {
+          btn.className = 'px-4 py-2.5 border-b-2 border-amber-500 text-amber-400 flex items-center gap-1.5 transition font-bold';
+        } else {
+          btn.className = 'px-4 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition';
+        }
+      }
+    });
+
+    if (tabId === 'all_agents') renderAgentsTable();
+    if (tabId === 'kyc_queue') renderKycQueue();
+    if (tabId === 'settlements') renderSettlementsConsole();
+    if (tabId === 'settlement_history') renderSettlementHistory();
+  }
+
+  // Load Main Console
+  function loadSuperadminAgentsConsole() {
+    const agents = getLocalData('gpmh_agents', defaultAgents);
+    const commissions = getLocalData('gpmh_agent_commissions', defaultCommissions);
+    const settlements = getLocalData('gpmh_agent_settlements', defaultSettlements);
+
+    // KPI Calculations
+    const totalAgents = agents.length;
+    const pendingAgents = agents.filter(a => a.status === 'PENDING_APPROVAL').length;
+    const activeAgents = agents.filter(a => a.status === 'ACTIVE').length;
+    
+    const disbursedSum = settlements.reduce((acc, s) => acc + (Number(s.amount) || 0), 0);
+    const pendingSum = commissions.filter(c => c.status === 'PAYABLE' || c.status === 'PENDING')
+                                  .reduce((acc, c) => acc + (Number(c.commissionAmount) || 0), 0);
+
+    document.getElementById('kpi-total-agents').textContent = totalAgents;
+    document.getElementById('kpi-pending-agents').textContent = pendingAgents;
+    document.getElementById('kpi-active-agents').textContent = activeAgents;
+    document.getElementById('kpi-disbursed-comm').textContent = `₹ ${disbursedSum.toLocaleString('en-IN')}`;
+    document.getElementById('kpi-pending-comm').textContent = `₹ ${pendingSum.toLocaleString('en-IN')}`;
+
+    document.getElementById('tab-badge-all').textContent = totalAgents;
+    document.getElementById('tab-badge-kyc').textContent = `${pendingAgents} नवीन`;
+    document.getElementById('kycQueueCount').textContent = `${pendingAgents} अर्ज प्रलंबित`;
+    document.getElementById('totalGlobalPayable').textContent = `₹ ${pendingSum.toLocaleString('en-IN')}`;
+
+    renderAgentsTable();
+  }
+
+  // Render Agents Directory Table
+  function renderAgentsTable() {
+    const agents = getLocalData('gpmh_agents', defaultAgents);
+    const commissions = getLocalData('gpmh_agent_commissions', defaultCommissions);
+    const settlements = getLocalData('gpmh_agent_settlements', defaultSettlements);
+    const tbody = document.getElementById('agentsTableBody');
+
+    tbody.innerHTML = agents.map(a => {
+      const agentComms = commissions.filter(c => c.agentId === a.id);
+      const agentSets = settlements.filter(s => s.agentId === a.id);
+      
+      const paid = agentSets.reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
+      const pending = agentComms.filter(c => c.status === 'PAYABLE' || c.status === 'PENDING')
+                                .reduce((sum, c) => sum + (Number(c.commissionAmount) || 0), 0);
+
+      const statusBadge = a.status === 'ACTIVE' ? 
+        '<span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded text-[10px] font-bold">ACTIVE ✓</span>' :
+        a.status === 'PENDING_APPROVAL' ?
+        '<span class="bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded text-[10px] font-bold">PENDING ⏳</span>' :
+        '<span class="bg-rose-500/20 text-rose-400 border border-rose-500/30 px-2 py-0.5 rounded text-[10px] font-bold">INACTIVE ✕</span>';
+
+      const newRateText = a.approvedNewRate ? `${a.approvedNewRate}%` : `${a.requestedCommissionRate}% (मागणी)`;
+      const renewalRateText = a.approvedRenewalRate ? `${a.approvedRenewalRate}%` : '—';
+
+      return `
+        <tr class="hover:bg-slate-800/40 transition">
+          <td class="px-4 py-3">
+            <div class="font-bold text-white">${a.fullName}</div>
+            <div class="text-[10px] font-mono text-amber-300 font-bold">${a.agentCode}</div>
+          </td>
+          <td class="px-4 py-3">
+            <div class="font-mono text-slate-200">📞 ${a.mobileNumber}</div>
+            <div class="text-[10px] text-slate-400">${a.email}</div>
+          </td>
+          <td class="px-4 py-3 text-slate-300">${a.district} / ${a.taluka}</td>
+          <td class="px-4 py-3 font-mono">
+            <span class="text-emerald-400 font-bold">${newRateText}</span>
+            <span class="text-slate-600"> / </span>
+            <span class="text-sky-400 font-bold">${renewalRateText}</span>
+          </td>
+          <td class="px-4 py-3 font-mono font-bold text-slate-200">${agentComms.length} GPs</td>
+          <td class="px-4 py-3 font-mono font-bold text-emerald-400">₹ ${paid.toLocaleString('en-IN')}</td>
+          <td class="px-4 py-3 font-mono font-bold text-rose-400">₹ ${pending.toLocaleString('en-IN')}</td>
+          <td class="px-4 py-3">${statusBadge}</td>
+          <td class="px-4 py-3 text-right">
+            <div class="inline-flex gap-1">
+              <button onclick="viewAgentProfile('${a.id}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-semibold border border-slate-700" title="प्रोफाईल पहा">
+                पहा
+              </button>
+              ${a.status === 'PENDING_APPROVAL' ? `
+                <button onclick="openApproveKycModal('${a.id}')" class="px-2 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded text-[11px] font-bold" title="मंजूर करा">
+                  मंजूर
+                </button>
+              ` : `
+                <button onclick="openExecuteSettlementModal('${a.id}')" class="px-2 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-[11px] font-bold" title="कमिशन द्या">
+                  पेआउट
+                </button>
+              `}
+              <button onclick="toggleAgentStatus('${a.id}')" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded text-[11px] border border-slate-700" title="स्थिती बदला">
+                ⚙️
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function filterAgentsTable() {
+    const q = document.getElementById('agentSearchInput').value.toLowerCase();
+    const dist = document.getElementById('agentDistrictFilter').value;
+    const status = document.getElementById('agentStatusFilter').value;
+    const rows = document.querySelectorAll('#agentsTableBody tr');
+
+    rows.forEach(r => {
+      const text = r.innerText.toLowerCase();
+      const matchText = text.includes(q);
+      const matchDist = !dist || text.includes(dist.toLowerCase());
+      const matchStatus = !status || text.includes(status);
+      r.style.display = (matchText && matchDist && matchStatus) ? '' : 'none';
+    });
+  }
+
+  // Render KYC Queue
+  function renderKycQueue() {
+    const agents = getLocalData('gpmh_agents', defaultAgents).filter(a => a.status === 'PENDING_APPROVAL');
+    const container = document.getElementById('kycCardsContainer');
+
+    if (agents.length === 0) {
+      container.innerHTML = `
+        <div class="bg-slate-900 border border-slate-800 p-8 rounded-xl text-center space-y-2">
+          <div class="text-3xl">🎉</div>
+          <h4 class="text-sm font-bold text-white">कोणताही प्रलंबित अर्ज शिल्लक नाही!</h4>
+          <p class="text-xs text-slate-400">सर्व एजंट अर्ज व ओळखपत्रे तपासली गेली आहेत.</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = agents.map(a => `
+      <div class="bg-slate-900 border border-amber-500/40 rounded-xl p-5 space-y-4 shadow-md">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="text-base font-bold text-white">${a.fullName}</h4>
+              <span class="bg-amber-500/20 text-amber-300 font-mono text-[10px] font-bold px-2 py-0.5 rounded border border-amber-500/30">${a.agentCode}</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">अर्ज सादर दिनांक: <span class="text-slate-300 font-mono">${a.registeredAt || '2026-11-13'}</span></p>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="inspectDocument('${a.idProofType}', '${a.idProofNumber}', '${a.idProofImage}')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1.5">
+              <span>📄</span>
+              <span>${a.idProofType} दस्तऐवज पहा</span>
+            </button>
+            <button onclick="openApproveKycModal('${a.id}')" class="px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-lg shadow">
+              मंजूर करा व दर ठरवा ✓
+            </button>
+            <button onclick="rejectAgentApplication('${a.id}')" class="px-3 py-1.5 bg-rose-900/40 hover:bg-rose-900/60 text-rose-200 border border-rose-800 rounded-lg text-xs font-semibold">
+              नाकारा ✕
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 bg-slate-950 p-3.5 rounded-lg border border-slate-800 text-xs">
+          <div>
+            <span class="text-slate-400 block text-[11px]">मोबाईल व ईमेल:</span>
+            <span class="font-mono text-amber-300 font-bold block">${a.mobileNumber}</span>
+            <span class="text-slate-300 text-[11px]">${a.email}</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block text-[11px]">स्थान (पत्ता):</span>
+            <span class="text-slate-200 block">${a.district}, तालुका: ${a.taluka}</span>
+            <span class="text-slate-400 text-[11px]">${a.address}</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block text-[11px]">ओळखपत्र तपशील:</span>
+            <span class="text-white block font-mono font-bold">${a.idProofType}: ${a.idProofNumber}</span>
+            <span class="text-emerald-400 text-[10px]">खाजगी सुरक्षित स्टोरेज</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block text-[11px]">मागणी केलेले कमिशन दर:</span>
+            <span class="text-2xl font-extrabold text-amber-400 mono">${a.requestedCommissionRate}%</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Inspect KYC document
+  function inspectDocument(type, num, file) {
+    alert(`[सुरक्षित शासकीय KYC तपासणी]\n\nदस्तऐवज प्रकार: ${type}\nदस्तऐवज क्रमांक: ${num}\nफाईल नाव: ${file}\n\nसर्व्हर स्थिती: एनक्रिप्टेड प्रायव्हेट स्टोरेज पडताळणी वैध आहे.`);
+  }
+
+  // Open Approve KYC Modal
+  function openApproveKycModal(agentId) {
+    const agents = getLocalData('gpmh_agents', defaultAgents);
+    const agent = agents.find(a => a.id === agentId);
+    if (!agent) return;
+
+    document.getElementById('appAgentId').value = agent.id;
+    document.getElementById('appAgentName').textContent = agent.fullName;
+    document.getElementById('appAgentMobile').textContent = agent.mobileNumber;
+    document.getElementById('appAgentLocation').textContent = `${agent.district} / ${agent.taluka}`;
+    document.getElementById('appAgentReqRate').textContent = `${agent.requestedCommissionRate}%`;
+    document.getElementById('appNewRate').value = agent.requestedCommissionRate || 25.0;
+    document.getElementById('appRenewalRate').value = 15.0;
+
+    document.getElementById('approveKycModal').classList.remove('hidden');
+  }
+
+  function closeApproveKycModal() {
+    document.getElementById('approveKycModal').classList.add('hidden');
+  }
+
+  function confirmApproveKyc() {
+    const agentId = document.getElementById('appAgentId').value;
+    const newRate = Number(document.getElementById('appNewRate').value);
+    const renewalRate = Number(document.getElementById('appRenewalRate').value);
+    const remarks = document.getElementById('appRemarks').value.trim();
+
+    const agents = getLocalData('gpmh_agents', defaultAgents);
+    const idx = agents.findIndex(a => a.id === agentId);
+    if (idx !== -1) {
+      agents[idx].status = 'ACTIVE';
+      agents[idx].approvedNewRate = newRate;
+      agents[idx].approvedRenewalRate = renewalRate;
+      agents[idx].approvedAt = new Date().toISOString();
+      agents[idx].approvalRemarks = remarks;
+      setLocalData('gpmh_agents', agents);
+    }
+
+    alert(`अभिनंदन! ${agents[idx].fullName} यांचा एजंट अर्ज मंजूर झाला आहे.\n\nनवीन नोंदणी दर: ${newRate}%\nवार्षिक नूतनीकरण दर: ${renewalRate}%\n\nएजंट आता पोर्टलवर त्वरित लॉगिन करू शकेल.`);
+    closeApproveKycModal();
+    loadSuperadminAgentsConsole();
+    switchTab('all_agents');
+  }
+
+  function rejectAgentApplication(agentId) {
+    const reason = prompt('अर्ज नाकारण्याचे कारण प्रविष्ट करा (उदा. अयोग्य ओळखपत्र, अपूर्ण पत्ता):', 'अस्पष्ट आधार कार्ड / ओळखपत्राची प्रत योग्य नाही.');
+    if (!reason) return;
+
+    const agents = getLocalData('gpmh_agents', defaultAgents);
+    const idx = agents.findIndex(a => a.id === agentId);
+    if (idx !== -1) {
+      agents[idx].status = 'REJECTED';
+      agents[idx].rejectionReason = reason;
+      setLocalData('gpmh_agents', agents);
+    }
+    alert('अर्ज नाकारला गेला.');
+    loadSuperadminAgentsConsole();
+    renderKycQueue();
+  }
+
+  function toggleAgentStatus(agentId) {
+    const agents = getLocalData('gpmh_agents', defaultAgents);
+    const idx = agents.findIndex(a => a.id === agentId);
+    if (idx === -1) return;
+
+    const newStatus = agents[idx].status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    agents[idx].status = newStatus;
+    setLocalData('gpmh_agents', agents);
+    alert(`${agents[idx].fullName} यांच्या खात्याची स्थिती आता ${newStatus} करण्यात आली आहे.`);
+    loadSuperadminAgentsConsole();
+  }
+
+  // Render Settlements Console
+  function renderSettlementsConsole() {
+    const agents = getLocalData('gpmh_agents', defaultAgents).filter(a => a.status === 'ACTIVE');
+    const commissions = getLocalData('gpmh_agent_commissions', defaultCommissions);
+    const container = document.getElementById('agentSettlementCards');
+    const itemsTbody = document.getElementById('unsettledItemsTableBody');
+
+    // Agent Payable Cards
+    container.innerHTML = agents.map(a => {
+      const pendingComms = commissions.filter(c => c.agentId === a.id && (c.status === 'PAYABLE' || c.status === 'PENDING'));
+      const balance = pendingComms.reduce((acc, c) => acc + (Number(c.commissionAmount) || 0), 0);
+
+      return `
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="font-bold text-white text-sm">${a.fullName}</h4>
+              <span class="text-[10px] font-mono text-amber-300">${a.agentCode} • ${a.district}</span>
+            </div>
+            <span class="text-xs bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded">सक्रिय</span>
+          </div>
+
+          <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 flex justify-between items-center">
+            <div>
+              <span class="text-[11px] text-slate-400 block">देय कमिशन शिल्लक:</span>
+              <span class="text-xl font-extrabold text-rose-400 mono">₹ ${balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</span>
+            </div>
+            <div class="text-right text-[11px] text-slate-400">
+              <span>प्रलंबित GP नोंदी: <b class="text-white">${pendingComms.length}</b></span>
+              <div class="font-mono text-emerald-400">${a.upiId || a.bankName}</div>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-1">
+            <button onclick="openExecuteSettlementModal('${a.id}')" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs shadow transition flex items-center justify-center gap-1.5 cursor-pointer">
+              <span>💸 कमिशन सेटल करा (Settle Payout)</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Unsettled Items Table
+    const unsettled = commissions.filter(c => c.status === 'PAYABLE' || c.status === 'PENDING');
+    if (unsettled.length === 0) {
+      itemsTbody.innerHTML = '<tr><td colspan="9" class="p-6 text-center text-slate-500">कोणतीही प्रलंबित कमिशन नोंद नाही.</td></tr>';
+      return;
+    }
+
+    itemsTbody.innerHTML = unsettled.map(c => {
+      const ag = agents.find(a => a.id === c.agentId) || { fullName: 'एजंट' };
+      return `
+        <tr class="hover:bg-slate-800/40 transition">
+          <td class="px-4 py-2.5 font-mono text-slate-400">${c.id}</td>
+          <td class="px-4 py-2.5 font-bold text-white">${ag.fullName}</td>
+          <td class="px-4 py-2.5">
+            <div class="text-slate-200">${c.gpName}</div>
+            <div class="text-[10px] font-mono text-slate-400">LGD: ${c.gpLgd}</div>
+          </td>
+          <td class="px-4 py-2.5 text-slate-300">${c.type === 'NEW_REGISTRATION' ? 'नवीन' : 'नूतनीकरण'}</td>
+          <td class="px-4 py-2.5 font-mono">₹ ${Number(c.dealAmount).toLocaleString('en-IN')}</td>
+          <td class="px-4 py-2.5 font-mono text-emerald-400 font-bold">${c.rate}%</td>
+          <td class="px-4 py-2.5 font-mono font-extrabold text-amber-300">₹ ${Number(c.commissionAmount).toLocaleString('en-IN')}</td>
+          <td class="px-4 py-2.5">
+            <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${c.status === 'PAYABLE' ? 'bg-sky-500/20 text-sky-400' : 'bg-amber-500/20 text-amber-400'}">
+              ${c.status === 'PAYABLE' ? 'देय (Payable)' : 'पडताळणी प्रलंबित'}
+            </span>
+          </td>
+          <td class="px-4 py-2.5 text-right">
+            <button onclick="openExecuteSettlementModal('${c.agentId}')" class="px-2 py-1 bg-emerald-700 hover:bg-emerald-600 text-white rounded text-[11px] font-bold">
+              सेटल
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // Open Settlement Modal
+  function openExecuteSettlementModal(preselectedAgentId) {
+    const agents = getLocalData('gpmh_agents', defaultAgents).filter(a => a.status === 'ACTIVE');
+    const select = document.getElementById('settleAgentSelect');
+    select.innerHTML = agents.map(a => `<option value="${a.id}">${a.fullName} (${a.agentCode}) - ${a.district}</option>`).join('');
+
+    if (preselectedAgentId) {
+      select.value = preselectedAgentId;
+    }
+
+    document.getElementById('settleDate').value = new Date().toISOString().split('T')[0];
+    onSettleAgentChanged();
+    document.getElementById('settlementModal').classList.remove('hidden');
+  }
+
+  function closeSettlementModal() {
+    document.getElementById('settlementModal').classList.add('hidden');
+  }
+
+  function onSettleAgentChanged() {
+    const agentId = document.getElementById('settleAgentSelect').value;
+    const agents = getLocalData('gpmh_agents', defaultAgents);
+    const agent = agents.find(a => a.id === agentId) || agents[0];
+    const commissions = getLocalData('gpmh_agent_commissions', defaultCommissions)
+      .filter(c => c.agentId === agentId && (c.status === 'PAYABLE' || c.status === 'PENDING'));
+
+    const balance = commissions.reduce((sum, c) => sum + (Number(c.commissionAmount) || 0), 0);
+    document.getElementById('settlePayableBalance').textContent = `₹ ${balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+    document.getElementById('settleBankUpiText').textContent = agent.upiId || `${agent.bankName} (A/C: ${agent.accountNumber})`;
+    document.getElementById('settleAmountInput').value = balance; // Defaults to full balance, but user can enter ANY AMOUNT!
+    document.getElementById('settleReferenceNo').value = `UPI/${Date.now().toString().slice(-8)}/SBI`;
+  }
+
+  // Execute Commission Settlement
+  function handleExecuteSettlement() {
+    const agentId = document.getElementById('settleAgentSelect').value;
+    const payoutAmount = Number(document.getElementById('settleAmountInput').value);
+    const paymentMode = document.getElementById('settlePaymentMode').value;
+    const refNo = document.getElementById('settleReferenceNo').value.trim();
+    const date = document.getElementById('settleDate').value;
+    const remarks = document.getElementById('settleRemarks').value.trim() || 'कमिशन सेटलमेंट पेआउट.';
+
+    if (payoutAmount <= 0) {
+      alert('कृपया वैध पेआउट रक्कम प्रविष्ट करा!');
+      return;
+    }
+
+    const settlements = getLocalData('gpmh_agent_settlements', defaultSettlements);
+    const newSettlementId = "SET-2026-00" + (settlements.length + 1);
+
+    const newSettlement = {
+      id: newSettlementId,
+      agentId: agentId,
+      date: date,
+      amount: payoutAmount,
+      paymentMode: paymentMode,
+      referenceNo: refNo,
+      itemsCount: 1,
+      status: "COMPLETED",
+      remarks: remarks
+    };
+
+    settlements.unshift(newSettlement);
+    setLocalData('gpmh_agent_settlements', settlements);
+
+    // Update Commission Records for this agent to PAID
+    const commissions = getLocalData('gpmh_agent_commissions', defaultCommissions);
+    let remainingToSettle = payoutAmount;
+    
+    commissions.forEach(c => {
+      if (c.agentId === agentId && (c.status === 'PAYABLE' || c.status === 'PENDING') && remainingToSettle > 0) {
+        c.status = 'PAID';
+        c.settlementId = newSettlementId;
+        c.settlementDate = date;
+        remainingToSettle -= c.commissionAmount;
+      }
+    });
+    setLocalData('gpmh_agent_commissions', commissions);
+
+    alert(`कमिशन सेटलमेंट यशस्वीरित्या पूर्ण झाले!\n\nव्हाउचर क्रमांक: ${newSettlementId}\nवितरित रक्कम: ₹${payoutAmount}\nमाध्यम: ${paymentMode}\nसंदर्भ क्र: ${refNo}`);
+    closeSettlementModal();
+    loadSuperadminAgentsConsole();
+    switchTab('settlement_history');
+  }
+
+  // Render Settlement History
+  function renderSettlementHistory() {
+    const settlements = getLocalData('gpmh_agent_settlements', defaultSettlements);
+    const agents = getLocalData('gpmh_agents', defaultAgents);
+    const tbody = document.getElementById('settlementHistoryTableBody');
+
+    if (settlements.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" class="p-6 text-center text-slate-500">कोणतीही सेटलमेंट नोंद उपलब्ध नाही.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = settlements.map(s => {
+      const agent = agents.find(a => a.id === s.agentId) || { fullName: 'एजंट', agentCode: '—' };
+      return `
+        <tr class="hover:bg-slate-800/40 transition">
+          <td class="px-4 py-3 font-mono font-bold text-amber-300">${s.id}</td>
+          <td class="px-4 py-3 font-mono text-slate-300">${s.date}</td>
+          <td class="px-4 py-3">
+            <div class="font-bold text-white">${agent.fullName}</div>
+            <div class="text-[10px] font-mono text-slate-400">${agent.agentCode}</div>
+          </td>
+          <td class="px-4 py-3 font-mono font-extrabold text-emerald-400 text-sm">₹ ${Number(s.amount).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+          <td class="px-4 py-3 font-semibold text-slate-200">${s.paymentMode}</td>
+          <td class="px-4 py-3 font-mono text-[11px] text-slate-300">${s.referenceNo}</td>
+          <td class="px-4 py-3 font-mono text-slate-400">${s.itemsCount} GPs</td>
+          <td class="px-4 py-3">
+            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              पूर्ण (Disbursed)
+            </span>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <button onclick="alert('व्हाउचर क्र: ${s.id}\\nवितरित रक्कम: ₹${s.amount}\\nसंदर्भ: ${s.referenceNo}\\nशेरा: ${s.remarks}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-semibold border border-slate-700">
+              पावती 📄
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // Profile Modal View
+  function viewAgentProfile(agentId) {
+    const agents = getLocalData('gpmh_agents', defaultAgents);
+    const a = agents.find(item => item.id === agentId);
+    if (!a) return;
+
+    const content = document.getElementById('profileModalContent');
+    content.innerHTML = `
+      <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3">
+        <div class="flex justify-between items-start">
+          <div>
+            <h4 class="text-base font-bold text-white">${a.fullName}</h4>
+            <span class="font-mono text-xs text-amber-300 font-bold">${a.agentCode}</span>
+          </div>
+          <span class="px-2 py-0.5 rounded text-xs font-bold ${a.status === 'ACTIVE' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'}">${a.status}</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 text-xs pt-2">
+          <div><span class="text-slate-400 block">मोबाईल:</span> <b class="font-mono text-amber-300">${a.mobileNumber}</b></div>
+          <div><span class="text-slate-400 block">ईमेल:</span> <b class="text-slate-200">${a.email}</b></div>
+          <div><span class="text-slate-400 block">जिल्हा व तालुका:</span> <b class="text-slate-200">${a.district} / ${a.taluka}</b></div>
+          <div><span class="text-slate-400 block">पत्ता:</span> <b class="text-slate-300">${a.address}</b></div>
+        </div>
+      </div>
+
+      <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+        <h5 class="font-bold text-emerald-400 uppercase tracking-wider text-[11px]">मंजूर कमिशन रचना</h5>
+        <div class="grid grid-cols-2 gap-3 font-mono">
+          <div>नवीन नोंदणी दर: <b class="text-emerald-400">${a.approvedNewRate || a.requestedCommissionRate}%</b></div>
+          <div>नूतनीकरण दर: <b class="text-sky-400">${a.approvedRenewalRate || 15}%</b></div>
+        </div>
+      </div>
+
+      <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
+        <h5 class="font-bold text-sky-400 uppercase tracking-wider text-[11px]">बँक व UPI पेआउट तपशील</h5>
+        <div class="grid grid-cols-2 gap-2 text-xs font-mono">
+          <div>बँक: <span class="text-white">${a.bankName || 'State Bank of India'}</span></div>
+          <div>खाते क्र: <span class="text-amber-300">${a.accountNumber || '30992817261'}</span></div>
+          <div>IFSC: <span class="text-white">${a.ifscCode || 'SBIN0000301'}</span></div>
+          <div>UPI ID: <span class="text-emerald-400 font-bold">${a.upiId || 'agent@upi'}</span></div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('agentProfileModal').classList.remove('hidden');
+  }
+
+  function closeProfileModal() {
+    document.getElementById('agentProfileModal').classList.add('hidden');
+  }
+
+  // Add Manual Agent
+  function openAddAgentModal() {
+    document.getElementById('manualAgentForm').reset();
+    document.getElementById('addAgentModal').classList.remove('hidden');
+  }
+
+  function closeAddAgentModal() {
+    document.getElementById('addAgentModal').classList.add('hidden');
+  }
+
+  function handleSaveManualAgent() {
+    const agents = getLocalData('gpmh_agents', defaultAgents);
+    const newCode = "AGT-MH-010" + (agents.length + 1);
+
+    const newAgent = {
+      id: "agt-" + (agents.length + 1),
+      agentCode: newCode,
+      fullName: document.getElementById('m_fullName').value.trim(),
+      mobileNumber: document.getElementById('m_mobileNumber').value.trim(),
+      email: document.getElementById('m_email').value.trim(),
+      idProofType: document.getElementById('m_idType').value,
+      idProofNumber: document.getElementById('m_idNumber').value.trim(),
+      idProofImage: "doc_manual_" + newCode + ".pdf",
+      address: document.getElementById('m_address').value.trim(),
+      village: document.getElementById('m_taluka').value.trim(),
+      taluka: document.getElementById('m_taluka').value.trim(),
+      district: document.getElementById('m_district').value,
+      state: "महाराष्ट्र",
+      requestedCommissionRate: Number(document.getElementById('m_newRate').value),
+      approvedNewRate: Number(document.getElementById('m_newRate').value),
+      approvedRenewalRate: Number(document.getElementById('m_renewalRate').value),
+      password: document.getElementById('m_password').value.trim(),
+      status: document.getElementById('m_autoApprove').checked ? "ACTIVE" : "PENDING_APPROVAL",
+      registeredAt: new Date().toISOString().replace('T', ' ').slice(0, 16),
+      approvedAt: document.getElementById('m_autoApprove').checked ? new Date().toISOString() : null,
+      bankName: "State Bank of India",
+      accountNumber: "3000" + Math.floor(1000000 + Math.random() * 9000000),
+      ifscCode: "SBIN0000301",
+      upiId: document.getElementById('m_mobileNumber').value.trim() + "@upi"
+    };
+
+    agents.unshift(newAgent);
+    setLocalData('gpmh_agents', agents);
+
+    alert(`नवीन विक्री प्रतिनिधी (Agent) यशस्वीरीत्या जोडला गेला!\n\nएजंट कोड: ${newCode}\nनाव: ${newAgent.fullName}\nस्थिती: ${newAgent.status}`);
+    closeAddAgentModal();
+    loadSuperadminAgentsConsole();
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    loadSuperadminAgentsConsole();
+  });
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,38 @@
+{
+  "isSuccess": true,
+  "statusCode": 200,
+  "title": "Area Slab Tax List",
+  "data": [
+    {
+      "id": 1,
+      "areaFrom": 1,
+      "areaTo": 300,
+      "lightingTax": 40,
+      "healthTax": 40,
+      "sanitationTax": 100,
+      "toiletTax": 0,
+      "isActive": true
+    },
+    {
+      "id": 2,
+      "areaFrom": 301,
+      "areaTo": 700,
+      "lightingTax": 50,
+      "healthTax": 50,
+      "sanitationTax": 100,
+      "toiletTax": 20,
+      "isActive": true
+    },
+    {
+      "id": 3,
+      "areaFrom": 701,
+      "areaTo": 999999,
+      "lightingTax": 100,
+      "healthTax": 100,
+      "sanitationTax": 100,
+      "toiletTax": 0,
+      "isActive": true
+    }
+  ],
+  "errors": []
+}

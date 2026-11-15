@@ -1,0 +1,41 @@
+{
+  "isSuccess": true,
+  "statusCode": 200,
+  "title": "Mutations fetched successfully",
+  "data": {
+    "items": [
+      {
+        "id": 1,
+        "mutationNo": "FR-2026-0001",
+        "mutationDate": "2026-11-02T00:00:00",
+        "wardNoType": 1,
+        "propertyId": 1,
+        "propertyNo": "1",
+        "oldOwnerId": 1,
+        "oldOwnerName": "अमोल राजेश देशमुख",
+        "newOwnerId": 2,
+        "newOwnerName": "ऋषिकेश सावरकर",
+        "reason": 1,
+        "documentType": 1,
+        "documentNo": "9",
+        "documentDate": "2026-11-02T00:00:00",
+        "basisDetails": "",
+        "isCancelled": false,
+        "propertyDescription": null,
+        "registerPageNo": "१",
+        "resolutionNo": "9/१",
+        "resolutionDate": "2026-11-02T00:00:00",
+        "remarks": "",
+        "oldOwnerDetails": null,
+        "newOwnerDetails": null
+      }
+    ],
+    "pageNumber": 1,
+    "pageSize": 200,
+    "totalCount": 1,
+    "totalPages": 1,
+    "hasPreviousPage": false,
+    "hasNextPage": false
+  },
+  "errors": []
+}

@@ -1,0 +1,80 @@
+{
+  "isSuccess": true,
+  "statusCode": 200,
+  "title": "Depreciation List",
+  "data": [
+    {
+      "id": 1,
+      "ageFrom": 0,
+      "ageTo": 2,
+      "hutMudPercent": 100,
+      "stoneBrickRccPercent": 100,
+      "isActive": true
+    },
+    {
+      "id": 2,
+      "ageFrom": 2,
+      "ageTo": 5,
+      "hutMudPercent": 95,
+      "stoneBrickRccPercent": 95,
+      "isActive": true
+    },
+    {
+      "id": 3,
+      "ageFrom": 5,
+      "ageTo": 10,
+      "hutMudPercent": 85,
+      "stoneBrickRccPercent": 90,
+      "isActive": true
+    },
+    {
+      "id": 4,
+      "ageFrom": 10,
+      "ageTo": 20,
+      "hutMudPercent": 75,
+      "stoneBrickRccPercent": 80,
+      "isActive": true
+    },
+    {
+      "id": 5,
+      "ageFrom": 20,
+      "ageTo": 30,
+      "hutMudPercent": 60,
+      "stoneBrickRccPercent": 70,
+      "isActive": true
+    },
+    {
+      "id": 6,
+      "ageFrom": 30,
+      "ageTo": 40,
+      "hutMudPercent": 45,
+      "stoneBrickRccPercent": 60,
+      "isActive": true
+    },
+    {
+      "id": 7,
+      "ageFrom": 40,
+      "ageTo": 50,
+      "hutMudPercent": 30,
+      "stoneBrickRccPercent": 50,
+      "isActive": true
+    },
+    {
+      "id": 8,
+      "ageFrom": 50,
+      "ageTo": 60,
+      "hutMudPercent": 20,
+      "stoneBrickRccPercent": 40,
+      "isActive": true
+    },
+    {
+      "id": 9,
+      "ageFrom": 60,
+      "ageTo": 100,
+      "hutMudPercent": 15,
+      "stoneBrickRccPercent": 30,
+      "isActive": true
+    }
+  ],
+  "errors": []
+}

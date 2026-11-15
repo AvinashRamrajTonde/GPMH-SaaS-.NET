@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+
+<html lang="mr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>नमुना ११ — किरकोळ कर, फी व भाडे वसुली पावती (Dual Copy Landscape Print)</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #f8fafc;
+      font-family: 'Noto Sans Devanagari', system-ui, sans-serif;
+      color: #0f172a;
+      -webkit-font-smoothing: antialiased;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Screen Preview Container */
+    .sheet-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      padding: 16px 0 32px 0;
+    }
+
+    /* Standard A4 Landscape Page: exactly 297mm x 210mm */
+    .sheet {
+      width: 297mm;
+      height: 210mm;
+      max-height: 210mm;
+      background: #ffffff;
+      padding: 5mm 6mm;
+      display: grid;
+      grid-template-columns: 1fr 8mm 1fr;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Center Vertical Cut/Perforation Guide */
+    .cut-line-col {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+    .cut-line-col::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      border-left: 1.5px dashed #94a3b8;
+    }
+    .cut-badge {
+      position: relative;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 9999px;
+      padding: 10px 2px;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-size: 8.5px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    /* Single Receipt Container */
+    .receipt-box {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      border: 1.5px solid #b45309;
+      border-radius: 6px;
+      padding: 7px 9px;
+      background: #ffffff;
+      position: relative;
+      overflow: hidden;
+    }
+    .receipt-box.taxpayer-copy {
+      border-color: #0f766e;
+    }
+
+    /* Top Accent Line */
+    .top-accent-line {
+      height: 3.5px;
+      background: linear-gradient(90deg, #b45309, #f59e0b);
+      margin: -7px -9px 6px -9px;
+    }
+    .receipt-box.taxpayer-copy .top-accent-line {
+      background: linear-gradient(90deg, #0f766e, #14b8a6);
+    }
+
+    /* Tables */
+    .misc-tbl {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8.5px;
+      line-height: 1.25;
+      margin-top: 4px;
+    }
+    .misc-tbl th, .misc-tbl td {
+      border: 1px solid #cbd5e1;
+      padding: 3px 5px;
+      text-align: center;
+    }
+    .misc-tbl th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: #334155;
+    }
+    .misc-tbl td.text-left {
+      text-align: left;
+    }
+    .misc-tbl td.text-right {
+      text-align: right;
+    }
+    .misc-tbl tr.tot-row {
+      background: #fffbeb;
+      font-weight: 800;
+    }
+    .receipt-box.taxpayer-copy .misc-tbl tr.tot-row {
+      background: #f0fdfa;
+    }
+
+    /* Print Overrides */
+    @media print {
+      #offline-nav-bar,
+      .no-print-toolbar {
+        display: none !important;
+      }
+      html, body {
+        background: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 297mm !important;
+        height: 210mm !important;
+        overflow: hidden !important;
+      }
+      .sheet-wrapper {
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 297mm !important;
+        height: 210mm !important;
+      }
+      .sheet {
+        box-shadow: none !important;
+        border: none !important;
+        width: 297mm !important;
+        height: 210mm !important;
+        max-height: 210mm !important;
+        padding: 5mm 6mm !important;
+        margin: 0 !important;
+        overflow: hidden !important;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- OFFLINE NAVIGATION BAR INJECTED FOR INSTANT PREVIEW -->
+<style>@media print { #offline-nav-bar { display: none !important; } }</style>
+<div class="no-print" id="offline-nav-bar" style="background:#f1f5f9; border-bottom:1px solid #cbd5e1; padding:5px 12px; font-family:'Noto Sans Devanagari',system-ui,sans-serif; font-size:11.5px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px; z-index:999999; position:relative;">
+<div style="font-weight:800; font-size:11.5px; color:#0f6b61; display:flex; align-items:center; gap:5px;">
+<span style="background:#0f6b61; color:#fff; border-radius:4px; padding:2px 5px; font-size:9.5px;">GPMH</span>
+<span>ई-ग्रामपंचायत ERP (७२ स्क्रीन संपूर्ण प्रणाली)</span>
+<a href="./review_dashboard.html" style="display:inline-block; padding:4px 9px; margin:1.5px 2px; font-size:10.5px; border-radius:5px; text-decoration:none; border:1px solid #d97706; background:#fef3c7; color:#92400e; font-weight:700; transition:all 0.2s;">⭐ मंजुरी केंद्र (Review Hub)</a>
+</div>
+<div style="display:flex; flex-wrap:wrap; align-items:center; gap:4px;">
+<a href="./02_dashboard.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">डॅशबोर्ड</a>
+<a href="./03_namuna_8_hub.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">नमुना ८</a>
+<a href="./11_namuna_9_demand_register.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">नमुना ९</a>
+<a href="./14_namuna_10_receipt_register.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">नमुना १०</a>
+<a href="./accounts_ns1to7_cashbook.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">रोख वही (१-७)</a>
+<a href="./accounts_forms_hub.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">सर्व नमुने (१-३३)</a>
+<a href="./works_ns15_register.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">विकासकामे (१५)</a>
+<a href="./citizen_applications.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">नागरिक सेवा</a>
+</div>
+</div>
+<!-- INTERACTIVE TOOLBAR (HIDDEN ON PRINT) -->
+<div class="no-print-toolbar sticky top-0 z-40 bg-slate-900/95 backdrop-blur text-white border-b border-slate-700 px-4 py-2.5 shadow-md">
+<div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+<span class="font-bold text-sm tracking-wide text-amber-400">नमुना ११ — किरकोळ कर, फी व भाडे पावती (Dual Copy)</span>
+</div>
+<span class="text-xs text-slate-400 hidden sm:inline">|</span>
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-800 border border-slate-700 rounded-md text-[11px] text-slate-200">
+<span>📄 A4 Landscape</span>
+<span class="text-slate-400">•</span>
+<span class="text-amber-300 font-medium">दुकान भाडे / दाखले / NOC / बाजार फी</span>
+<span class="text-slate-400">•</span>
+<span class="text-emerald-400 font-semibold">०% ओव्हरफ्लो हमी</span>
+</div>
+</div>
+<!-- Actions & Mock Switcher -->
+<div class="flex items-center flex-wrap gap-2">
+<!-- Selector for different receipts -->
+<div class="flex items-center gap-1.5 bg-slate-800 border border-slate-700 px-2 py-1 rounded text-xs">
+<span class="text-slate-400 text-[11px]">पावती प्रकार:</span>
+<select class="bg-slate-900 text-slate-100 text-xs rounded border border-slate-700 px-2 py-0.5 focus:outline-none focus:border-amber-500" id="receiptSelector" onchange="switchMiscData(this.value)">
+<option value="misc-1">गाळा / दुकान भाडे — सुरेश बंडू तायडे (₹१,५००)</option>
+<option value="misc-2">जन्म व विवाह दाखला फी — राहुल विनायक पाटील (₹७०)</option>
+<option value="misc-3">व्यवसाय ना-हरकत (NOC) फी — भारत पेट्रोलियम ऑइल (₹२,५००)</option>
+<option value="misc-4">नवीन नळ जोडणी फी — रमेश विठ्ठल काळे (₹१,२००)</option>
+</select>
+</div>
+<a class="inline-flex items-center gap-1 px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded border border-slate-700 transition" href="./17_namuna_10_dual_receipt_print.html">
+<span>१० कर पावतीकडे जा</span>
+</a>
+<button class="inline-flex items-center gap-1.5 px-4 py-1.5 bg-amber-600 hover:bg-amber-500 active:scale-95 text-white text-xs font-bold rounded shadow-md transition" onclick="window.print()">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+<span>🖨️ पावती प्रिंट करा (Print / PDF)</span>
+</button>
+</div>
+</div>
+</div>
+<!-- PRINT SHEET CONTAINER -->
+<div class="sheet-wrapper">
+<div class="sheet">
+<!-- ========================================== -->
+<!-- 1. LEFT COPY: दप्तर / नोंदवही प्रत (OFFICE) -->
+<!-- ========================================== -->
+<article class="receipt-box office-copy">
+<div class="top-accent-line"></div>
+<!-- Header: GP & Statutory Rule -->
+<div class="text-center border-b border-slate-300 pb-1.5 mb-1.5 relative">
+<div class="flex items-center justify-between text-[7.5px] font-bold text-slate-500 mb-0.5">
+<span>महाराष्ट्र ग्रामपंचायत लेखा संहिता २०११ • नियम ३३</span>
+<span class="mono">GSTIN: 27AMRAV0042G</span>
+</div>
+<h1 class="text-[15px] font-extrabold text-[#b45309] leading-tight">ग्रामपंचायत चिंचोली खुर्द</h1>
+<div class="text-[9px] font-semibold text-slate-600">
+          पंचायत समिती: अंजनगाव सुर्जी  |  जिल्हा: अमरावती  |  पिन: ४४४७०५
+        </div>
+<div class="mt-1 flex items-center justify-between bg-amber-50/90 border border-amber-200 px-2 py-0.5 rounded">
+<span class="text-[10px] font-bold text-amber-950">नमुना न. ११ — किरकोळ कर, फी व भाडे वसुली पावती</span>
+<span class="text-[8.5px] font-bold bg-[#b45309] text-white px-2 py-0.5 rounded-full shadow-xs">
+            📋 दप्तर प्रत (Office Record Copy)
+          </span>
+</div>
+</div>
+<!-- Meta Grid: Receipt & Date -->
+<div class="grid grid-cols-4 gap-1 text-[8.5px] bg-slate-50 p-1.5 rounded border border-slate-200 mb-1.5">
+<div><span class="text-slate-500">पावती क्र.:</span> <b class="text-amber-800 mono" id="off-recNo">MISC-2026/00042</b></div>
+<div><span class="text-slate-500">पुस्तक/पान:</span> <b class="mono" id="off-bookPage">02 / 18</b></div>
+<div><span class="text-slate-500">दिनांक:</span> <b id="off-recDate">08/11/2026</b></div>
+<div><span class="text-slate-500">आर्थिक वर्ष:</span> <b class="text-slate-900" id="off-finYear">2026-27</b></div>
+</div>
+<!-- Payer & Subject Details Grid -->
+<div class="space-y-1 text-[8.5px] mb-1.5 px-0.5">
+<div class="flex justify-between items-center">
+<div><span class="text-slate-500">श्री / श्रीमती / संस्था:</span> <b class="text-slate-900 text-[9px]" id="off-payerName">सुरेश बंडू तायडे</b></div>
+<div><span class="text-slate-500">मोबाईल:</span> <b class="mono" id="off-payerMobile">9822445566</b></div>
+</div>
+<div class="grid grid-cols-2 gap-2 bg-slate-50/70 p-1 rounded border border-slate-200">
+<div><span class="text-slate-500">गाळा / परवाना संदर्भ:</span> <b class="mono text-slate-800" id="off-refNo">गाळा क्र. ०४ (मार्केट कॉम्प्लेक्स)</b></div>
+<div><span class="text-slate-500">आकारणी बाब:</span> <b class="text-amber-900" id="off-headLabel">गाळा / दुकान भाडे (Shop Rent)</b></div>
+</div>
+<div class="text-[8px] text-slate-600">
+<span class="font-bold">तपशील:</span> <span id="off-desc">माहे नोव्हेंबर २०२६ या महिन्याचे ग्रामपंचायत व्यापारी संकुल गाळा भाडे.</span>
+</div>
+</div>
+<!-- Amount Breakdown Table -->
+<table class="misc-tbl">
+<thead>
+<tr>
+<th class="w-6">अ.क्र.</th>
+<th class="text-left">तपशील (Particulars)</th>
+<th class="w-20">हप्ता / महिना</th>
+<th class="w-24 text-right">रक्कम (₹)</th>
+</tr>
+</thead>
+<tbody id="off-tblRows">
+<tr><td class="mono">१</td><td class="text-left font-medium">किरकोळ कर / फी / भाडे मुद्दल भरणा</td><td class="mono">नोव्हेंबर २०२६</td><td class="mono font-bold text-right">1,500.00</td></tr>
+<tr><td class="mono">२</td><td class="text-left font-medium">विलंब शुल्क / दंड आकारणी</td><td class="mono">—</td><td class="mono text-right">0.00</td></tr>
+<tr class="tot-row">
+<td class="text-right font-bold" colspan="3">एकूण जमा झालेली रक्कम (Total Paid):</td>
+<td class="mono font-bold text-amber-900 text-[10px] text-right" id="off-grandTotal">₹1,500.00</td>
+</tr>
+</tbody>
+</table>
+<!-- Amount in Words & Mode Strip -->
+<div class="mt-1.5 p-1 bg-amber-50/60 border border-dashed border-amber-300 rounded text-[8px] space-y-0.5">
+<div>
+<span class="font-bold text-amber-950">अक्षरी रक्कम:</span>
+<b class="text-slate-900" id="off-words">एक हजार पाचशे रुपये फक्त.</b>
+</div>
+<div class="flex justify-between items-center text-slate-700 pt-0.5 border-t border-amber-200/80">
+<div><span class="font-bold">भरणा पद्धत:</span> <b class="mono uppercase" id="off-payMode">रोख (CASH)</b> <span id="off-payRef"></span></div>
+<div><span class="font-bold">उर्वरित येणे बाकी:</span> <b class="mono text-rose-700" id="off-balance">₹ 0.00 (निरंक)</b></div>
+</div>
+</div>
+<!-- Remarks -->
+<div class="text-[7.5px] text-slate-500 mt-1 flex justify-between items-center px-0.5">
+<div><span class="font-semibold">शेरा/नोंद:</span> <span id="off-remarks">सदर पावती संगणकीय प्रणालीद्वारे तयार करण्यात आली आहे.</span></div>
+<div class="mono text-slate-400">TrxID: TXN-MISC-90412</div>
+</div>
+<!-- QR & Footer Signatures -->
+<div class="mt-auto pt-2 border-t border-slate-200 flex items-end justify-between">
+<!-- Digital QR -->
+<div class="flex items-center gap-1.5">
+<svg class="w-10 h-10 border border-slate-300 p-0.5 rounded bg-white shrink-0" viewbox="0 0 100 100">
+<rect fill="#fff" height="100" width="100"></rect>
+<path d="M5 5h30v30h-30zM12 12h16v16h-16zM65 5h30v30h-30zM72 12h16v16h-16zM5 65h30v30h-30zM12 72h16v16h-16zM45 10h10v10h-10zM45 35h10v10h-10zM10 45h10v10h-10zM35 45h10v10h-10zM65 45h10v10h-10zM85 45h10v10h-10zM45 65h10v10h-10zM65 65h10v10h-10zM85 65h10v10h-10zM45 85h10v10h-10zM65 85h10v10h-10zM85 85h10v10h-10z" fill="#b45309"></path>
+</svg>
+<div class="text-[7px] text-slate-400 leading-tight">
+<div>ई-पडताळणी QR</div>
+<div class="mono">MISC-000042</div>
+<div>चिंचोली खुर्द GP</div>
+</div>
+</div>
+<!-- Center Note -->
+<div class="text-center">
+<div class="text-[7.5px] font-bold text-amber-900">वेळेवर कर भरून ग्रामविकासास सहकार्य करा!</div>
+<div class="text-[6.5px] text-slate-400">ई-ग्रामपंचायत ERP प्रणाली</div>
+</div>
+<!-- Signatures -->
+<div class="flex gap-4 text-center">
+<div>
+<div class="h-5"></div>
+<div class="w-16 border-t border-slate-400 text-[7.5px] font-bold text-slate-700 pt-0.5">
+              कर वसुली कारकून
+            </div>
+</div>
+<div>
+<div class="h-5"></div>
+<div class="w-20 border-t border-slate-400 text-[7.5px] font-bold text-slate-700 pt-0.5">
+              ग्रामसेवक / अधिकारी
+            </div>
+</div>
+</div>
+</div>
+</article>
+<!-- ========================================== -->
+<!-- CENTER PERFORATION / CUT GUIDE COLUMN     -->
+<!-- ========================================== -->
+<div class="cut-line-col">
+<div class="cut-badge">
+<span>✂️ येथून कापा (कात्रीने वेगळे करा)</span>
+<span class="mono">PERFORATION CUT LINE</span>
+<span>✂️</span>
+</div>
+</div>
+<!-- ========================================== -->
+<!-- 2. RIGHT COPY: मूळ प्रत (भरणा करणाऱ्यासाठी) -->
+<!-- ========================================== -->
+<article class="receipt-box taxpayer-copy">
+<div class="top-accent-line"></div>
+<!-- Header: GP & Statutory Rule -->
+<div class="text-center border-b border-slate-300 pb-1.5 mb-1.5 relative">
+<div class="flex items-center justify-between text-[7.5px] font-bold text-slate-500 mb-0.5">
+<span>महाराष्ट्र ग्रामपंचायत लेखा संहिता २०११ • नियम ३३</span>
+<span class="mono">GSTIN: 27AMRAV0042G</span>
+</div>
+<h1 class="text-[15px] font-extrabold text-[#0f766e] leading-tight">ग्रामपंचायत चिंचोली खुर्द</h1>
+<div class="text-[9px] font-semibold text-slate-600">
+          पंचायत समिती: अंजनगाव सुर्जी  |  जिल्हा: अमरावती  |  पिन: ४४४७०५
+        </div>
+<div class="mt-1 flex items-center justify-between bg-teal-50/90 border border-teal-200 px-2 py-0.5 rounded">
+<span class="text-[10px] font-bold text-teal-950">नमुना न. ११ — किरकोळ कर, फी व भाडे वसुली पावती</span>
+<span class="text-[8.5px] font-bold bg-[#0f766e] text-white px-2 py-0.5 rounded-full shadow-xs">
+            ⭐ मूळ प्रत (भरणा करणाऱ्यासाठी / Payer Copy)
+          </span>
+</div>
+</div>
+<!-- Meta Grid: Receipt & Date -->
+<div class="grid grid-cols-4 gap-1 text-[8.5px] bg-slate-50 p-1.5 rounded border border-slate-200 mb-1.5">
+<div><span class="text-slate-500">पावती क्र.:</span> <b class="text-teal-800 mono" id="tax-recNo">MISC-2026/00042</b></div>
+<div><span class="text-slate-500">पुस्तक/पान:</span> <b class="mono" id="tax-bookPage">02 / 18</b></div>
+<div><span class="text-slate-500">दिनांक:</span> <b id="tax-recDate">08/11/2026</b></div>
+<div><span class="text-slate-500">आर्थिक वर्ष:</span> <b class="text-slate-900" id="tax-finYear">2026-27</b></div>
+</div>
+<!-- Payer & Subject Details Grid -->
+<div class="space-y-1 text-[8.5px] mb-1.5 px-0.5">
+<div class="flex justify-between items-center">
+<div><span class="text-slate-500">श्री / श्रीमती / संस्था:</span> <b class="text-slate-900 text-[9px]" id="tax-payerName">सुरेश बंडू तायडे</b></div>
+<div><span class="text-slate-500">मोबाईल:</span> <b class="mono" id="tax-payerMobile">9822445566</b></div>
+</div>
+<div class="grid grid-cols-2 gap-2 bg-slate-50/70 p-1 rounded border border-slate-200">
+<div><span class="text-slate-500">गाळा / परवाना संदर्भ:</span> <b class="mono text-slate-800" id="tax-refNo">गाळा क्र. ०४ (मार्केट कॉम्प्लेक्स)</b></div>
+<div><span class="text-slate-500">आकारणी बाब:</span> <b class="text-teal-900" id="tax-headLabel">गाळा / दुकान भाडे (Shop Rent)</b></div>
+</div>
+<div class="text-[8px] text-slate-600">
+<span class="font-bold">तपशील:</span> <span id="tax-desc">माहे नोव्हेंबर २०२६ या महिन्याचे ग्रामपंचायत व्यापारी संकुल गाळा भाडे.</span>
+</div>
+</div>
+<!-- Amount Breakdown Table -->
+<table class="misc-tbl">
+<thead>
+<tr>
+<th class="w-6">अ.क्र.</th>
+<th class="text-left">तपशील (Particulars)</th>
+<th class="w-20">हप्ता / महिना</th>
+<th class="w-24 text-right">रक्कम (₹)</th>
+</tr>
+</thead>
+<tbody id="tax-tblRows">
+<tr><td class="mono">१</td><td class="text-left font-medium">किरकोळ कर / फी / भाडे मुद्दल भरणा</td><td class="mono">नोव्हेंबर २०२६</td><td class="mono font-bold text-right">1,500.00</td></tr>
+<tr><td class="mono">२</td><td class="text-left font-medium">विलंब शुल्क / दंड आकारणी</td><td class="mono">—</td><td class="mono text-right">0.00</td></tr>
+<tr class="tot-row">
+<td class="text-right font-bold" colspan="3">एकूण जमा झालेली रक्कम (Total Paid):</td>
+<td class="mono font-bold text-teal-900 text-[10px] text-right" id="tax-grandTotal">₹1,500.00</td>
+</tr>
+</tbody>
+</table>
+<!-- Amount in Words & Mode Strip -->
+<div class="mt-1.5 p-1 bg-teal-50/60 border border-dashed border-teal-300 rounded text-[8px] space-y-0.5">
+<div>
+<span class="font-bold text-teal-950">अक्षरी रक्कम:</span>
+<b class="text-slate-900" id="tax-words">एक हजार पाचशे रुपये फक्त.</b>
+</div>
+<div class="flex justify-between items-center text-slate-700 pt-0.5 border-t border-teal-200/80">
+<div><span class="font-bold">भरणा पद्धत:</span> <b class="mono uppercase" id="tax-payMode">रोख (CASH)</b> <span id="tax-payRef"></span></div>
+<div><span class="font-bold">उर्वरित येणे बाकी:</span> <b class="mono text-rose-700" id="tax-balance">₹ 0.00 (निरंक)</b></div>
+</div>
+</div>
+<!-- Remarks -->
+<div class="text-[7.5px] text-slate-500 mt-1 flex justify-between items-center px-0.5">
+<div><span class="font-semibold">शेरा/नोंद:</span> <span id="tax-remarks">सदर पावती संगणकीय प्रणालीद्वारे तयार करण्यात आली आहे.</span></div>
+<div class="mono text-slate-400">TrxID: TXN-MISC-90412</div>
+</div>
+<!-- QR & Footer Signatures -->
+<div class="mt-auto pt-2 border-t border-slate-200 flex items-end justify-between">
+<!-- Digital QR -->
+<div class="flex items-center gap-1.5">
+<svg class="w-10 h-10 border border-slate-300 p-0.5 rounded bg-white shrink-0" viewbox="0 0 100 100">
+<rect fill="#fff" height="100" width="100"></rect>
+<path d="M5 5h30v30h-30zM12 12h16v16h-16zM65 5h30v30h-30zM72 12h16v16h-16zM5 65h30v30h-30zM12 72h16v16h-16zM45 10h10v10h-10zM45 35h10v10h-10zM10 45h10v10h-10zM35 45h10v10h-10zM65 45h10v10h-10zM85 45h10v10h-10zM45 65h10v10h-10zM65 65h10v10h-10zM85 65h10v10h-10zM45 85h10v10h-10zM65 85h10v10h-10zM85 85h10v10h-10z" fill="#0f766e"></path>
+</svg>
+<div class="text-[7px] text-slate-400 leading-tight">
+<div>ई-पडताळणी QR</div>
+<div class="mono">MISC-000042</div>
+<div>चिंचोली खुर्द GP</div>
+</div>
+</div>
+<!-- Center Note -->
+<div class="text-center">
+<div class="text-[7.5px] font-bold text-teal-900">वेळेवर कर भरून ग्रामविकासास सहकार्य करा!</div>
+<div class="text-[6.5px] text-slate-400">ई-ग्रामपंचायत ERP प्रणाली</div>
+</div>
+<!-- Signatures -->
+<div class="flex gap-4 text-center">
+<div>
+<div class="h-5"></div>
+<div class="w-16 border-t border-slate-400 text-[7.5px] font-bold text-slate-700 pt-0.5">
+              कर वसुली कारकून
+            </div>
+</div>
+<div>
+<div class="h-5"></div>
+<div class="w-20 border-t border-slate-400 text-[7.5px] font-bold text-slate-700 pt-0.5">
+              ग्रामसेवक / अधिकारी
+            </div>
+</div>
+</div>
+</div>
+</article>
+</div>
+</div>
+<script>
+  const mockMisc = {
+    'misc-1': {
+      recNo: 'MISC-2026/00042',
+      bookPage: '02 / 18',
+      date: '08/11/2026',
+      finYear: '2026-27',
+      payerName: 'सुरेश बंडू तायडे',
+      mobile: '9822445566',
+      refNo: 'गाळा क्र. ०४ (मार्केट संकुल)',
+      headLabel: 'गाळा / दुकान भाडे (Shop Rent)',
+      desc: 'माहे नोव्हेंबर २०२६ या महिन्याचे ग्रामपंचायत व्यापारी संकुल गाळा भाडे.',
+      payMode: 'रोख (CASH)',
+      payRef: '',
+      words: 'एक हजार पाचशे रुपये फक्त.',
+      balance: '₹ 0.00 (निरंक)',
+      remarks: 'माहे नोव्हेंबर २०२६ भाडे नियमित जमा झाले.',
+      grandTotal: '₹1,500.00',
+      rows: [
+        ['१', 'गाळा / दुकान भाडे मुद्दल भरणा', 'नोव्हेंबर २०२६', '1,500.00'],
+        ['२', 'विलंब शुल्क / दंड आकारणी', '—', '0.00']
+      ]
+    },
+    'misc-2': {
+      recNo: 'MISC-2026/00043',
+      bookPage: '02 / 19',
+      date: '08/11/2026',
+      finYear: '2026-27',
+      payerName: 'राहुल विनायक पाटील',
+      mobile: '9421889900',
+      refNo: 'अर्ज क्र. CERT-9021',
+      headLabel: 'दाखले फी (Birth & Marriage Cert Fee)',
+      desc: 'जन्म नोंद दाखला २ प्रती (₹२०) व विवाह नोंदणी प्रमाणपत्र १ प्रत (₹५०).',
+      payMode: 'UPI / PhonePe',
+      payRef: '(Ref: UPI/38910248/SBI)',
+      words: 'सत्तर रुपये फक्त.',
+      balance: '₹ 0.00 (निरंक)',
+      remarks: 'दाखले त्वरित वितरित करण्यात आले.',
+      grandTotal: '₹70.00',
+      rows: [
+        ['१', 'जन्म नोंद दाखला फी (२ प्रती)', '—', '20.00'],
+        ['२', 'विवाह नोंदणी दाखला फी (१ प्रत)', '—', '50.00']
+      ]
+    },
+    'misc-3': {
+      recNo: 'MISC-2026/00044',
+      bookPage: '02 / 20',
+      date: '08/11/2026',
+      finYear: '2026-27',
+      payerName: 'भारत पेट्रोलियम ऑइल कॉर्पोरेशन',
+      mobile: '9890123456',
+      refNo: 'NOC-2026-PETROL-01',
+      headLabel: 'व्यवसाय ना-हरकत (Trade License / NOC)',
+      desc: 'गावठाण हद्दीतील नवीन पेट्रोल पंप आस्थापनेसाठी ग्रामपंचायत ना-हरकत प्रमाणपत्र फी.',
+      payMode: 'NEFT / RTGS',
+      payRef: '(UTR: MAHB2631289410)',
+      words: 'दोन हजार पाचशे रुपये फक्त.',
+      balance: '₹ 0.00 (निरंक)',
+      remarks: 'ग्रामसभा ठराव क्र. १२ नुसार मंजुरी फी प्राप्त.',
+      grandTotal: '₹2,500.00',
+      rows: [
+        ['१', 'व्यवसाय परवाना / NOC तपासणी फी', 'वार्षिक', '2,000.00'],
+        ['२', 'प्रशासकीय प्रक्रिया शुल्क', 'एकवेळ', '500.00']
+      ]
+    },
+    'misc-4': {
+      recNo: 'MISC-2026/00045',
+      bookPage: '02 / 21',
+      date: '08/11/2026',
+      finYear: '2026-27',
+      payerName: 'रमेश विठ्ठल काळे',
+      mobile: '9922001122',
+      refNo: 'WTR-CONN-2026-08',
+      headLabel: 'नवीन नळ जोडणी फी (New Water Connection Fee)',
+      desc: 'घर क्र. १५८ साठी नवीन घरगुती नळ जोडणी अनामत व जोडणी शुल्क.',
+      payMode: 'रोख (CASH)',
+      payRef: '',
+      words: 'एक हजार दोनशे रुपये फक्त.',
+      balance: '₹ 0.00 (निरंक)',
+      remarks: 'प्लंबर जोडणी अहवाल प्राप्त झाल्यानंतर नळ सुरु केला जाईल.',
+      grandTotal: '₹1,200.00',
+      rows: [
+        ['१', 'नवीन नळ कनेक्शन फी', 'एकवेळ', '1,000.00'],
+        ['२', 'जलवाहिनी रस्ता कटिंग दुरुस्ती शुल्क', '—', '200.00']
+      ]
+    }
+  };
+
+  function switchMiscData(key) {
+    const data = mockMisc[key];
+    if (!data) return;
+
+    ['off', 'tax'].forEach(prefix => {
+      document.getElementById(prefix + '-recNo').textContent = data.recNo;
+      document.getElementById(prefix + '-bookPage').textContent = data.bookPage;
+      document.getElementById(prefix + '-recDate').textContent = data.date;
+      document.getElementById(prefix + '-finYear').textContent = data.finYear;
+      document.getElementById(prefix + '-payerName').textContent = data.payerName;
+      document.getElementById(prefix + '-payerMobile').textContent = data.mobile;
+      document.getElementById(prefix + '-refNo').textContent = data.refNo;
+      document.getElementById(prefix + '-headLabel').textContent = data.headLabel;
+      document.getElementById(prefix + '-desc').textContent = data.desc;
+      document.getElementById(prefix + '-payMode').textContent = data.payMode;
+      document.getElementById(prefix + '-payRef').textContent = data.payRef;
+      document.getElementById(prefix + '-words').textContent = data.words;
+      document.getElementById(prefix + '-balance').textContent = data.balance;
+      document.getElementById(prefix + '-remarks').textContent = data.remarks;
+      document.getElementById(prefix + '-grandTotal').textContent = data.grandTotal;
+
+      const tbody = document.getElementById(prefix + '-tblRows');
+      let rowsHtml = '';
+      data.rows.forEach((r, idx) => {
+        rowsHtml += `<tr><td class="mono">${idx + 1}</td><td class="text-left font-medium">${r[1]}</td><td class="mono">${r[2]}</td><td class="mono text-right font-bold">${r[3]}</td></tr>`;
+      });
+      rowsHtml += `
+        <tr class="tot-row">
+          <td colspan="3" class="text-right font-bold">एकूण जमा झालेली रक्कम (Total Paid):</td>
+          <td class="mono font-bold text-right text-[10px] text-amber-900">${data.grandTotal}</td>
+        </tr>
+      `;
+      tbody.innerHTML = rowsHtml;
+    });
+  }
+</script>
+
+<!-- GPMH PROTOTYPE REVIEW BAR INJECTION -->
+<div id="gpmh-review-floating-bar" class="no-print" style="position:fixed;bottom:0;left:0;right:0;height:56px;background:#ffffff;border-top:3px solid #0f6b61;box-shadow:0 -4px 15px rgba(0,0,0,0.12);display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:9999999;font-family:'Noto Sans Devanagari',system-ui,sans-serif;">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span style="background:#0f6b61;color:#ffffff;padding:3px 8px;border-radius:4px;font-weight:700;font-size:12px;">COL-003</span>
+    <span style="font-weight:600;color:#0f172a;font-size:13px;">नमुना ११ किरकोळ वसुली पावती (Misc Revenue Dual Print)</span>
+    <span id="screen-review-badge" style="padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;background:#f1f5f9;color:#475569;">तपासणी प्रलंबित</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button onclick="approveCurrentScreen('COL-003')" style="background:#059669;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;">
+      ✓ मंजूर करा (Approve)
+    </button>
+    <button onclick="openChangeRequestModal('COL-003')" style="background:#dc2626;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;">
+      ✎ बदल सुचवा (Request Changes)
+    </button>
+    <a href="./review_dashboard.html" style="background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;">
+      📊 मंजुरी डॅशबोर्ड (Review Matrix)
+    </a>
+  </div>
+</div>
+
+<div id="change-request-modal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,0.6);z-index:10000000;align-items:center;justify-content:center;font-family:'Noto Sans Devanagari',system-ui,sans-serif;">
+  <div style="background:#fff;border-radius:8px;padding:24px;width:90%;max-width:540px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.2);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid #e2e8f0;padding-bottom:10px;">
+      <h3 style="margin:0;font-size:16px;font-weight:700;color:#0f172a;">बदल सूचना नोंदवा (Submit Change Request)</h3>
+      <button onclick="closeChangeRequestModal()" style="border:none;background:transparent;font-size:18px;cursor:pointer;color:#64748b;">✕</button>
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;">बदलाचे स्वरूप (Change Category)</label>
+      <select id="change-category" style="width:100%;padding:8px 12px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;">
+        <option value="UI/Layout">लेआउट / दृश्य स्वरूप (UI / Layout)</option>
+        <option value="Workflow">कार्यप्रवाह बदल (Workflow / Logic)</option>
+        <option value="Marathi Terms">मराठी शब्दांकन / वैधानिक दुरुस्ती (Statutory Terms)</option>
+        <option value="Validation">फॉर्म व्हॅलिडेशन / फील्ड्स (Fields & Validation)</option>
+        <option value="Print Format">प्रिंट / उतारा फॉरमॅट (Print / Extract Layout)</option>
+      </select>
+    </div>
+    <div style="margin-bottom:18px;">
+      <label style="display:block;font-size:12px;font-weight:600;color:#334155;margin-bottom:6px;">तपशीलवार सूचना (Detailed Comments)</label>
+      <textarea id="change-comments" rows="4" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;resize:vertical;" placeholder="कृपया अपेक्षित बदलांची माहिती येथे लिहा..."></textarea>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;">
+      <button onclick="closeChangeRequestModal()" style="background:#e2e8f0;color:#334155;border:none;padding:7px 16px;border-radius:6px;font-size:13px;cursor:pointer;">रद्द करा (Cancel)</button>
+      <button onclick="submitChangeRequest('COL-003')" style="background:#dc2626;color:#fff;border:none;padding:7px 18px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;">बदल सबमिट करा (Submit Request)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function getReviews() {
+    try {
+      return JSON.parse(localStorage.getItem('gpmh_prototype_reviews') || '{}');
+    } catch(e) {
+      return {};
+    }
+  }
+
+  function updateReviewBadge(screenId) {
+    const reviews = getReviews();
+    const badge = document.getElementById('screen-review-badge');
+    if (!badge) return;
+    const item = reviews[screenId];
+    if (!item || item.status === 'PENDING') {
+      badge.style.background = '#fef3c7';
+      badge.style.color = '#92400e';
+      badge.textContent = 'तपासणी प्रलंबित (Pending Review)';
+    } else if (item.status === 'APPROVED') {
+      badge.style.background = '#dcfce7';
+      badge.style.color = '#15803d';
+      badge.textContent = '✓ मंजूर (Approved)';
+    } else if (item.status === 'CHANGES_REQUESTED') {
+      badge.style.background = '#fee2e2';
+      badge.style.color = '#b91c1c';
+      badge.textContent = '✎ बदल सुचवले (Changes Requested)';
+    }
+  }
+
+  function approveCurrentScreen(screenId) {
+    const reviews = getReviews();
+    reviews[screenId] = {
+      status: 'APPROVED',
+      updatedAt: new Date().toISOString(),
+      comments: 'Screen visually inspected and approved.'
+    };
+    localStorage.setItem('gpmh_prototype_reviews', JSON.stringify(reviews));
+    updateReviewBadge(screenId);
+    alert('स्क्रीन ' + screenId + ' यशस्वीरित्या मंजूर केली गेली आहे! (Screen Approved)');
+  }
+
+  function openChangeRequestModal(screenId) {
+    const modal = document.getElementById('change-request-modal');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  function closeChangeRequestModal() {
+    const modal = document.getElementById('change-request-modal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function submitChangeRequest(screenId) {
+    const cat = document.getElementById('change-category').value;
+    const comments = document.getElementById('change-comments').value.trim();
+    if (!comments) {
+      alert('कृपया बदल सूचना तपशील लिहा.');
+      return;
+    }
+    const reviews = getReviews();
+    reviews[screenId] = {
+      status: 'CHANGES_REQUESTED',
+      category: cat,
+      comments: comments,
+      updatedAt: new Date().toISOString()
+    };
+    localStorage.setItem('gpmh_prototype_reviews', JSON.stringify(reviews));
+    closeChangeRequestModal();
+    updateReviewBadge(screenId);
+    alert('बदल सूचना नोंदवली गेली आहे! (Change Request Recorded)');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    updateReviewBadge('COL-003');
+  });
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // 1. Submenu Accordion Toggle
+  const subMenuButtons = document.querySelectorAll('aside nav > div > div > button');
+  subMenuButtons.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const parentRow = btn.closest('.group');
+      const container = parentRow ? parentRow.parentElement : btn.parentElement;
+      const subMenu = container.querySelector('.grid');
+      const chevron = parentRow ? parentRow.querySelector('svg.lucide-chevron-down') : null;
+      const expandBtn = parentRow ? parentRow.querySelector('button[aria-expanded]') : null;
+
+      if (subMenu) {
+        const isCollapsed = subMenu.classList.contains('grid-rows-[0fr]') || subMenu.style.gridTemplateRows === '0fr';
+        if (isCollapsed) {
+          subMenu.classList.remove('grid-rows-[0fr]', 'opacity-0');
+          subMenu.classList.add('grid-rows-[1fr]', 'opacity-100');
+          if (chevron) chevron.classList.add('rotate-180');
+          if (expandBtn) expandBtn.setAttribute('aria-expanded', 'true');
+        } else {
+          subMenu.classList.remove('grid-rows-[1fr]', 'opacity-100');
+          subMenu.classList.add('grid-rows-[0fr]', 'opacity-0');
+          if (chevron) chevron.classList.remove('rotate-180');
+          if (expandBtn) expandBtn.setAttribute('aria-expanded', 'false');
+        }
+      }
+    });
+  });
+
+  // 2. Desktop Sidebar Collapse Toggle
+  const collapseBtn = document.querySelector('header button[aria-label="आकुंचन करा"]');
+  const aside = document.querySelector('aside');
+  if (collapseBtn && aside) {
+    collapseBtn.addEventListener('click', function() {
+      const isExpanded = aside.classList.contains('lg:w-[260px]');
+      if (isExpanded) {
+        aside.classList.remove('lg:w-[260px]');
+        aside.classList.add('lg:w-[72px]');
+        document.querySelectorAll('aside .truncate, aside .text-[11px], aside span.truncate').forEach(el => el.classList.add('lg:hidden'));
+        collapseBtn.setAttribute('aria-expanded', 'false');
+      } else {
+        aside.classList.remove('lg:w-[72px]');
+        aside.classList.add('lg:w-[260px]');
+        document.querySelectorAll('aside .truncate, aside .text-[11px], aside span.truncate').forEach(el => el.classList.remove('lg:hidden'));
+        collapseBtn.setAttribute('aria-expanded', 'true');
+      }
+    });
+  }
+
+  // 3. Mobile Hamburger & Backdrop Toggle
+  const menuBtn = document.querySelector('header button[aria-label="मेनू"]');
+  const closeAsideBtn = document.querySelector('aside button[aria-label="बंद करा"]');
+  const backdrop = document.querySelector('#root > div > div.fixed.inset-0.z-30');
+
+  function openMobileMenu() {
+    if (aside) aside.classList.remove('-translate-x-full');
+    if (backdrop) {
+      backdrop.classList.remove('pointer-events-none', 'opacity-0');
+      backdrop.classList.add('pointer-events-auto', 'opacity-100');
+    }
+  }
+
+  function closeMobileMenu() {
+    if (aside) aside.classList.add('-translate-x-full');
+    if (backdrop) {
+      backdrop.classList.add('pointer-events-none', 'opacity-0');
+      backdrop.classList.remove('pointer-events-auto', 'opacity-100');
+    }
+  }
+
+  if (menuBtn) menuBtn.addEventListener('click', openMobileMenu);
+  if (closeAsideBtn) closeAsideBtn.addEventListener('click', closeMobileMenu);
+  if (backdrop) backdrop.addEventListener('click', closeMobileMenu);
+
+  // 4. Auto-Expand and Highlight Current Route
+  const currentPath = window.location.pathname.split('/').pop() || '02_dashboard.html';
+  const allLinks = document.querySelectorAll('aside nav a');
+  allLinks.forEach(a => {
+    const href = a.getAttribute('href');
+    if (href && (href.endsWith(currentPath) || (currentPath === 'index.html' && href.endsWith('02_dashboard.html')))) {
+      a.classList.add('bg-primary-50', 'font-semibold', 'text-primary-700');
+      a.setAttribute('aria-current', 'page');
+      const parentSub = a.closest('.grid');
+      if (parentSub) {
+        parentSub.classList.remove('grid-rows-[0fr]', 'opacity-0');
+        parentSub.classList.add('grid-rows-[1fr]', 'opacity-100');
+        const parentContainer = parentSub.parentElement;
+        const chevron = parentContainer ? parentContainer.querySelector('svg.lucide-chevron-down') : null;
+        if (chevron) chevron.classList.add('rotate-180');
+        const expandBtn = parentContainer ? parentContainer.querySelector('button[aria-expanded]') : null;
+        if (expandBtn) expandBtn.setAttribute('aria-expanded', 'true');
+      }
+    }
+  });
+
+  // 5. Font Sizing (A-, A, A+)
+  const btnAminus = document.querySelector('header button[aria-label="A-"]');
+  const btnA = document.querySelector('header button[aria-label="A"]');
+  const btnAplus = document.querySelector('header button[aria-label="A+"]');
+  if (btnAminus) btnAminus.addEventListener('click', () => document.documentElement.style.fontSize = '14px');
+  if (btnA) btnA.addEventListener('click', () => document.documentElement.style.fontSize = '16px');
+  if (btnAplus) btnAplus.addEventListener('click', () => document.documentElement.style.fontSize = '18px');
+});
+</script>
+
+</body>
+</html>

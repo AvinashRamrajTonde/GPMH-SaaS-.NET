@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>एजंट डॅशबोर्ड — ई-ग्रामपंचायत ERP विक्री व कमिशन पोर्टल</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Noto Sans Devanagari', system-ui, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    @media print {
+      .no-print, #offline-nav-bar, header, nav, .action-cell, .filter-bar, button {
+        display: none !important;
+      }
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      .printable-card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        background: white !important;
+        color: black !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+
+<!-- OFFLINE NAVIGATION BAR -->
+<div class="no-print" id="offline-nav-bar" style="background:#f1f5f9; border-bottom:1px solid #cbd5e1; padding:5px 12px; font-family:'Noto Sans Devanagari',system-ui,sans-serif; font-size:11.5px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:6px; z-index:999999; position:relative;">
+  <div style="font-weight:800; font-size:11.5px; color:#0f6b61; display:flex; align-items:center; gap:5px;">
+    <span style="background:#0f6b61; color:#fff; border-radius:4px; padding:2px 5px; font-size:9.5px;">GPMH</span>
+    <span>ई-ग्रामपंचायत ERP (विक्री प्रतिनिधी पोर्टल • MOD-AGT)</span>
+    <a href="./review_dashboard.html" style="display:inline-block; padding:4px 9px; margin:1.5px 2px; font-size:10.5px; border-radius:5px; text-decoration:none; border:1px solid #d97706; background:#fef3c7; color:#92400e; font-weight:700;">⭐ मंजुरी केंद्र</a>
+  </div>
+  <div style="display:flex; flex-wrap:wrap; align-items:center; gap:4px;">
+    <a href="./agent_login.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">एजंट लॉगिन</a>
+    <a href="./agent_register.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">नवीन एजंट अर्ज</a>
+    <a href="./superadmin_agents.html" style="padding:2px 8px; border-radius:4px; background:#fef3c7; color:#92400e; text-decoration:none; font-weight:700; border:1px solid #f59e0b;">👑 सुपरॲडमिन एजंट्स हब</a>
+    <a href="./22_superadmin_dashboard.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">सुपरॲडमिन डॅशबोर्ड</a>
+    <a href="./02_dashboard.html" style="padding:2px 8px; border-radius:4px; background:#e2e8f0; color:#1e293b; text-decoration:none; font-weight:600;">GP ऑपरेटर डॅशबोर्ड</a>
+  </div>
+</div>
+
+<!-- TOP AGENT HEADER -->
+<header class="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40 px-4 py-3 shadow-lg">
+  <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+    
+    <!-- Branding -->
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-700 flex items-center justify-center font-extrabold text-white text-lg shadow-md border border-emerald-400/30">
+        🤝
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base font-extrabold text-white tracking-wide">ई-ग्रामपंचायत ERP • विक्री प्रतिनिधी (Agent) पोर्टल</h1>
+          <span class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full mono" id="hdrAgentCode">
+            AGT-MH-0101
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-400">ग्रामपंचायत ऑनबोर्डिंग व वार्षिक नूतनीकरण कमिशन व्यवस्थापन</p>
+      </div>
+    </div>
+
+    <!-- Right: Agent Profile & Actions -->
+    <div class="flex items-center gap-3">
+      <!-- Rates Badge -->
+      <div class="hidden md:flex items-center gap-2 bg-slate-950 border border-slate-800 px-3 py-1.5 rounded-xl text-xs">
+        <span class="text-slate-400 text-[11px]">मंजूर कमिशन:</span>
+        <span class="text-emerald-400 font-bold font-mono">नवीन: <span id="hdrNewRate">२५%</span></span>
+        <span class="text-slate-600">|</span>
+        <span class="text-sky-400 font-bold font-mono">नूतनीकरण: <span id="hdrRenewalRate">१५%</span></span>
+      </div>
+
+      <!-- Agent Profile Chip -->
+      <div class="flex items-center gap-2 bg-slate-800/80 border border-slate-700 px-3 py-1.5 rounded-xl text-xs">
+        <div class="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px]">
+          👤
+        </div>
+        <div>
+          <div class="font-bold text-white leading-tight" id="hdrAgentName">महेश देशमुख</div>
+          <div class="text-[10px] text-emerald-400 font-mono" id="hdrAgentDistrict">अमरावती (सक्रिय)</div>
+        </div>
+      </div>
+
+      <!-- Quick Switcher for Demo -->
+      <select id="agentSwitcher" onchange="switchDemoAgent(this.value)" class="bg-slate-950 border border-slate-700 text-amber-300 text-xs rounded-lg px-2.5 py-1.5 font-semibold focus:outline-none focus:border-amber-500">
+        <option value="agt-1">महेश देशमुख (२५%)</option>
+        <option value="agt-2">सचिन जोशी (२०%)</option>
+      </select>
+
+      <!-- Logout Button -->
+      <button onclick="handleLogout()" class="px-3 py-1.5 bg-slate-800 hover:bg-rose-900/40 text-slate-300 hover:text-rose-200 text-xs font-semibold rounded-lg border border-slate-700 transition flex items-center gap-1">
+        <span>🚪</span>
+        <span class="hidden sm:inline">लॉगआउट</span>
+      </button>
+    </div>
+
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 space-y-6">
+
+  <!-- ============================================================ -->
+  <!-- 1. 8 STATISTICAL KPI CARDS (DYNAMIC PER SPEC)                 -->
+  <!-- ============================================================ -->
+  <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+    
+    <!-- 1. Total Villages Onboarded -->
+    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm hover:border-slate-700 transition">
+      <div class="flex justify-between items-start mb-1.5">
+        <span class="text-xs font-semibold text-slate-400">एकूण जोडलेल्या ग्रामपंचायती</span>
+        <span class="text-lg">🏛️</span>
+      </div>
+      <div class="text-2xl font-extrabold text-white mono" id="kpi-total-villages">५</div>
+      <div class="mt-1 text-[11px] text-slate-400">आपल्या खात्याशी जोडलेल्या एकूण GP</div>
+    </div>
+
+    <!-- 2. Active Grampanchayats -->
+    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm hover:border-slate-700 transition">
+      <div class="flex justify-between items-start mb-1.5">
+        <span class="text-xs font-semibold text-slate-400">सक्रिय ग्रामपंचायती</span>
+        <span class="text-xs bg-emerald-500/10 text-emerald-400 font-bold px-1.5 py-0.5 rounded">सक्रिय</span>
+      </div>
+      <div class="text-2xl font-extrabold text-emerald-400 mono" id="kpi-active-villages">४</div>
+      <div class="mt-1 text-[11px] text-slate-400">सध्या चालू ERP सदस्यत्व</div>
+    </div>
+
+    <!-- 3. Pending Registrations -->
+    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm hover:border-slate-700 transition">
+      <div class="flex justify-between items-start mb-1.5">
+        <span class="text-xs font-semibold text-slate-400">पडताळणी प्रलंबित</span>
+        <span class="text-xs bg-amber-500/10 text-amber-400 font-bold px-1.5 py-0.5 rounded">पडताळणी</span>
+      </div>
+      <div class="text-2xl font-extrabold text-amber-400 mono" id="kpi-pending-villages">१</div>
+      <div class="mt-1 text-[11px] text-slate-400">सुपरॲडमिन मंजुरी प्रतीक्षेत</div>
+    </div>
+
+    <!-- 4. Total Sales Generated -->
+    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm hover:border-slate-700 transition">
+      <div class="flex justify-between items-start mb-1.5">
+        <span class="text-xs font-semibold text-slate-400">एकूण विक्री / व्यवसाय</span>
+        <span class="text-lg">📈</span>
+      </div>
+      <div class="text-2xl font-extrabold text-sky-400 mono" id="kpi-total-sales">₹ ४८,०००</div>
+      <div class="mt-1 text-[11px] text-slate-400">नोंदणी व नूतनीकरण एकूण रक्कम</div>
+    </div>
+
+    <!-- 5. Total Commission Earned -->
+    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm hover:border-slate-700 transition">
+      <div class="flex justify-between items-start mb-1.5">
+        <span class="text-xs font-semibold text-slate-400">एकूण कमिशन कमाई</span>
+        <span class="text-lg">💰</span>
+      </div>
+      <div class="text-2xl font-extrabold text-amber-300 mono" id="kpi-total-commission">₹ ११,२००</div>
+      <div class="mt-1 text-[11px] text-slate-400">प्राप्त + देय एकूण कमिशन</div>
+    </div>
+
+    <!-- 6. Pending Commission -->
+    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm hover:border-slate-700 transition relative overflow-hidden">
+      <div class="flex justify-between items-start mb-1.5">
+        <span class="text-xs font-semibold text-slate-400">देय / प्रलंबित कमिशन</span>
+        <span class="text-xs bg-rose-500/10 text-rose-400 font-bold px-1.5 py-0.5 rounded">वितरण बाकी</span>
+      </div>
+      <div class="text-2xl font-extrabold text-rose-400 mono" id="kpi-pending-commission">₹ ६,२००</div>
+      <div class="mt-1 text-[11px] text-slate-400">सुपरॲडमिन कडून येणे बाकी रक्कम</div>
+    </div>
+
+    <!-- 7. Total Commission Paid -->
+    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm hover:border-slate-700 transition">
+      <div class="flex justify-between items-start mb-1.5">
+        <span class="text-xs font-semibold text-slate-400">अदा केलेले / प्राप्त कमिशन</span>
+        <span class="text-xs bg-emerald-500/10 text-emerald-400 font-bold px-1.5 py-0.5 rounded">जमा</span>
+      </div>
+      <div class="text-2xl font-extrabold text-emerald-400 mono" id="kpi-paid-commission">₹ ५,०००</div>
+      <div class="mt-1 text-[11px] text-slate-400">बँक/UPI खात्यात प्रत्यक्ष जमा</div>
+    </div>
+
+    <!-- 8. Upcoming Village Renewals -->
+    <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl shadow-sm hover:border-slate-700 transition">
+      <div class="flex justify-between items-start mb-1.5">
+        <span class="text-xs font-semibold text-slate-400">आगामी वार्षिक नूतनीकरणे</span>
+        <span class="text-lg">⏳</span>
+      </div>
+      <div class="text-2xl font-extrabold text-indigo-400 mono" id="kpi-upcoming-renewals">२</div>
+      <div class="mt-1 text-[11px] text-slate-400">पुढील ९० दिवसांत नूतनीकरण योग्य</div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 2. NAVIGATION TABS (8 SECTIONS PER REQUIREMENTS)              -->
+  <!-- ============================================================ -->
+  <div class="border-b border-slate-800 flex flex-wrap gap-2 text-xs sm:text-sm font-semibold">
+    <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="px-3.5 py-2.5 border-b-2 border-emerald-500 text-emerald-400 flex items-center gap-1.5 transition font-bold">
+      <span>📊 डॅशबोर्ड आढावा</span>
+    </button>
+    <button onclick="switchTab('add_gp')" id="tab-btn-add_gp" class="px-3.5 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">
+      <span>➕ नवीन ग्रामपंचायत नोंदवा</span>
+      <span class="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-1.5 py-0.2 rounded">फॉर्म</span>
+    </button>
+    <button onclick="switchTab('my_villages')" id="tab-btn-my_villages" class="px-3.5 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">
+      <span>🏛️ माझ्या ग्रामपंचायती</span>
+      <span class="bg-slate-800 text-slate-300 text-xs px-2 py-0.5 rounded-full mono" id="tab-badge-villages">५</span>
+    </button>
+    <button onclick="switchTab('renewals')" id="tab-btn-renewals" class="px-3.5 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">
+      <span>🔄 वार्षिक नूतनीकरणे</span>
+      <span class="bg-indigo-500/20 text-indigo-300 text-xs px-2 py-0.5 rounded-full mono font-bold">२</span>
+    </button>
+    <button onclick="switchTab('my_commissions')" id="tab-btn-my_commissions" class="px-3.5 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">
+      <span>💰 माझे कमिशन लेजर</span>
+    </button>
+    <button onclick="switchTab('payment_history')" id="tab-btn-payment_history" class="px-3.5 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">
+      <span>🧾 पेआउट / प्रदान इतिहास</span>
+    </button>
+    <button onclick="switchTab('my_profile')" id="tab-btn-my_profile" class="px-3.5 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">
+      <span>👤 माझे प्रोफाईल व बँक</span>
+    </button>
+    <button onclick="switchTab('change_password')" id="tab-btn-change_password" class="px-3.5 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">
+      <span>🔒 पासवर्ड बदला</span>
+    </button>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 1: DASHBOARD OVERVIEW                                    -->
+  <!-- ============================================================ -->
+  <div id="tab-dashboard" class="tab-pane space-y-6">
+    
+    <!-- Quick Action / Welcome Banner -->
+    <div class="bg-gradient-to-r from-emerald-950/70 via-slate-900 to-teal-950/70 border border-emerald-500/30 p-5 rounded-2xl flex flex-wrap items-center justify-between gap-4 shadow-xl">
+      <div class="space-y-1">
+        <h2 class="text-base font-bold text-white flex items-center gap-2">
+          <span>नमस्कार, <span id="welcomeAgentName">महेश देशमुख</span> जी!</span>
+          <span class="bg-emerald-500/20 text-emerald-300 text-xs font-semibold px-2 py-0.5 rounded-md border border-emerald-500/30">सक्रिय विक्री प्रतिनिधी</span>
+        </h2>
+        <p class="text-xs text-slate-300 leading-relaxed max-w-2xl">
+          आपण नवीन ग्रामपंचायती ऑनबोर्ड करून प्रति सदस्यत्व <b class="text-emerald-400" id="welcomeNewRate">२५%</b> कमिशन मिळवू शकता. तसेच दरवर्षी नूतनीकरणावर <b class="text-sky-400" id="welcomeRenewalRate">१५%</b> हमखास वार्षिक कमिशन मिळेल.
+        </p>
+      </div>
+      <div class="flex items-center gap-2.5">
+        <button onclick="switchTab('add_gp')" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl shadow-lg transition transform active:scale-95 flex items-center gap-2 cursor-pointer border border-emerald-400/30">
+          <span>➕ नवीन GP ऑनबोर्ड करा</span>
+        </button>
+        <button onclick="switchTab('my_commissions')" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs rounded-xl border border-slate-700 transition flex items-center gap-1.5">
+          <span>💰 कमिशन विवरण</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 2 Column Overview Grids -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <!-- Recent Commissions Card -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 shadow-sm">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>💰 अलीकडील कमिशन नोंदी</span>
+            <span class="text-[11px] text-slate-400 font-normal">(Recent Commissions)</span>
+          </h3>
+          <button onclick="switchTab('my_commissions')" class="text-xs text-emerald-400 hover:underline">सर्व पहा ↗</button>
+        </div>
+        
+        <div class="space-y-2.5" id="dashRecentCommissions">
+          <!-- Dynamically injected -->
+        </div>
+      </div>
+
+      <!-- Recent Onboarded GPs Card -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4 shadow-sm">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>🏛️ अलीकडे जोडलेल्या ग्रामपंचायती</span>
+            <span class="text-[11px] text-slate-400 font-normal">(Recent Onboarded GPs)</span>
+          </h3>
+          <button onclick="switchTab('my_villages')" class="text-xs text-emerald-400 hover:underline">सर्व पहा ↗</button>
+        </div>
+        
+        <div class="space-y-2.5" id="dashRecentVillages">
+          <!-- Dynamically injected -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Commission Settlement Rules Information Card -->
+    <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-4 text-xs space-y-2 text-slate-300">
+      <div class="font-bold text-amber-300 flex items-center gap-1.5">
+        <span>ℹ️ कमिशन हक्क व वितरण धोरण (Commission Policy)</span>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1 text-[11px] text-slate-400">
+        <div class="p-2.5 bg-slate-950 rounded-lg border border-slate-800">
+          <strong class="text-slate-200 block mb-0.5">१. नवीन नोंदणी कमिशन</strong>
+          ग्रामपंचायतीची प्रत्यक्ष वर्गणी (₹10,000) जमा झाल्यानंतर लगेच ठरलेल्या % प्रमाणे कमिशन आपल्या खात्यात देय होते.
+        </div>
+        <div class="p-2.5 bg-slate-950 rounded-lg border border-slate-800">
+          <strong class="text-slate-200 block mb-0.5">२. वार्षिक नूतनीकरण कमिशन</strong>
+          दरवर्षी ग्रामपंचायत सॉफ्टवेअर नूतनीकरण करेल तेव्हा दरवर्षी कायमस्वरूपी नूतनीकरण कमिशन जमा केले जाते.
+        </div>
+        <div class="p-2.5 bg-slate-950 rounded-lg border border-slate-800">
+          <strong class="text-slate-200 block mb-0.5">३. थेट बँक / UPI वितरण</strong>
+          सुपरॲडमिन कोणत्याही रकमेची मर्यादा नसताना (Any Amount) थेट आपल्या बँक खात्यात / UPI वर रक्कम वर्ग करतो.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 2: ADD NEW GRAMPANCHAYAT (ASSISTED GP ONBOARDING)         -->
+  <!-- ============================================================ -->
+  <div id="tab-add_gp" class="tab-pane hidden space-y-6">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+      
+      <div>
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <span>➕ नवीन ग्रामपंचायत नोंदणी (Assisted GP Registration)</span>
+              <span class="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                एजंट संदर्भ: <span id="addGpAgentRef">AGT-MH-0101</span>
+              </span>
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">
+              आपल्या अधिकृत एजंट खात्याशी ग्रामपंचायत लिंक करून नवीन टेनंट नोंदणी सादर करा. सुपरॲडमिन मंजुरीनंतर कमिशन लागू होईल.
+            </p>
+          </div>
+          <span class="text-xs bg-slate-800 text-amber-300 px-3 py-1.5 rounded-lg border border-slate-700 font-mono">
+            आपले कमिशन: <b id="addGpRatePreview">२५%</b>
+          </span>
+        </div>
+      </div>
+
+      <form id="agentAddGpForm" onsubmit="event.preventDefault(); handleAgentSubmitGp();" class="space-y-6 text-xs">
+        
+        <!-- Section A: Panchayat Administrative Hierarchy -->
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-4">
+          <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+            <span>🏛️ भाग १: ग्रामपंचायत प्रशासकीय तपशील</span>
+          </h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">
+                एल.जी.डी. कोड (LGD Code) <span class="text-rose-400">*</span>
+              </label>
+              <input type="text" id="gp_lgdCode" maxlength="6" pattern="^\d{6}$" placeholder="उदा. 271234" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 font-mono text-amber-300 focus:border-emerald-500 focus:outline-none"/>
+              <p class="text-[10px] text-slate-500 mt-0.5">६ अंकी केंद्र शासन LGD कोड</p>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">
+                ग्रामपंचायतीचे नाव (मराठी) <span class="text-rose-400">*</span>
+              </label>
+              <input type="text" id="gp_nameMr" placeholder="उदा. चिंचोली खुर्द" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-emerald-500 focus:outline-none"/>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">
+                GP Name (English) <span class="text-rose-400">*</span>
+              </label>
+              <input type="text" id="gp_nameEn" placeholder="e.g. Chincholi Khurd" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-emerald-500 focus:outline-none"/>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">
+                जिल्हा (District) <span class="text-rose-400">*</span>
+              </label>
+              <select id="gp_district" onchange="onAgentDistrictChange()" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-emerald-500 focus:outline-none">
+                <option value="">जिल्हा निवडा</option>
+                <option value="अमरावती" selected="">अमरावती (Amravati)</option>
+                <option value="अहिल्यानगर">अहिल्यानगर (अहमदनगर)</option>
+                <option value="पुणे">पुणे</option>
+                <option value="नागपूर">नागपूर</option>
+                <option value="नाशिक">नाशिक</option>
+                <option value="कोल्हापूर">कोल्हापूर</option>
+                <option value="यवतमाळ">यवतमाळ</option>
+                <option value="बुलढाणा">बुलढाणा</option>
+                <option value="वाशिम">वाशिम</option>
+                <option value="अकोला">अकोला</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">
+                तालुका / पं.स. (Taluka) <span class="text-rose-400">*</span>
+              </label>
+              <select id="gp_taluka" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-200 focus:border-emerald-500 focus:outline-none">
+                <option value="अचलपूर" selected="">अचलपूर</option>
+                <option value="अमरावती">अमरावती</option>
+                <option value="भातकुली">भातकुली</option>
+                <option value="चांदूर बाजार">चांदूर बाजार</option>
+                <option value="चांदूर रेल्वे">चांदूर रेल्वे</option>
+                <option value="दर्यापूर">दर्यापूर</option>
+                <option value="धामणगाव रेल्वे">धामणगाव रेल्वे</option>
+                <option value="धारणी">धारणी</option>
+                <option value="मोर्शी">मोर्शी</option>
+                <option value="नांदगाव खंडेश्वर">नांदगाव खंडेश्वर</option>
+                <option value="वरुड">वरुड</option>
+                <option value="तिवसा">तिवसा</option>
+                <option value="चिखलदरा">चिखलदरा</option>
+                <option value="अंजनगाव सुर्जी">अंजनगाव सुर्जी</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">
+                पिनकोड (Pincode) <span class="text-rose-400">*</span>
+              </label>
+              <input type="text" id="gp_pincode" maxlength="6" pattern="^\d{6}$" placeholder="उदा. 444806" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 font-mono text-white focus:border-emerald-500 focus:outline-none"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section B: Primary Administrator Credentials -->
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-4">
+          <h3 class="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+            <span>👤 भाग २: प्राथमिक प्रशासक / ग्रामसेवक लॉगिन माहिती</span>
+          </h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">
+                प्रशासक / ग्रामसेवक नाव <span class="text-rose-400">*</span>
+              </label>
+              <input type="text" id="gp_adminName" placeholder="उदा. राहुल शांताराम पाटील" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-emerald-500 focus:outline-none"/>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">
+                मोबाईल नंबर (लॉगिन आयडी) <span class="text-rose-400">*</span>
+              </label>
+              <input type="tel" id="gp_adminPhone" maxlength="10" pattern="^[6-9]\d{9}$" placeholder="१० अंकी अधिकृत मोबाईल" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 font-mono text-amber-300 font-bold focus:border-emerald-500 focus:outline-none"/>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">
+                अधिकृत ईमेल (Official Email) <span class="text-rose-400">*</span>
+              </label>
+              <input type="email" id="gp_adminEmail" placeholder="उदा. gp.chincholi@maharashtra.gov.in" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-emerald-500 focus:outline-none"/>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">
+                पासवर्ड (Password) <span class="text-rose-400">*</span>
+              </label>
+              <input type="password" id="gp_password" placeholder="किमान ८ अक्षरे (e.g. Gp@12345)" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 font-mono text-white focus:border-emerald-500 focus:outline-none"/>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">
+                पासवर्ड पुष्टी (Confirm Password) <span class="text-rose-400">*</span>
+              </label>
+              <input type="password" id="gp_confirmPassword" placeholder="पासवर्ड पुन्हा प्रविष्ट करा" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 font-mono text-white focus:border-emerald-500 focus:outline-none"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section C: Deal Amount & Commission Calculator -->
+        <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-emerald-950/40 p-4 rounded-xl border border-emerald-500/30 space-y-3">
+          <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+            <span>💳 भाग ३: व्यवसाय रक्कम व कमिशन अंदाज</span>
+          </h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center">
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">
+                सॉफ्टवेअर वर्गणी रक्कम (Deal Amount) <span class="text-rose-400">*</span>
+              </label>
+              <div class="relative">
+                <span class="absolute left-3 top-2 text-slate-400 font-mono">₹</span>
+                <input type="number" id="gp_dealAmount" value="10000" min="5000" max="25000" oninput="calculateCommissionPreview()" required class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-7 pr-3 py-2 font-mono text-white font-bold focus:border-emerald-500 focus:outline-none"/>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1">प्रमाणित वार्षिक वर्गणी: ₹10,000</p>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">
+                लागू एजंट कमिशन दर
+              </label>
+              <div class="bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-emerald-400 font-bold font-mono text-sm" id="calcAgentRateText">
+                २५.००% (मंजूर दर)
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1">नवीन नोंदणी दरानुसार आपोआप लागू</p>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">
+                अपेक्षित एजंट कमिशन कमाई
+              </label>
+              <div class="bg-emerald-950/80 border border-emerald-500/40 rounded-lg px-3 py-2 text-amber-300 font-extrabold font-mono text-base" id="calcExpectedCommission">
+                ₹ २,५००.००
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1">सुपरॲडमिन पडताळणीनंतर खात्यात जमा होईल</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <button type="button" onclick="switchTab('my_villages')" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition">
+            रद्द करा
+          </button>
+          
+          <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl shadow-lg transition transform active:scale-95 flex items-center gap-2 cursor-pointer border border-emerald-400/30">
+            <span>🚀 सुपरॲडमिन मंजुरीसाठी सादर करा (Submit GP)</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 3: MY GRAMPANCHAYATS                                     -->
+  <!-- ============================================================ -->
+  <div id="tab-my_villages" class="tab-pane hidden space-y-4">
+    
+    <!-- Filter Toolbar -->
+    <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-3 filter-bar">
+      <div class="flex items-center flex-wrap gap-2.5 flex-1 min-w-[280px]">
+        <div class="relative flex-1 min-w-[200px]">
+          <input type="text" id="villageSearchInput" onkeyup="filterVillages()" placeholder="LGD कोड, ग्रामपंचायत नाव, तालुका किंवा प्रशासक शोधा..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500"/>
+          <svg class="w-4 h-4 text-slate-500 absolute left-2.5 top-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+        <select id="villageStatusFilter" onchange="filterVillages()" class="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500">
+          <option value="">सर्व स्थिती (All Status)</option>
+          <option value="ACTIVE">सक्रिय (Active)</option>
+          <option value="PENDING_APPROVAL">मंजुरी प्रलंबित (Pending)</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="switchTab('add_gp')" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow transition flex items-center gap-1.5">
+          <span>+ नवीन GP जोडा</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 font-semibold">
+            <tr>
+              <th class="px-4 py-3">LGD कोड</th>
+              <th class="px-4 py-3">ग्रामपंचायत नाव</th>
+              <th class="px-4 py-3">तालुका व जिल्हा</th>
+              <th class="px-4 py-3">प्रशासक / ग्रामसेवक</th>
+              <th class="px-4 py-3">व्यवसाय रक्कम</th>
+              <th class="px-4 py-3">माझे कमिशन</th>
+              <th class="px-4 py-3">स्थिती</th>
+              <th class="px-4 py-3 text-right">कृती</th>
+            </tr>
+          </thead>
+          <tbody id="myVillagesTableBody" class="divide-y divide-slate-800/60 font-sans">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 4: VILLAGE RENEWALS                                      -->
+  <!-- ============================================================ -->
+  <div id="tab-renewals" class="tab-pane hidden space-y-4">
+    <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-2">
+      <h3 class="text-sm font-bold text-white flex items-center gap-2">
+        <span>🔄 आगामी वार्षिक नूतनीकरणे व कमिशन संधी</span>
+        <span class="bg-indigo-500/20 text-indigo-300 text-xs px-2 py-0.5 rounded font-mono">Renewal Rate: <span id="renewalsRateText">१५%</span></span>
+      </h3>
+      <p class="text-xs text-slate-400">
+        आपण जोडलेल्या ग्रामपंचायतींचे १ वर्ष पूर्ण झाल्यावर वार्षिक नूतनीकरण शुल्क भरले की आपणास आपोआप नूतनीकरण कमिशन मिळते. खालील ग्रामपंचायतींना नूतनीकरणाची आठवण करून द्या.
+      </p>
+    </div>
+
+    <!-- Renewals Table -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 font-semibold">
+            <tr>
+              <th class="px-4 py-3">LGD कोड</th>
+              <th class="px-4 py-3">ग्रामपंचायत नाव</th>
+              <th class="px-4 py-3">तालुका</th>
+              <th class="px-4 py-3">सदस्यत्व समाप्ती दिनांक</th>
+              <th class="px-4 py-3">कालावधी शिल्लक</th>
+              <th class="px-4 py-3">नूतनीकरण शुल्क</th>
+              <th class="px-4 py-3">अपेक्षित कमिशन (१५%)</th>
+              <th class="px-4 py-3 text-right">कृती</th>
+            </tr>
+          </thead>
+          <tbody id="villageRenewalsTableBody" class="divide-y divide-slate-800/60">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 5: MY COMMISSIONS LEDGER                                 -->
+  <!-- ============================================================ -->
+  <div id="tab-my_commissions" class="tab-pane hidden space-y-4">
+    <!-- Filter Bar -->
+    <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-semibold text-slate-400">स्थितीनुसार फिल्टर:</span>
+        <select id="commStatusFilter" onchange="renderCommissionsTable()" class="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500">
+          <option value="">सर्व स्थिती (All)</option>
+          <option value="PAID">अदा केलेले (Paid)</option>
+          <option value="PAYABLE">वितरण योग्य (Payable)</option>
+          <option value="PENDING">पडताळणी प्रलंबित (Pending)</option>
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-slate-400">एकूण देय कमिशन: <b class="text-amber-300 mono" id="ledgerPayableSum">₹ ५,०००.००</b></span>
+        <button onclick="window.print()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1.5">
+          <span>🖨️</span>
+          <span>प्रिंट लेजर</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Ledger Table -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 font-semibold">
+            <tr>
+              <th class="px-4 py-3">व्यवहार आयडी</th>
+              <th class="px-4 py-3">ग्रामपंचायत नाव व LGD</th>
+              <th class="px-4 py-3">प्रकार</th>
+              <th class="px-4 py-3">व्यवसाय रक्कम</th>
+              <th class="px-4 py-3">कमिशन दर (%)</th>
+              <th class="px-4 py-3">कमिशन रक्कम</th>
+              <th class="px-4 py-3">व्यवहार दिनांक</th>
+              <th class="px-4 py-3">स्थिती</th>
+              <th class="px-4 py-3">सेटलमेंट संदर्भ</th>
+            </tr>
+          </thead>
+          <tbody id="myCommissionsTableBody" class="divide-y divide-slate-800/60 font-sans">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 6: PAYMENT & SETTLEMENT HISTORY                          -->
+  <!-- ============================================================ -->
+  <div id="tab-payment_history" class="tab-pane hidden space-y-4">
+    <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl space-y-2">
+      <h3 class="text-sm font-bold text-white flex items-center gap-2">
+        <span>🧾 कमिशन पेआउट / प्रदान इतिहास</span>
+        <span class="text-xs text-slate-400 font-normal">(Payment & Settlement Vouchers)</span>
+      </h3>
+      <p class="text-xs text-slate-400">
+        सुपरॲडमिन द्वारे आपल्या बँक किंवा UPI खात्यात वितरित झालेल्या सर्व कमिशन व्यवहारांची अधिकृत पावती व विवरण.
+      </p>
+    </div>
+
+    <!-- Settlements Table -->
+    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 font-semibold">
+            <tr>
+              <th class="px-4 py-3">व्हाउचर क्र. (Voucher)</th>
+              <th class="px-4 py-3">प्रदान दिनांक</th>
+              <th class="px-4 py-3">वितरित रक्कम (₹)</th>
+              <th class="px-4 py-3">प्रदान माध्यम (Mode)</th>
+              <th class="px-4 py-3">बँक / UTR संदर्भ क्र.</th>
+              <th class="px-4 py-3">समाविष्ट नोंदी</th>
+              <th class="px-4 py-3">स्थिती</th>
+              <th class="px-4 py-3 text-right">पावती</th>
+            </tr>
+          </thead>
+          <tbody id="settlementsTableBody" class="divide-y divide-slate-800/60">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 7: MY PROFILE & BANK DETAILS                             -->
+  <!-- ============================================================ -->
+  <div id="tab-my_profile" class="tab-pane hidden space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Left: Agent Identity Card -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+        <div class="text-center space-y-2 pb-4 border-b border-slate-800">
+          <div class="w-16 h-16 rounded-full bg-emerald-600 text-white text-2xl flex items-center justify-center font-bold mx-auto shadow-md border-2 border-emerald-400/40">
+            👤
+          </div>
+          <h3 class="text-base font-bold text-white" id="profFullName">महेश विठ्ठलराव देशमुख</h3>
+          <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" id="profAgentCode">
+            AGT-MH-0101
+          </span>
+          <p class="text-[11px] text-slate-400">अधिकृत राज्य विक्री प्रतिनिधी</p>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <div class="flex justify-between py-1 border-b border-slate-800/60">
+            <span class="text-slate-400">मोबाईल क्रमांक:</span>
+            <span class="font-mono text-amber-300 font-bold" id="profMobile">9822112233</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-800/60">
+            <span class="text-slate-400">ईमेल पत्ता:</span>
+            <span class="text-slate-200" id="profEmail">mahesh.deshmukh@gmail.com</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-800/60">
+            <span class="text-slate-400">जिल्हा व तालुका:</span>
+            <span class="text-slate-200" id="profLocation">अमरावती / अचलपूर</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-800/60">
+            <span class="text-slate-400">गाव / पत्ता:</span>
+            <span class="text-slate-200 text-right max-w-[180px]" id="profAddress">शिवाजी नगर, अचलपूर रोड</span>
+          </div>
+          <div class="flex justify-between py-1 border-b border-slate-800/60">
+            <span class="text-slate-400">नोंदणी दिनांक:</span>
+            <span class="font-mono text-slate-300" id="profRegisteredAt">2026-10-15</span>
+          </div>
+        </div>
+
+        <!-- KYC Verification Pill -->
+        <div class="p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl space-y-1">
+          <div class="flex items-center justify-between text-xs font-bold text-emerald-400">
+            <span>🛡️ ओळखपत्र (KYC) पडताळणी</span>
+            <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded text-[10px]">मंजूर ✓</span>
+          </div>
+          <div class="text-[11px] text-slate-300 font-mono flex justify-between pt-1">
+            <span id="profIdType">आधार क्रमांक:</span>
+            <span class="text-amber-300" id="profIdNumber">9823-4412-8890</span>
+          </div>
+          <button onclick="alert('दस्तऐवज सुरक्षित शासकीय सर्व्हरवर साठवलेले आहेत.')" class="text-[10px] text-emerald-400 hover:underline pt-1 inline-block">
+            दस्तऐवज प्रत पहा ↗
+          </button>
+        </div>
+      </div>
+
+      <!-- Right: Commission Rates & Settlement Bank Settings -->
+      <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Approved Commission Rates Card -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <span>⚡ सुपरॲडमिन द्वारे मंजूर कमिशन रचना</span>
+            <span class="text-xs bg-amber-500/10 text-amber-300 px-2 py-0.5 rounded font-mono">Approved Slabs</span>
+          </h3>
+          <p class="text-xs text-slate-400">
+            आपल्या अर्जाच्या पडताळणीअंती राज्य नियंत्रण कक्षाने निश्चित केलेले अधिकृत कमिशन दर खालीलप्रमाणे आहेत:
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+            <div class="p-4 bg-slate-950 rounded-xl border border-emerald-500/30 space-y-1">
+              <span class="text-xs font-semibold text-slate-400 block">नवीन ग्रामपंचायत नोंदणी दर</span>
+              <div class="text-2xl font-extrabold text-emerald-400 mono" id="profBoxNewRate">२५.००%</div>
+              <p class="text-[11px] text-slate-400">उदा. ₹10,000 वर्गणीवर ₹2,500 तात्काळ कमाई</p>
+            </div>
+
+            <div class="p-4 bg-slate-950 rounded-xl border border-sky-500/30 space-y-1">
+              <span class="text-xs font-semibold text-slate-400 block">वार्षिक नूतनीकरण कमिशन दर</span>
+              <div class="text-2xl font-extrabold text-sky-400 mono" id="profBoxRenewalRate">१५.००%</div>
+              <p class="text-[11px] text-slate-400">दरवर्षी प्रत्येक ग्रामपंचायतीकडून नियमित हमखास कमाई</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bank & UPI Payout Settings Form -->
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <span>🏦 कमिशन जमा करण्याचे बँक खाते व UPI माहिती</span>
+            </h3>
+            <span class="text-xs text-emerald-400">थेट वितरण सक्षम</span>
+          </div>
+
+          <form id="bankDetailsForm" onsubmit="event.preventDefault(); saveBankDetails();" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">बँकेचे नाव (Bank Name)</label>
+              <input type="text" id="profBankName" value="State Bank of India" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white focus:border-emerald-500 focus:outline-none"/>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">खाते क्रमांक (Account Number)</label>
+              <input type="text" id="profAccountNumber" value="30992817261" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 font-mono text-amber-300 focus:border-emerald-500 focus:outline-none"/>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">IFSC कोड (IFSC Code)</label>
+              <input type="text" id="profIfscCode" value="SBIN0000301" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 font-mono text-white focus:border-emerald-500 focus:outline-none"/>
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-300 mb-1">UPI आयडी (उदा. GPay/PhonePe)</label>
+              <input type="text" id="profUpiId" value="mahesh.deshmukh@okhdfcbank" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 font-mono text-emerald-300 font-bold focus:border-emerald-500 focus:outline-none"/>
+            </div>
+
+            <div class="sm:col-span-2 flex justify-end pt-2">
+              <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition shadow">
+                बँक माहिती अपडेट करा
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- TAB 8: CHANGE PASSWORD                                       -->
+  <!-- ============================================================ -->
+  <div id="tab-change_password" class="tab-pane hidden space-y-4 max-w-xl mx-auto">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+      <div class="text-center space-y-1">
+        <div class="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center text-xl mx-auto">
+          🔒
+        </div>
+        <h3 class="text-base font-bold text-white">लॉगिन पासवर्ड बदला</h3>
+        <p class="text-xs text-slate-400">आपल्या खात्याच्या सुरक्षिततेसाठी पासवर्ड वेळोवेळी बदला</p>
+      </div>
+
+      <form id="changePasswordForm" onsubmit="event.preventDefault(); handleChangePassword();" class="space-y-4 text-xs">
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">सध्याचा पासवर्ड (Current Password)</label>
+          <input type="password" id="curPassword" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 font-mono text-white focus:border-emerald-500 focus:outline-none"/>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">नवीन पासवर्ड (New Password)</label>
+          <input type="password" id="newPassword" placeholder="किमान ८ अक्षरे, १ मोठा, १ विशेष अक्षर" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 font-mono text-white focus:border-emerald-500 focus:outline-none"/>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 mb-1">नवीन पासवर्ड पुष्टी (Confirm New Password)</label>
+          <input type="password" id="cnfPassword" placeholder="नवीन पासवर्ड पुन्हा प्रविष्ट करा" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 font-mono text-white focus:border-emerald-500 focus:outline-none"/>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow transition">
+          पासवर्ड यशस्वीरीत्या बदला
+        </button>
+      </form>
+    </div>
+  </div>
+
+</main>
+
+<!-- ============================================================ -->
+<!-- MODAL: PAYMENT STATEMENT / VOUCHER VIEW & PRINT              -->
+<!-- ============================================================ -->
+<div id="voucherModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl p-6 space-y-4 text-xs max-h-[90vh] overflow-y-auto">
+    
+    <!-- Printable Voucher Container -->
+    <div id="printableVoucherContent" class="printable-card bg-slate-950 border border-slate-800 p-6 rounded-xl space-y-4">
+      
+      <!-- Voucher Letterhead -->
+      <div class="text-center pb-4 border-b border-slate-800 space-y-1">
+        <div class="flex items-center justify-center gap-2">
+          <span class="text-xl">🏛️</span>
+          <h2 class="text-base font-extrabold text-white">ई-ग्रामपंचायत ERP महाराष्ट्र राज्य मल्टि-टेनंट प्रणाली</h2>
+        </div>
+        <p class="text-[11px] text-slate-400">राज्य नियंत्रण कक्ष, ग्रामविकास व पंचायतराज विभाग, मंत्रालय, मुंबई</p>
+        <div class="pt-2">
+          <span class="inline-block px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold rounded-md text-xs">
+            अधिकृत कमिशन वितरण पावती (Commission Payment Voucher)
+          </span>
+        </div>
+      </div>
+
+      <!-- Voucher Meta Grid -->
+      <div class="grid grid-cols-2 gap-4 text-xs font-mono">
+        <div>
+          <span class="text-slate-400 block font-sans">व्हाउचर क्रमांक:</span>
+          <b class="text-amber-300 text-sm" id="vouchNo">SET-2026-001</b>
+        </div>
+        <div class="text-right">
+          <span class="text-slate-400 block font-sans">प्रदान दिनांक:</span>
+          <b class="text-white" id="vouchDate">2026-10-31</b>
+        </div>
+        <div>
+          <span class="text-slate-400 block font-sans">एजंट नाव व कोड:</span>
+          <b class="text-white font-sans" id="vouchAgent">महेश देशमुख (AGT-MH-0101)</b>
+        </div>
+        <div class="text-right">
+          <span class="text-slate-400 block font-sans">वितरण माध्यम:</span>
+          <b class="text-emerald-400" id="vouchMode">UPI (UPI/329482910281/SBI)</b>
+        </div>
+      </div>
+
+      <!-- Itemized Table -->
+      <div class="border border-slate-800 rounded-lg overflow-hidden">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-slate-900 text-slate-400 font-semibold border-b border-slate-800">
+            <tr>
+              <th class="p-2">ग्रामपंचायत नाव</th>
+              <th class="p-2">प्रकार</th>
+              <th class="p-2">व्यवसाय रक्कम</th>
+              <th class="p-2">दर (%)</th>
+              <th class="p-2 text-right">कमिशन (₹)</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800" id="vouchItemsBody">
+            <tr>
+              <td class="p-2 font-sans">चिंचोली खुर्द (271234)</td>
+              <td class="p-2">नवीन नोंदणी</td>
+              <td class="p-2 font-mono">₹ 10,000</td>
+              <td class="p-2 font-mono">25%</td>
+              <td class="p-2 font-mono text-right font-bold text-emerald-400">₹ 2,500.00</td>
+            </tr>
+            <tr>
+              <td class="p-2 font-sans">शिरजगाव कसबा (271255)</td>
+              <td class="p-2">नवीन नोंदणी</td>
+              <td class="p-2 font-mono">₹ 10,000</td>
+              <td class="p-2 font-mono">25%</td>
+              <td class="p-2 font-mono text-right font-bold text-emerald-400">₹ 2,500.00</td>
+            </tr>
+          </tbody>
+          <tfoot class="bg-slate-900 border-t border-slate-800 font-bold">
+            <tr>
+              <td colspan="4" class="p-2 text-right text-slate-300">एकूण वितरित कमिशन:</td>
+              <td class="p-2 font-mono text-right text-amber-300 text-sm" id="vouchTotalAmount">₹ ५,०००.००</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Remarks & Signature -->
+      <div class="pt-2 flex justify-between items-end text-[11px] text-slate-400">
+        <div>
+          <span>नोंद / शेरा: </span>
+          <span class="text-slate-200" id="vouchRemarks">ऑक्टोबर २०२६ महिन्याचे नवीन GP ऑनबोर्डिंग कमिशन सेटलमेंट.</span>
+        </div>
+        <div class="text-center font-sans">
+          <div class="h-10 flex items-center justify-center text-xs text-slate-600 italic">डीजिटल स्वाक्षरीत ✓</div>
+          <div class="border-t border-slate-700 pt-1 text-slate-300 font-semibold">लेखा अधिकारी / सुपरॲडमिन</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-end gap-2 pt-2">
+      <button onclick="closeVoucherModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold">
+        बंद करा
+      </button>
+      <button onclick="window.print()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5">
+        <span>🖨️</span>
+        <span>पावती प्रिंट करा (Print Slip)</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<footer class="py-4 text-center text-xs text-slate-500 border-t border-slate-800/60 no-print">
+  ई-ग्रामपंचायत ERP • विक्री प्रतिनिधी व कमिशन व्यवस्थापन प्रणाली • महाराष्ट्र शासन
+</footer>
+
+<!-- SCRIPT LOGIC -->
+<script>
+  let currentAgentId = "agt-1";
+
+  // Data Stores
+  const defaultAgents = [
+    {
+      id: "agt-1",
+      agentCode: "AGT-MH-0101",
+      fullName: "महेश विठ्ठलराव देशमुख",
+      mobileNumber: "9822112233",
+      email: "mahesh.deshmukh@gmail.com",
+      idProofType: "AADHAAR",
+      idProofNumber: "9823-4412-8890",
+      idProofImage: "aadhaar_mahesh_deshmukh.pdf",
+      address: "प्लॉट क्र. १२, शिवाजी नगर, अचलपूर रोड",
+      village: "अचलपूर",
+      taluka: "अचलपूर",
+      district: "अमरावती",
+      state: "महाराष्ट्र",
+      requestedCommissionRate: 25.0,
+      approvedNewRate: 25.0,
+      approvedRenewalRate: 15.0,
+      password: "Agent@123",
+      status: "ACTIVE",
+      registeredAt: "2026-10-15 11:30 AM",
+      approvedAt: "2026-10-16 02:00 PM",
+      bankName: "State Bank of India",
+      accountNumber: "30992817261",
+      ifscCode: "SBIN0000301",
+      upiId: "mahesh.deshmukh@okhdfcbank"
+    },
+    {
+      id: "agt-2",
+      agentCode: "AGT-MH-0102",
+      fullName: "सचिन प्रभाकर जोशी",
+      mobileNumber: "9890445566",
+      email: "sachin.joshi@pune-it.com",
+      idProofType: "PAN",
+      idProofNumber: "ABCDE1234F",
+      idProofImage: "pan_sachin_joshi.pdf",
+      address: "रानडे गल्ली, बारामती",
+      village: "बारामती",
+      taluka: "बारामती",
+      district: "पुणे",
+      state: "महाराष्ट्र",
+      requestedCommissionRate: 30.0,
+      approvedNewRate: 20.0,
+      approvedRenewalRate: 10.0,
+      password: "Agent@123",
+      status: "ACTIVE",
+      registeredAt: "2026-10-20 04:15 PM",
+      approvedAt: "2026-10-21 10:00 AM",
+      bankName: "Bank of Maharashtra",
+      accountNumber: "60119283746",
+      ifscCode: "MAHB0000122",
+      upiId: "sachinjoshi@ybl"
+    }
+  ];
+
+  const defaultCommissions = [
+    {
+      id: "COMM-2026-001",
+      agentId: "agt-1",
+      gpLgd: "271234",
+      gpName: "चिंचोली खुर्द",
+      type: "NEW_REGISTRATION",
+      dealAmount: 10000,
+      rate: 25.0,
+      commissionAmount: 2500,
+      status: "PAID",
+      date: "2026-10-18",
+      settlementId: "SET-2026-001",
+      settlementDate: "2026-10-31"
+    },
+    {
+      id: "COMM-2026-002",
+      agentId: "agt-1",
+      gpLgd: "271255",
+      gpName: "शिरजगाव कसबा",
+      type: "NEW_REGISTRATION",
+      dealAmount: 10000,
+      rate: 25.0,
+      commissionAmount: 2500,
+      status: "PAID",
+      date: "2026-10-25",
+      settlementId: "SET-2026-001",
+      settlementDate: "2026-10-31"
+    },
+    {
+      id: "COMM-2026-003",
+      agentId: "agt-1",
+      gpLgd: "271260",
+      gpName: "भातकुली बुद्रुक",
+      type: "NEW_REGISTRATION",
+      dealAmount: 10000,
+      rate: 25.0,
+      commissionAmount: 2500,
+      status: "PAYABLE",
+      date: "2026-11-05",
+      settlementId: null,
+      settlementDate: null
+    },
+    {
+      id: "COMM-2026-004",
+      agentId: "agt-1",
+      gpLgd: "271270",
+      gpName: "चांदूर रेल्वे",
+      type: "NEW_REGISTRATION",
+      dealAmount: 10000,
+      rate: 25.0,
+      commissionAmount: 2500,
+      status: "PAYABLE",
+      date: "2026-11-10",
+      settlementId: null,
+      settlementDate: null
+    },
+    {
+      id: "COMM-2026-005",
+      agentId: "agt-1",
+      gpLgd: "271280",
+      gpName: "अचलपूर ग्रामीण",
+      type: "RENEWAL",
+      dealAmount: 8000,
+      rate: 15.0,
+      commissionAmount: 1200,
+      status: "PENDING",
+      date: "2026-11-12",
+      settlementId: null,
+      settlementDate: null
+    },
+    {
+      id: "COMM-2026-006",
+      agentId: "agt-2",
+      gpLgd: "272101",
+      gpName: "सुपे",
+      type: "NEW_REGISTRATION",
+      dealAmount: 10000,
+      rate: 20.0,
+      commissionAmount: 2000,
+      status: "PAID",
+      date: "2026-10-28",
+      settlementId: "SET-2026-002",
+      settlementDate: "2026-11-02"
+    },
+    {
+      id: "COMM-2026-007",
+      agentId: "agt-2",
+      gpLgd: "272105",
+      gpName: "वडगाव निंबाळकर",
+      type: "NEW_REGISTRATION",
+      dealAmount: 10000,
+      rate: 20.0,
+      commissionAmount: 2000,
+      status: "PAYABLE",
+      date: "2026-11-08",
+      settlementId: null,
+      settlementDate: null
+    }
+  ];
+
+  const defaultVillages = [
+    {
+      lgdCode: "271234",
+      agentId: "agt-1",
+      nameMr: "चिंचोली खुर्द",
+      nameEn: "Chincholi Khurd",
+      district: "अमरावती",
+      taluka: "अचलपूर",
+      pincode: "444806",
+      adminName: "गजानन पाटील",
+      adminPhone: "9822100111",
+      adminEmail: "gp.chincholi@gov.in",
+      dealAmount: 10000,
+      status: "ACTIVE",
+      onboardedDate: "2026-10-18",
+      renewalDue: "2027-10-17"
+    },
+    {
+      lgdCode: "271255",
+      agentId: "agt-1",
+      nameMr: "शिरजगाव कसबा",
+      nameEn: "Shirajgaon Kasba",
+      district: "अमरावती",
+      taluka: "चांदूर बाजार",
+      pincode: "444810",
+      adminName: "सुरेश गावंडे",
+      adminPhone: "9822200222",
+      adminEmail: "gp.shirajgaon@gov.in",
+      dealAmount: 10000,
+      status: "ACTIVE",
+      onboardedDate: "2026-10-25",
+      renewalDue: "2027-10-24"
+    },
+    {
+      lgdCode: "271260",
+      agentId: "agt-1",
+      nameMr: "भातकुली बुद्रुक",
+      nameEn: "Bhatkuli Bk",
+      district: "अमरावती",
+      taluka: "भातकुली",
+      pincode: "444602",
+      adminName: "विलास देशमुख",
+      adminPhone: "9822300333",
+      adminEmail: "gp.bhatkuli@gov.in",
+      dealAmount: 10000,
+      status: "ACTIVE",
+      onboardedDate: "2026-11-05",
+      renewalDue: "2027-11-04"
+    },
+    {
+      lgdCode: "271270",
+      agentId: "agt-1",
+      nameMr: "चांदूर रेल्वे ग्रामीण",
+      nameEn: "Chandur Railway Rural",
+      district: "अमरावती",
+      taluka: "चांदूर रेल्वे",
+      pincode: "444904",
+      adminName: "प्रफुल्ल खोडके",
+      adminPhone: "9822400444",
+      adminEmail: "gp.chandur@gov.in",
+      dealAmount: 10000,
+      status: "ACTIVE",
+      onboardedDate: "2026-11-10",
+      renewalDue: "2027-11-09"
+    },
+    {
+      lgdCode: "271280",
+      agentId: "agt-1",
+      nameMr: "अचलपूर ग्रामीण",
+      nameEn: "Achalpur Rural",
+      district: "अमरावती",
+      taluka: "अचलपूर",
+      pincode: "444806",
+      adminName: "रमेश ठाकरे",
+      adminPhone: "9822500555",
+      adminEmail: "gp.achalpur@gov.in",
+      dealAmount: 8000,
+      status: "PENDING_APPROVAL",
+      onboardedDate: "2026-11-12",
+      renewalDue: "2027-11-11"
+    },
+    {
+      lgdCode: "272101",
+      agentId: "agt-2",
+      nameMr: "सुपे",
+      nameEn: "Supe",
+      district: "पुणे",
+      taluka: "बारामती",
+      pincode: "412204",
+      adminName: "विकास खलाटे",
+      adminPhone: "9822600666",
+      adminEmail: "gp.supe@gov.in",
+      dealAmount: 10000,
+      status: "ACTIVE",
+      onboardedDate: "2026-10-28",
+      renewalDue: "2027-10-27"
+    },
+    {
+      lgdCode: "272105",
+      agentId: "agt-2",
+      nameMr: "वडगाव निंबाळकर",
+      nameEn: "Vadgaon Nimbalkar",
+      district: "पुणे",
+      taluka: "बारामती",
+      pincode: "412102",
+      adminName: "संजय सावंत",
+      adminPhone: "9822700777",
+      adminEmail: "gp.vadgaon@gov.in",
+      dealAmount: 10000,
+      status: "ACTIVE",
+      onboardedDate: "2026-11-08",
+      renewalDue: "2027-11-07"
+    }
+  ];
+
+  const defaultSettlements = [
+    {
+      id: "SET-2026-001",
+      agentId: "agt-1",
+      date: "2026-10-31",
+      amount: 5000,
+      paymentMode: "UPI",
+      referenceNo: "UPI/329482910281/SBI",
+      itemsCount: 2,
+      status: "COMPLETED",
+      remarks: "ऑक्टोबर २०२६ महिन्याचे नवीन GP ऑनबोर्डिंग कमिशन सेटलमेंट."
+    },
+    {
+      id: "SET-2026-002",
+      agentId: "agt-2",
+      date: "2026-11-02",
+      amount: 2000,
+      paymentMode: "NEFT_RTGS",
+      referenceNo: "MAHB202611029910",
+      itemsCount: 1,
+      status: "COMPLETED",
+      remarks: "सुपे GP यशस्वी पडताळणीनंतरचे कमिशन."
+    }
+  ];
+
+  function getLocalData(key, fallback) {
+    try {
+      const data = localStorage.getItem(key);
+      if (data) return JSON.parse(data);
+    } catch(e) {
+      console.error(e);
+    }
+    localStorage.setItem(key, JSON.stringify(fallback));
+    return fallback;
+  }
+
+  function setLocalData(key, val) {
+    localStorage.setItem(key, JSON.stringify(val));
+  }
+
+  // Active User Resolver
+  function getActiveAgent() {
+    const agents = getLocalData('gpmh_agents', defaultAgents);
+    const sessionUser = sessionStorage.getItem('gpmh_active_agent_id');
+    if (sessionUser) {
+      currentAgentId = sessionUser;
+    }
+    let agent = agents.find(a => a.id === currentAgentId);
+    if (!agent) {
+      agent = agents[0];
+      currentAgentId = agent.id;
+    }
+    return agent;
+  }
+
+  function switchDemoAgent(id) {
+    currentAgentId = id;
+    sessionStorage.setItem('gpmh_active_agent_id', id);
+    loadAgentDashboard();
+  }
+
+  function handleLogout() {
+    sessionStorage.removeItem('gpmh_active_agent_id');
+    window.location.href = './agent_login.html';
+  }
+
+  // Navigation tab switcher
+  function switchTab(tabId) {
+    const tabs = ['dashboard', 'add_gp', 'my_villages', 'renewals', 'my_commissions', 'payment_history', 'my_profile', 'change_password'];
+    tabs.forEach(t => {
+      const pane = document.getElementById('tab-' + t);
+      const btn = document.getElementById('tab-btn-' + t);
+      if (pane) {
+        if (t === tabId) {
+          pane.classList.remove('hidden');
+        } else {
+          pane.classList.add('hidden');
+        }
+      }
+      if (btn) {
+        if (t === tabId) {
+          btn.className = 'px-3.5 py-2.5 border-b-2 border-emerald-500 text-emerald-400 flex items-center gap-1.5 transition font-bold';
+        } else {
+          btn.className = 'px-3.5 py-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition';
+        }
+      }
+    });
+
+    if (tabId === 'my_villages') renderVillagesTable();
+    if (tabId === 'my_commissions') renderCommissionsTable();
+    if (tabId === 'payment_history') renderSettlementsTable();
+    if (tabId === 'renewals') renderRenewalsTable();
+  }
+
+  // Initialize and load UI
+  function loadAgentDashboard() {
+    const agent = getActiveAgent();
+    const commissions = getLocalData('gpmh_agent_commissions', defaultCommissions).filter(c => c.agentId === currentAgentId);
+    const villages = getLocalData('gpmh_agent_villages', defaultVillages).filter(v => v.agentId === currentAgentId);
+    const settlements = getLocalData('gpmh_agent_settlements', defaultSettlements).filter(s => s.agentId === currentAgentId);
+
+    // Header Updates
+    document.getElementById('hdrAgentCode').textContent = agent.agentCode;
+    document.getElementById('hdrAgentName').textContent = agent.fullName;
+    document.getElementById('hdrAgentDistrict').textContent = `${agent.district} (${agent.status === 'ACTIVE' ? 'सक्रिय' : agent.status})`;
+    document.getElementById('hdrNewRate').textContent = `${agent.approvedNewRate || agent.requestedCommissionRate}%`;
+    document.getElementById('hdrRenewalRate').textContent = `${agent.approvedRenewalRate || 15}%`;
+    document.getElementById('agentSwitcher').value = agent.id;
+
+    // Welcome Banner
+    document.getElementById('welcomeAgentName').textContent = agent.fullName;
+    document.getElementById('welcomeNewRate').textContent = `${agent.approvedNewRate || agent.requestedCommissionRate}%`;
+    document.getElementById('welcomeRenewalRate').textContent = `${agent.approvedRenewalRate || 15}%`;
+
+    // 8 KPI Calculations
+    const totalVillages = villages.length;
+    const activeVillages = villages.filter(v => v.status === 'ACTIVE').length;
+    const pendingVillages = villages.filter(v => v.status === 'PENDING_APPROVAL').length;
+    const totalSales = villages.reduce((acc, v) => acc + (Number(v.dealAmount) || 0), 0);
+    
+    const totalCommissionEarned = commissions.reduce((acc, c) => acc + (Number(c.commissionAmount) || 0), 0);
+    const paidCommission = settlements.reduce((acc, s) => acc + (Number(s.amount) || 0), 0);
+    const pendingCommission = commissions.filter(c => c.status === 'PAYABLE' || c.status === 'PENDING')
+                                         .reduce((acc, c) => acc + (Number(c.commissionAmount) || 0), 0);
+    const upcomingRenewalsCount = 2; // pipeline demo
+
+    document.getElementById('kpi-total-villages').textContent = totalVillages;
+    document.getElementById('kpi-active-villages').textContent = activeVillages;
+    document.getElementById('kpi-pending-villages').textContent = pendingVillages;
+    document.getElementById('kpi-total-sales').textContent = `₹ ${totalSales.toLocaleString('en-IN')}`;
+    document.getElementById('kpi-total-commission').textContent = `₹ ${totalCommissionEarned.toLocaleString('en-IN')}`;
+    document.getElementById('kpi-pending-commission').textContent = `₹ ${pendingCommission.toLocaleString('en-IN')}`;
+    document.getElementById('kpi-paid-commission').textContent = `₹ ${paidCommission.toLocaleString('en-IN')}`;
+    document.getElementById('kpi-upcoming-renewals').textContent = upcomingRenewalsCount;
+    document.getElementById('tab-badge-villages').textContent = totalVillages;
+
+    // Form previews
+    document.getElementById('addGpAgentRef').textContent = agent.agentCode;
+    document.getElementById('addGpRatePreview').textContent = `${agent.approvedNewRate || 25}%`;
+    document.getElementById('calcAgentRateText').textContent = `${agent.approvedNewRate || 25}.00% (मंजूर दर)`;
+    calculateCommissionPreview();
+
+    // Profile Tab
+    document.getElementById('profFullName').textContent = agent.fullName;
+    document.getElementById('profAgentCode').textContent = agent.agentCode;
+    document.getElementById('profMobile').textContent = agent.mobileNumber;
+    document.getElementById('profEmail').textContent = agent.email;
+    document.getElementById('profLocation').textContent = `${agent.district} / ${agent.taluka}`;
+    document.getElementById('profAddress').textContent = agent.address;
+    document.getElementById('profRegisteredAt').textContent = agent.registeredAt || '2026-10-15';
+    document.getElementById('profIdType').textContent = agent.idProofType === 'PAN' ? 'पॅन क्रमांक:' : 'आधार क्रमांक:';
+    document.getElementById('profIdNumber').textContent = agent.idProofNumber;
+    document.getElementById('profBoxNewRate').textContent = `${agent.approvedNewRate || 25}.00%`;
+    document.getElementById('profBoxRenewalRate').textContent = `${agent.approvedRenewalRate || 15}.00%`;
+    document.getElementById('renewalsRateText').textContent = `${agent.approvedRenewalRate || 15}%`;
+
+    if (agent.bankName) document.getElementById('profBankName').value = agent.bankName;
+    if (agent.accountNumber) document.getElementById('profAccountNumber').value = agent.accountNumber;
+    if (agent.ifscCode) document.getElementById('profIfscCode').value = agent.ifscCode;
+    if (agent.upiId) document.getElementById('profUpiId').value = agent.upiId;
+
+    // Render Dashboard widgets
+    renderDashboardOverview(commissions, villages);
+  }
+
+  function renderDashboardOverview(commissions, villages) {
+    const recentCommContainer = document.getElementById('dashRecentCommissions');
+    const recentVillContainer = document.getElementById('dashRecentVillages');
+
+    if (commissions.length === 0) {
+      recentCommContainer.innerHTML = '<div class="text-xs text-slate-500 py-4 text-center">अद्याप कमिशन नोंदी उपलब्ध नाहीत.</div>';
+    } else {
+      recentCommContainer.innerHTML = commissions.slice(0, 4).map(c => `
+        <div class="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800">
+          <div>
+            <div class="font-bold text-white text-xs">${c.gpName}</div>
+            <div class="text-[11px] text-slate-400 font-mono">${c.type === 'NEW_REGISTRATION' ? 'नवीन नोंदणी' : 'वार्षिक नूतनीकरण'} • ${c.date}</div>
+          </div>
+          <div class="text-right">
+            <div class="font-bold text-emerald-400 mono text-xs">+ ₹ ${Number(c.commissionAmount).toLocaleString('en-IN')}</div>
+            <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${c.status === 'PAID' ? 'bg-emerald-500/10 text-emerald-300' : 'bg-amber-500/10 text-amber-300'}">${c.status === 'PAID' ? 'जमा' : 'देय'}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    if (villages.length === 0) {
+      recentVillContainer.innerHTML = '<div class="text-xs text-slate-500 py-4 text-center">अद्याप कोणतीही GP जोडलेली नाही.</div>';
+    } else {
+      recentVillContainer.innerHTML = villages.slice(0, 4).map(v => `
+        <div class="flex items-center justify-between p-3 bg-slate-950 rounded-xl border border-slate-800">
+          <div>
+            <div class="font-bold text-white text-xs">${v.nameMr} <span class="text-[10px] text-slate-500 font-mono">(${v.lgdCode})</span></div>
+            <div class="text-[11px] text-slate-400">${v.taluka}, ${v.district} • प्रशासक: ${v.adminName}</div>
+          </div>
+          <div class="text-right">
+            <div class="font-bold text-sky-400 mono text-xs">₹ ${Number(v.dealAmount).toLocaleString('en-IN')}</div>
+            <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold ${v.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'}">${v.status === 'ACTIVE' ? 'सक्रिय' : 'प्रलंबित'}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  // Assisted GP Registration Submit Handler
+  function handleAgentSubmitGp() {
+    const lgd = document.getElementById('gp_lgdCode').value.trim();
+    const nameMr = document.getElementById('gp_nameMr').value.trim();
+    const nameEn = document.getElementById('gp_nameEn').value.trim();
+    const district = document.getElementById('gp_district').value;
+    const taluka = document.getElementById('gp_taluka').value;
+    const pincode = document.getElementById('gp_pincode').value.trim();
+    const adminName = document.getElementById('gp_adminName').value.trim();
+    const adminPhone = document.getElementById('gp_adminPhone').value.trim();
+    const adminEmail = document.getElementById('gp_adminEmail').value.trim();
+    const pwd = document.getElementById('gp_password').value;
+    const cnfPwd = document.getElementById('gp_confirmPassword').value;
+    const dealAmount = Number(document.getElementById('gp_dealAmount').value) || 10000;
+
+    if (pwd !== cnfPwd) {
+      alert('पासवर्ड आणि पासवर्ड पुष्टी जुळत नाहीत!');
+      return;
+    }
+
+    const agent = getActiveAgent();
+    const villages = getLocalData('gpmh_agent_villages', defaultVillages);
+    
+    // Check duplicate LGD
+    if (villages.some(v => v.lgdCode === lgd)) {
+      alert('हा LGD कोड प्रणालीमध्ये आधीच अस्तित्वात आहे!');
+      return;
+    }
+
+    const newVillage = {
+      lgdCode: lgd,
+      agentId: agent.id,
+      nameMr: nameMr,
+      nameEn: nameEn,
+      district: district,
+      taluka: taluka,
+      pincode: pincode,
+      adminName: adminName,
+      adminPhone: adminPhone,
+      adminEmail: adminEmail,
+      dealAmount: dealAmount,
+      status: "PENDING_APPROVAL",
+      onboardedDate: new Date().toISOString().split('T')[0],
+      renewalDue: new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0]
+    };
+
+    villages.unshift(newVillage);
+    setLocalData('gpmh_agent_villages', villages);
+
+    // Add Commission Entry as PENDING
+    const commRate = agent.approvedNewRate || 25.0;
+    const commAmount = (dealAmount * commRate) / 100;
+    const commissions = getLocalData('gpmh_agent_commissions', defaultCommissions);
+    
+    const newComm = {
+      id: "COMM-2026-0" + (commissions.length + 1),
+      agentId: agent.id,
+      gpLgd: lgd,
+      gpName: nameMr,
+      type: "NEW_REGISTRATION",
+      dealAmount: dealAmount,
+      rate: commRate,
+      commissionAmount: commAmount,
+      status: "PENDING",
+      date: new Date().toISOString().split('T')[0],
+      settlementId: null,
+      settlementDate: null
+    };
+    commissions.unshift(newComm);
+    setLocalData('gpmh_agent_commissions', commissions);
+
+    alert(`अभिनंदन! ${nameMr} (LGD: ${lgd}) ऑनबोर्डिंग अर्ज यशस्वीरीत्या सादर केला गेला.\n\nसुपरॲडमिन द्वारे पडताळणी पूर्ण झाल्यावर ₹${commAmount} कमिशन आपल्या खात्यात देय होईल.`);
+    document.getElementById('agentAddGpForm').reset();
+    loadAgentDashboard();
+    switchTab('my_villages');
+  }
+
+  function calculateCommissionPreview() {
+    const agent = getActiveAgent();
+    const dealAmount = Number(document.getElementById('gp_dealAmount').value) || 10000;
+    const rate = agent.approvedNewRate || 25.0;
+    const comm = (dealAmount * rate) / 100;
+    document.getElementById('calcExpectedCommission').textContent = `₹ ${comm.toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+  }
+
+  function onAgentDistrictChange() {
+    const dist = document.getElementById('gp_district').value;
+    const talukaSelect = document.getElementById('gp_taluka');
+    talukaSelect.innerHTML = '';
+    
+    const talukaMap = {
+      'अमरावती': ['अचलपूर', 'अमरावती', 'भातकुली', 'चांदूर बाजार', 'चांदूर रेल्वे', 'दर्यापूर', 'धामणगाव रेल्वे', 'धारणी', 'मोर्शी', 'नांदगाव खंडेश्वर', 'वरुड', 'तिवसा', 'चिखलदरा', 'अंजनगाव सुर्जी'],
+      'पुणे': ['बारामती', 'हवेली', 'शिरूर', 'दौंड', 'इंदापूर', 'जुन्नर', 'आंबेगाव', 'खेड', 'मावळ', 'मुळशी', 'वेल्हे', 'भोर', 'पुरंदर'],
+      'नागपूर': ['नागपूर ग्रामीण', 'काटोल', 'नरखेड', 'सावनेर', 'कळमेश्वर', 'रामटेक', 'पारशिवनी', 'मौदा', 'कामठी', 'उमरेड', 'भिवापूर', 'कुही', 'हिंगणा'],
+      'अहिल्यानगर': ['नगर', 'राहुरी', 'नेवासा', 'शेवगाव', 'पाथर्डी', 'जामखेड', 'कर्जत', 'श्रीगोंदा', 'पारनेर', 'संगमनेर', 'अकोले', 'कोपरगाव', 'श्रीरामपूर', 'राहाता']
+    };
+
+    const list = talukaMap[dist] || ['तालुका १', 'तालुका २', 'तालुका ३'];
+    list.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = t;
+      talukaSelect.appendChild(opt);
+    });
+  }
+
+  // Render My Villages Table
+  function renderVillagesTable() {
+    const villages = getLocalData('gpmh_agent_villages', defaultVillages).filter(v => v.agentId === currentAgentId);
+    const agent = getActiveAgent();
+    const tbody = document.getElementById('myVillagesTableBody');
+
+    if (villages.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="p-6 text-center text-slate-500">कोणतीही ग्रामपंचायत आढळली नाही.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = villages.map(v => {
+      const comm = (Number(v.dealAmount) * (agent.approvedNewRate || 25)) / 100;
+      return `
+        <tr class="hover:bg-slate-800/40 transition">
+          <td class="px-4 py-3 font-mono text-amber-300 font-bold">${v.lgdCode}</td>
+          <td class="px-4 py-3">
+            <div class="font-bold text-white">${v.nameMr}</div>
+            <div class="text-[10px] text-slate-400">${v.nameEn}</div>
+          </td>
+          <td class="px-4 py-3 text-slate-300">${v.taluka}, ${v.district}</td>
+          <td class="px-4 py-3">
+            <div class="text-slate-200">${v.adminName}</div>
+            <div class="font-mono text-[10px] text-slate-400">📞 ${v.adminPhone}</div>
+          </td>
+          <td class="px-4 py-3 font-mono font-bold text-slate-200">₹ ${Number(v.dealAmount).toLocaleString('en-IN')}</td>
+          <td class="px-4 py-3 font-mono font-bold text-emerald-400">₹ ${comm.toLocaleString('en-IN')}</td>
+          <td class="px-4 py-3">
+            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold ${v.status === 'ACTIVE' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
+              ${v.status === 'ACTIVE' ? 'सक्रिय ✓' : 'प्रलंबित ⏳'}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <button onclick="alert('ग्रामपंचायत तपशील:\\nनाव: ${v.nameMr}\\nLGD: ${v.lgdCode}\\nप्रशासक: ${v.adminName} (${v.adminPhone})\\nनोंदणी दिनांक: ${v.onboardedDate}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-semibold border border-slate-700">
+              तपशील पहा
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function filterVillages() {
+    const q = document.getElementById('villageSearchInput').value.toLowerCase();
+    const status = document.getElementById('villageStatusFilter').value;
+    const rows = document.querySelectorAll('#myVillagesTableBody tr');
+
+    rows.forEach(r => {
+      const text = r.innerText.toLowerCase();
+      const matchText = text.includes(q);
+      const matchStatus = !status || text.includes(status === 'ACTIVE' ? 'सक्रिय' : 'प्रलंबित');
+      r.style.display = (matchText && matchStatus) ? '' : 'none';
+    });
+  }
+
+  // Render Village Renewals
+  function renderRenewalsTable() {
+    const villages = getLocalData('gpmh_agent_villages', defaultVillages)
+      .filter(v => v.agentId === currentAgentId && v.status === 'ACTIVE');
+    const agent = getActiveAgent();
+    const tbody = document.getElementById('villageRenewalsTableBody');
+
+    tbody.innerHTML = villages.map(v => {
+      const renewalFee = 8000;
+      const expectedComm = (renewalFee * (agent.approvedRenewalRate || 15)) / 100;
+      return `
+        <tr class="hover:bg-slate-800/40 transition">
+          <td class="px-4 py-3 font-mono text-amber-300 font-bold">${v.lgdCode}</td>
+          <td class="px-4 py-3 font-bold text-white">${v.nameMr}</td>
+          <td class="px-4 py-3 text-slate-300">${v.taluka}</td>
+          <td class="px-4 py-3 font-mono text-slate-300">${v.renewalDue}</td>
+          <td class="px-4 py-3">
+            <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              ३०-९० दिवस शिल्लक
+            </span>
+          </td>
+          <td class="px-4 py-3 font-mono text-slate-200 font-bold">₹ ${renewalFee.toLocaleString('en-IN')}</td>
+          <td class="px-4 py-3 font-mono font-bold text-amber-300">₹ ${expectedComm.toLocaleString('en-IN')}</td>
+          <td class="px-4 py-3 text-right">
+            <button onclick="alert('ग्रामसेवक ${v.adminName} यांना SMS/WhatsApp द्वारे नूतनीकरण स्मरणपत्र पाठवले गेले!')" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-[11px] font-bold">
+              स्मरणपत्र पाठवा
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  // Render My Commissions Ledger
+  function renderCommissionsTable() {
+    const filter = document.getElementById('commStatusFilter').value;
+    let commissions = getLocalData('gpmh_agent_commissions', defaultCommissions).filter(c => c.agentId === currentAgentId);
+    
+    if (filter) {
+      commissions = commissions.filter(c => c.status === filter);
+    }
+
+    const tbody = document.getElementById('myCommissionsTableBody');
+    if (commissions.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="9" class="p-6 text-center text-slate-500">कोणतीही कमिशन नोंद आढळली नाही.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = commissions.map(c => `
+      <tr class="hover:bg-slate-800/40 transition">
+        <td class="px-4 py-3 font-mono text-slate-400">${c.id}</td>
+        <td class="px-4 py-3">
+          <div class="font-bold text-white">${c.gpName}</div>
+          <div class="text-[10px] font-mono text-slate-400">LGD: ${c.gpLgd}</div>
+        </td>
+        <td class="px-4 py-3 text-slate-300 font-medium">
+          ${c.type === 'NEW_REGISTRATION' ? '✨ नवीन नोंदणी' : '🔄 वार्षिक नूतनीकरण'}
+        </td>
+        <td class="px-4 py-3 font-mono font-bold text-slate-200">₹ ${Number(c.dealAmount).toLocaleString('en-IN')}</td>
+        <td class="px-4 py-3 font-mono text-emerald-400 font-bold">${c.rate}%</td>
+        <td class="px-4 py-3 font-mono font-extrabold text-amber-300">₹ ${Number(c.commissionAmount).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+        <td class="px-4 py-3 font-mono text-slate-400">${c.date}</td>
+        <td class="px-4 py-3">
+          <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold ${
+            c.status === 'PAID' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+            c.status === 'PAYABLE' ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30' :
+            'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+          }">
+            ${c.status === 'PAID' ? 'अदा केलेले (Paid)' : c.status === 'PAYABLE' ? 'देय (Payable)' : 'प्रलंबित (Pending)'}
+          </span>
+        </td>
+        <td class="px-4 py-3 font-mono text-[11px] text-slate-400">
+          ${c.settlementId ? `<a href="javascript:viewVoucherById('${c.settlementId}')" class="text-emerald-400 hover:underline font-bold">${c.settlementId}</a>` : '—'}
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // Render Settlements Table
+  function renderSettlementsTable() {
+    const settlements = getLocalData('gpmh_agent_settlements', defaultSettlements).filter(s => s.agentId === currentAgentId);
+    const tbody = document.getElementById('settlementsTableBody');
+
+    if (settlements.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="p-6 text-center text-slate-500">कोणतीही सेटलमेंट नोंद उपलब्ध नाही.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = settlements.map(s => `
+      <tr class="hover:bg-slate-800/40 transition">
+        <td class="px-4 py-3 font-mono font-bold text-amber-300">${s.id}</td>
+        <td class="px-4 py-3 font-mono text-slate-300">${s.date}</td>
+        <td class="px-4 py-3 font-mono font-extrabold text-emerald-400 text-sm">₹ ${Number(s.amount).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+        <td class="px-4 py-3">
+          <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-200 border border-slate-700">
+            ${s.paymentMode}
+          </span>
+        </td>
+        <td class="px-4 py-3 font-mono text-[11px] text-slate-300">${s.referenceNo}</td>
+        <td class="px-4 py-3 font-mono text-slate-400">${s.itemsCount} GPs</td>
+        <td class="px-4 py-3">
+          <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            यशस्वी (Completed)
+          </span>
+        </td>
+        <td class="px-4 py-3 text-right">
+          <button onclick="viewVoucherById('${s.id}')" class="px-2.5 py-1 bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 rounded text-[11px] font-bold">
+            पावती पहा 📄
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // Voucher Modal Handler
+  function viewVoucherById(settlementId) {
+    const settlements = getLocalData('gpmh_agent_settlements', defaultSettlements);
+    const s = settlements.find(item => item.id === settlementId) || settlements[0];
+    const agent = getActiveAgent();
+    const commissions = getLocalData('gpmh_agent_commissions', defaultCommissions)
+      .filter(c => c.settlementId === s.id);
+
+    document.getElementById('vouchNo').textContent = s.id;
+    document.getElementById('vouchDate').textContent = s.date;
+    document.getElementById('vouchAgent').textContent = `${agent.fullName} (${agent.agentCode})`;
+    document.getElementById('vouchMode').textContent = `${s.paymentMode} (${s.referenceNo})`;
+    document.getElementById('vouchTotalAmount').textContent = `₹ ${Number(s.amount).toLocaleString('en-IN', {minimumFractionDigits: 2})}`;
+    document.getElementById('vouchRemarks').textContent = s.remarks || 'कमिशन सेटलमेंट.';
+
+    const itemsBody = document.getElementById('vouchItemsBody');
+    if (commissions.length > 0) {
+      itemsBody.innerHTML = commissions.map(c => `
+        <tr>
+          <td class="p-2 font-sans">${c.gpName} (${c.gpLgd})</td>
+          <td class="p-2">${c.type === 'NEW_REGISTRATION' ? 'नवीन नोंदणी' : 'वार्षिक नूतनीकरण'}</td>
+          <td class="p-2 font-mono">₹ ${Number(c.dealAmount).toLocaleString('en-IN')}</td>
+          <td class="p-2 font-mono">${c.rate}%</td>
+          <td class="p-2 font-mono text-right font-bold text-emerald-400">₹ ${Number(c.commissionAmount).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td>
+        </tr>
+      `).join('');
+    }
+
+    document.getElementById('voucherModal').classList.remove('hidden');
+  }
+
+  function closeVoucherModal() {
+    document.getElementById('voucherModal').classList.add('hidden');
+  }
+
+  // Save Bank Details
+  function saveBankDetails() {
+    const agent = getActiveAgent();
+    agent.bankName = document.getElementById('profBankName').value.trim();
+    agent.accountNumber = document.getElementById('profAccountNumber').value.trim();
+    agent.ifscCode = document.getElementById('profIfscCode').value.trim();
+    agent.upiId = document.getElementById('profUpiId').value.trim();
+
+    const agents = getLocalData('gpmh_agents', defaultAgents);
+    const idx = agents.findIndex(a => a.id === agent.id);
+    if (idx !== -1) {
+      agents[idx] = agent;
+      setLocalData('gpmh_agents', agents);
+    }
+    alert('बँक व UPI माहिती यशस्वीरीत्या जतन झाली!');
+  }
+
+  // Change Password
+  function handleChangePassword() {
+    const cur = document.getElementById('curPassword').value;
+    const nxt = document.getElementById('newPassword').value;
+    const cnf = document.getElementById('cnfPassword').value;
+    const agent = getActiveAgent();
+
+    if (cur !== agent.password) {
+      alert('सध्याचा पासवर्ड चुकीचा आहे!');
+      return;
+    }
+    if (nxt.length < 8) {
+      alert('नवीन पासवर्ड किमान ८ अक्षरांचा असणे आवश्यक आहे!');
+      return;
+    }
+    if (nxt !== cnf) {
+      alert('नवीन पासवर्ड आणि पुष्टी जुळत नाहीत!');
+      return;
+    }
+
+    agent.password = nxt;
+    const agents = getLocalData('gpmh_agents', defaultAgents);
+    const idx = agents.findIndex(a => a.id === agent.id);
+    if (idx !== -1) {
+      agents[idx] = agent;
+      setLocalData('gpmh_agents', agents);
+    }
+    alert('पासवर्ड यशस्वीरीत्या बदलला गेला!');
+    document.getElementById('changePasswordForm').reset();
+  }
+
+  // Window onload
+  window.addEventListener('DOMContentLoaded', () => {
+    loadAgentDashboard();
+  });
+</script>
+
+</body>
+</html>
+

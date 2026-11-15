@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Domain\GPMH.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Application\GPMH.Application.csproj" />
+    <ProjectReference Include="..\..\src\Infrastructure\GPMH.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\WebAPI\GPMH.WebAPI.csproj" />
+  </ItemGroup>
+</Project>
+

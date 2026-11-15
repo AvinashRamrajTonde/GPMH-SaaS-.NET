@@ -1,0 +1,59 @@
+{
+  "brand": "e-Grampanchayat ERP",
+  "subtitle": "Maharashtra Gram Panchayat Tax & Accounting SaaS",
+  "nav": {
+    "dashboard": "Dashboard",
+    "onboarding": "LGD Onboarding Lookup",
+    "login": "Auth & Roles"
+  },
+  "language": {
+    "label": "Language",
+    "mr": "मराठी",
+    "hi": "हिन्दी",
+    "en": "English"
+  },
+  "dashboard": {
+    "title": "GP Executive Workspace (Sprint 1 Foundation)",
+    "lead": "Unified Namuna 8, 9, 9-Ka, 10, 11 & 5-C Cash Book SaaS platform for Maharashtra Gram Panchayats.",
+    "taxPreviewTitle": "Capital Value Property Tax Live Preview (TaxDivisor = 1000)",
+    "goldenHint": "Golden Vector: Chincholi Khurd (15 x 15 ft = 20.90 sq.m, Age 5 -> 95% retention -> Building ₹66 + Slab ₹180 = ₹246)",
+    "lengthFt": "Length (ft)",
+    "widthFt": "Width (ft)",
+    "landRate": "Land Annual Rate",
+    "rrRate": "Ready Reckoner Rate",
+    "buildingAge": "Building Age (yrs)",
+    "taxRate": "Tax Rate",
+    "buildingTax": "Building Tax",
+    "slabTax": "Area Slab Tax (L+H+S)",
+    "totalTax": "Total Annual Tax",
+    "workflowTitle": "Statutory Namuna Lifecycle"
+  },
+  "onboarding": {
+    "title": "LGD Code Discovery & GP Onboarding Lookup",
+    "subtitle": "Fetch authoritative profile from the 27,931-GP Maharashtra LGD Directory REST API.",
+    "byCode": "Lookup by LGD Code",
+    "codePlaceholder": "e.g. 171391 (Chincholi Khurd)",
+    "verifyBtn": "Verify LGD",
+    "orCascade": "Or Select District -> Tehsil -> Gram Panchayat",
+    "district": "District",
+    "tehsil": "Tehsil / Taluka",
+    "panchayat": "Gram Panchayat",
+    "selectOption": "-- Select --",
+    "allowEdits": "Allow Manual Name Corrections (Audited Override)",
+    "loading": "Fetching directory data...",
+    "notFound": "LGD code not found or directory endpoint unreachable."
+  },
+  "login": {
+    "title": "Portal Sign-In (Issue #7 Auth Scaffold)",
+    "note": "15-minute access JWT + HttpOnly rotating refresh cookie authentication will be wired under Sprint 1 Issue #7.",
+    "roleLabel": "Canonical Platform Role (8 + 1 RBAC)",
+    "email": "Username or Mobile",
+    "password": "Password",
+    "submit": "Continue (Preview Shell)"
+  },
+  "notFound": {
+    "title": "Page Not Found (404)",
+    "back": "Return to Dashboard"
+  }
+}
+

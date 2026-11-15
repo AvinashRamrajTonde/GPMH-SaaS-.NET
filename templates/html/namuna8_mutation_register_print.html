@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1e293b">
+  <title>मिळकतीच्या फेरफाराचे रजिस्टर — ई-ग्रामपंचायत ERP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @page {
+      size: A4 landscape;
+      margin: 8mm 8mm 8mm 8mm;
+    }
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #f1f5f9;
+      font-family: 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #000;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Action Bar (no-print) */
+    .top-toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: #0f172a;
+      color: #fff;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      body {
+        background: #fff !important;
+        padding: 0 !important;
+      }
+      .sheet {
+        box-shadow: none !important;
+        border: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+    }
+
+    .sheet {
+      width: 297mm;
+      max-width: 100%;
+      min-height: 200mm;
+      margin: 12px auto;
+      background: #fff;
+      padding: 10mm 12mm;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      border: 1px solid #cbd5e1;
+    }
+
+    table.reg-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1.5px solid #000;
+      font-size: 11px;
+    }
+
+    table.reg-table th {
+      border: 1px solid #000;
+      padding: 5px 4px;
+      text-align: center;
+      font-weight: 700;
+      color: #000;
+      line-height: 1.25;
+      background: #f8fafc;
+    }
+
+    table.reg-table td {
+      border: 1px solid #000;
+      padding: 4px 5px;
+      height: 27px;
+      vertical-align: middle;
+      font-size: 11px;
+      color: #000;
+    }
+
+    table.reg-table td.center {
+      text-align: center;
+    }
+
+    table.reg-table td.bold {
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- FLOATING TOP TOOLBAR (NO-PRINT) -->
+  <header class="top-toolbar no-print">
+    <div class="flex items-center gap-3">
+      <a href="./09_namuna_8_mutation_register.html" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+        मागे (फेरफार यादी)
+      </a>
+      <div class="h-4 w-px bg-slate-700"></div>
+      <div>
+        <h1 class="text-sm font-bold text-white flex items-center gap-2">
+          <span>मिळकतीच्या फेरफाराचे रजिस्टर</span>
+          <span class="rounded bg-emerald-500/20 px-2 py-0.5 text-[11px] font-semibold text-emerald-300 border border-emerald-500/30">वैधानिक नोंदवही</span>
+        </h1>
+        <p class="text-[11px] text-slate-400">महाराष्ट्र ग्रामपंचायत अधिनियम — मालमत्ता मालकी हस्तांतरण रजिस्टर</p>
+      </div>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="flex items-center gap-2.5">
+      <!-- Year Select -->
+      <div class="flex items-center gap-1 text-xs">
+        <span class="text-slate-400">वर्ष:</span>
+        <select id="yearFilter" onchange="filterRegister()" class="bg-slate-800 text-white border border-slate-700 rounded-md px-2 py-1 text-xs font-semibold focus:outline-none focus:border-emerald-500">
+          <option value="2026-27" selected>२०२६-२७</option>
+          <option value="2025-26">२०२५-२६</option>
+          <option value="2024-25">२०२४-२५</option>
+        </select>
+      </div>
+
+      <!-- Ward Filter -->
+      <div class="flex items-center gap-1 text-xs">
+        <span class="text-slate-400">वॉर्ड:</span>
+        <select id="wardFilter" onchange="filterRegister()" class="bg-slate-800 text-white border border-slate-700 rounded-md px-2 py-1 text-xs font-semibold focus:outline-none focus:border-emerald-500">
+          <option value="all" selected>सर्व वॉर्ड</option>
+          <option value="वॉर्ड१">वॉर्ड १</option>
+          <option value="वॉर्ड२">वॉर्ड २</option>
+          <option value="वॉर्ड३">वॉर्ड ३</option>
+        </select>
+      </div>
+
+      <!-- Excel Export Button -->
+      <button onclick="exportToExcel()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-600 text-xs font-bold text-white transition active:scale-95 shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        एक्सेल / CSV
+      </button>
+
+      <!-- Print / PDF Button -->
+      <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition active:scale-95 shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        प्रिंट / PDF (Ctrl+P)
+      </button>
+    </div>
+  </header>
+
+  <!-- PRINTABLE LEDGER SHEET -->
+  <main class="sheet">
+    <!-- Center Heading -->
+    <div style="text-align: center; margin-bottom: 6px;">
+      <h1 style="font-size: 21px; font-weight: 800; color: #000; line-height: 1.22; margin: 0; letter-spacing: -0.2px;">
+        मिळकतीच्या<br>फेरफाराचे रजिस्टर
+      </h1>
+    </div>
+
+    <!-- Meta Information Header -->
+    <table style="width: 100%; border: 1.5px solid #000; border-collapse: collapse; margin-bottom: 5px; font-size: 11.5px; font-weight: 600; color: #000;">
+      <tr>
+        <td style="padding: 4px 8px; border-right: 1.5px solid #000; width: 38%; vertical-align: middle;">
+          <div>ग्रामपंचायत: <b>चिंचोली खुर्द</b></div>
+          <div style="margin-top: 2px;">गाव: <b>चिंचोली खुर्द, रहिमापूर</b></div>
+        </td>
+        <td style="padding: 4px 8px; border-right: 1.5px solid #000; width: 44%; vertical-align: middle;">
+          <div>तालुका: <b>अंजनगाव सुर्जी</b></div>
+          <div style="margin-top: 2px;">जिल्हा: <b>अमरावती</b></div>
+        </td>
+        <td style="padding: 4px 8px; text-align: right; width: 18%; vertical-align: top;">
+          <div>पान नं.: <b>1</b></div>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Main Register Table -->
+    <table class="reg-table" id="mutationRegisterTable">
+      <colgroup>
+        <col style="width: 16mm;">
+        <col style="width: 13mm;">
+        <col style="width: 22mm;">
+        <col style="width: 22mm;">
+        <col style="width: 16mm;">
+        <col style="width: 26mm;">
+        <col style="width: 36mm;">
+        <col style="width: 36mm;">
+        <col style="width: 44mm;">
+        <col style="width: 34mm;">
+        <col style="width: 22mm;">
+      </colgroup>
+      <thead>
+        <tr>
+          <th rowspan="2" style="width: 16mm;">फेरफार अ.क्र.</th>
+          <th rowspan="2" style="width: 13mm;">मालमत्ता क्र.</th>
+          <th rowspan="2" style="width: 22mm;">तारीख</th>
+          <th colspan="2">मिळकतीचा बदल तपशील</th>
+          <th rowspan="2" style="width: 26mm;">मिळकतीचे वर्णन</th>
+          <th rowspan="2" style="width: 36mm;">मूळ मालकाचे नाव</th>
+          <th rowspan="2" style="width: 36mm;">नवीन मालकाचे नाव</th>
+          <th rowspan="2" style="width: 44mm;">ज्या कागदपत्राच्या आधारे फेरफार करण्यात आली त्याचे थोडक्यात टिपण</th>
+          <th rowspan="2" style="width: 34mm;">आकारणी रजिस्टर पान / ठराव क्र. व दिनांक</th>
+          <th rowspan="2" style="width: 22mm;">ग्रामपंचायत अधिकारी सही</th>
+        </tr>
+        <tr>
+          <th style="width: 22mm;">दस्तऐवजाचे नाव</th>
+          <th style="width: 16mm;">मिळकत / दस्त क्र.</th>
+        </tr>
+      </thead>
+      <tbody id="mutationTableBody">
+        <!-- Row 1 (Actual Data matching Screenshot) -->
+        <tr>
+          <td class="center bold">FR-2026-0001</td>
+          <td class="center bold">1</td>
+          <td class="center">02/11/2026</td>
+          <td class="center">खरेदीखत</td>
+          <td class="center">9</td>
+          <td>-</td>
+          <td>अमोल राजेश देशमुख</td>
+          <td class="bold">ऋषिकेश सावरकर</td>
+          <td>खरेदीखत | क्र. 9 | दि. 02/11/2026</td>
+          <td class="center">१ / ठराव ९/१ / 02/11/2026</td>
+          <td></td>
+        </tr>
+
+        <!-- Row 2: Property Split Mutation (हिस्सा / वाटपपत्र फेरफार) -->
+        <tr>
+          <td class="center bold">FR-2026-0002</td>
+          <td class="center bold">२</td>
+          <td class="center">14/11/2026</td>
+          <td class="center">वाटपपत्र</td>
+          <td class="center">12</td>
+          <td>९९×३३ निवासी इमारत</td>
+          <td>बलवान पेंदिनाथ दिनकर</td>
+          <td class="bold">३ वारसदार (२, २/१, २/२)</td>
+          <td>नोंदणीकृत वाटपपत्र | क्र. १२ | प्रत्येकी ३३×३३ (१,०८९ चौ.फूट)</td>
+          <td class="center">२ / ठराव ९/२ / 14/11/2026</td>
+          <td></td>
+        </tr>
+
+        <!-- Empty Rows for standard Register Grid Fill (12 additional rows) -->
+        <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+
+    <!-- Bottom Footer Copyright -->
+    <div style="margin-top: 8px; text-align: right; font-size: 11px; color: #475569; font-weight: 500;">
+      © 2026 ई-ग्रामपंचायत ERP. सर्व हक्क राखीव.
+    </div>
+  </main>
+
+  <script>
+    // Simple filter simulation
+    function filterRegister() {
+      const year = document.getElementById('yearFilter').value;
+      const ward = document.getElementById('wardFilter').value;
+      console.log('Filtering register for year:', year, 'ward:', ward);
+    }
+
+    // Export Table to CSV
+    function exportToExcel() {
+      let csv = "\uFEFF"; // UTF-8 BOM
+      csv += "मिळकतीच्या फेरफाराचे रजिस्टर\n";
+      csv += "ग्रामपंचायत: चिंचोली खुर्द, तालुका: अंजनगाव सुर्जी, जिल्हा: अमरावती\n\n";
+      csv += "फेरफार अ.क्र.,मालमत्ता क्र.,तारीख,दस्तऐवजाचे नाव,मिळकत/दस्त क्र.,मिळकतीचे वर्णन,मूळ मालकाचे नाव,नवीन मालकाचे नाव,कागदपत्राचे थोडक्यात टिपण,आकारणी रजिस्टर पान/ठराव क्र. व दिनांक,ग्रामपंचायत अधिकारी सही\n";
+
+      const rows = [
+        ['FR-2026-0001', '1', '02/11/2026', 'खरेदीखत', '9', '-', 'अमोल राजेश देशमुख', 'ऋषिकेश सावरकर', 'खरेदीखत | क्र. 9 | दि. 02/11/2026', '१ / ठराव ९/१ / 02/11/2026', ''],
+        ['FR-2026-0002', '2', '14/11/2026', 'वारसा हक्क', '12', 'निवासी इमारत', 'बलवान पेंदिनाथ दिनकर', 'अनिता ऋषिकेश सावरकर', 'वारस नोंद | क्र. 12 | दि. 14/11/2026', '२ / ठराव ९/२ / 14/11/2026', '']
+      ];
+
+      rows.forEach(r => {
+        csv += r.map(f => '"' + (f || '').replace(/"/g, '""') + '"').join(',') + "\n";
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute("download", "Milkat_Ferfar_Register_2026_27.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>

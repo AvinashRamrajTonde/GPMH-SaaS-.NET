@@ -1,0 +1,116 @@
+{
+  "isSuccess": true,
+  "statusCode": 200,
+  "title": "Construction Type List",
+  "data": [
+    {
+      "id": 8,
+      "typeName": "झोपडी किंवा मातीची इमारत",
+      "landAnnualValueRate": 760,
+      "constructionReadyReckonerRate": 5852,
+      "usageWeightageFactor": 1,
+      "taxRate": 0.5,
+      "isActive": true
+    },
+    {
+      "id": 9,
+      "typeName": "दगड विटा मातीची इमारत",
+      "landAnnualValueRate": 760,
+      "constructionReadyReckonerRate": 10032,
+      "usageWeightageFactor": 1,
+      "taxRate": 0.8,
+      "isActive": true
+    },
+    {
+      "id": 10,
+      "typeName": "दगड सिमेंट चुना अर्थ पक्के घर",
+      "landAnnualValueRate": 758,
+      "constructionReadyReckonerRate": 14012,
+      "usageWeightageFactor": 1,
+      "taxRate": 1,
+      "isActive": true
+    },
+    {
+      "id": 11,
+      "typeName": "आर सी सी पक्के घर",
+      "landAnnualValueRate": 760,
+      "constructionReadyReckonerRate": 18392,
+      "usageWeightageFactor": 1,
+      "taxRate": 1.5,
+      "isActive": true
+    },
+    {
+      "id": 12,
+      "typeName": "खाली जागा",
+      "landAnnualValueRate": 760,
+      "constructionReadyReckonerRate": 2,
+      "usageWeightageFactor": 0,
+      "taxRate": 2,
+      "isActive": true
+    },
+    {
+      "id": 13,
+      "typeName": "मनोरे",
+      "landAnnualValueRate": 760,
+      "constructionReadyReckonerRate": 0,
+      "usageWeightageFactor": 1,
+      "taxRate": 8,
+      "isActive": true
+    },
+    {
+      "id": 14,
+      "typeName": "मनोऱ्याची खुली जागा",
+      "landAnnualValueRate": 760,
+      "constructionReadyReckonerRate": 0,
+      "usageWeightageFactor": 0,
+      "taxRate": 2,
+      "isActive": true
+    },
+    {
+      "id": 15,
+      "typeName": "जनावरांचा गोठा",
+      "landAnnualValueRate": 760,
+      "constructionReadyReckonerRate": 5852,
+      "usageWeightageFactor": 1,
+      "taxRate": 0.5,
+      "isActive": true
+    },
+    {
+      "id": 16,
+      "typeName": "फत्र्याचे शेठ",
+      "landAnnualValueRate": 760,
+      "constructionReadyReckonerRate": 5852,
+      "usageWeightageFactor": 1,
+      "taxRate": 0.5,
+      "isActive": true
+    },
+    {
+      "id": 17,
+      "typeName": "बखळ जागा",
+      "landAnnualValueRate": 760,
+      "constructionReadyReckonerRate": 0,
+      "usageWeightageFactor": 0,
+      "taxRate": 2,
+      "isActive": true
+    },
+    {
+      "id": 18,
+      "typeName": "खुली जागा",
+      "landAnnualValueRate": 760,
+      "constructionReadyReckonerRate": 0,
+      "usageWeightageFactor": 0,
+      "taxRate": 2,
+      "isActive": true
+    },
+    {
+      "id": 19,
+      "typeName": "string",
+      "landAnnualValueRate": 0,
+      "constructionReadyReckonerRate": 0,
+      "usageWeightageFactor": 0,
+      "taxRate": 0,
+      "isActive": true
+    }
+  ],
+  "errors": []
+}
