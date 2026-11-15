@@ -44,15 +44,15 @@ flowchart LR
 
 ## 3. Authoritative Backlog Mapping (`#5` – `#35`)
 
-### Sprint 1 — Foundation, Multi-Tenancy, Audit & LGD (`23 Points`)
+### Sprint 1 — Foundation, Multi-Tenancy, Audit & LGD (`23 Points` — **23/23 Done**)
 | Issue | Epic | Title | Pts | Role | Status / Scope |
 | :---: | :--- | :--- | :---: | :--- | :--- |
-| **#5** | `00-Foundation` | Clean Architecture Solution Scaffold (.NET + React 19.3 + i18n) | 5 | Fullstack | **Scaffolded & Compiling in this repo** |
-| **#6** | `00-Foundation` | Multi-Tenant Schema & Parameterized PostgreSQL `FORCE RLS` | 5 | Backend | `TenantMembership` validation + `set_config` + Cross-tenant tests |
-| **#7** | `00-Foundation` | Identity, 8+1 Role RBAC & Rotating Refresh Tokens | 3 | Backend | 15m JWT + 7d reuse-detected cookie rotation |
-| **#8** | `01-External-LGD-API` | Expose RESTful Public LGD Directory Endpoints | 3 | Backend | **Live (`https://api.grampanchayatmh.in/api/v1/`) + Hardened here** |
-| **#9** | `01-External-LGD-API` | SQLite Indexing, Search Safety & Hosting Hardening | 2 | DevOps | `15/15` automated tests passing in `external-api-proj/` |
-| **#24** | `00-Foundation` | Immutable Audit Trail & Field-Level JSON Diff Tracking | 5 | Backend | Same-tx interceptor + `REVOKE UPDATE, DELETE` |
+| **#5** | `00-Foundation` | Clean Architecture Solution Scaffold (.NET + React 19.3 + i18n) | 5 | Fullstack | **Done** (`5/5` ArchTests, `26/26` UnitTests, Vite prod build green) |
+| **#6** | `00-Foundation` | Multi-Tenant Schema & Parameterized PostgreSQL `FORCE RLS` | 5 | Backend | **Done** (`TenantMembership`, EF migrations + RLS SQL, `CrossTenantAccessTests` passing) |
+| **#7** | `00-Foundation` | Identity, 8+1 Role RBAC & Rotating Refresh Tokens | 3 | Backend | **Done** (15m JWT + 7d reuse-detected cookie/mobile rotation, `IdentityTests` passing) |
+| **#8** | `01-External-LGD-API` | Expose RESTful Public LGD Directory Endpoints | 3 | Backend | **Done** (6 LGD endpoints wired + `LgdClientTests` passing) |
+| **#9** | `01-External-LGD-API` | SQLite Indexing, Search Safety & Hosting Hardening | 2 | DevOps | **Done** (`15/15` automated tests passing in `external-api-proj/`) |
+| **#24** | `00-Foundation` | Immutable Audit Trail & Field-Level JSON Diff Tracking | 5 | Backend | **Done** (Same-tx interceptor + `SoftDeleted` + `AuditController` + `AuditTests` passing) |
 
 ### Sprint 2 — Smart Onboarding, Executive Hub & Agent Gate (`22 Points`)
 | Issue | Epic | Title | Pts | Role | Template Reference |
@@ -98,4 +98,18 @@ flowchart LR
 | **#33** | `04-Namuna-8-Assessment` | `Namuna 11` Misc Receipt Dual Print & Smart QR Nameplate (`19_digital_nameplate_qr_print.html`) | 3 | Fullstack | Completes promised `#16`/template Phase-1 deliverables |
 | **#34** | `12-Offline-Public-Verify` | Public Extract Verification Portal (`/verify/extract/{token}`) & Offline `Namuna 6` Sync Queue | 5 | Fullstack | Resolves offline tax camp requirement & QR verify URL |
 | **#35** | `05-Namuna-9-Demand` | Annual FY Rollover Batch Job, Period Locking & UPI UTR Reconciliation Report | 4 | Backend | Safe year-end rollover across 27,931 GPs |
+
+---
+
+## 4. Sprint Progress Matrix
+
+| Sprint | Scope | Planned Pts | Completed Pts | Progress | Status |
+| :--- | :--- | :---: | :---: | :---: | :--- |
+| **Sprint 1** | Foundation, RLS, Identity/RBAC, Audit & LGD (`#5–#9, #24`) | 23 | 23 | 100% | **Done** |
+| **Sprint 2** | Smart Onboarding, Dashboard & Agent KYC (`#10–#12, #25, #26, #30`) | 22 | 0 | 0% | Todo |
+| **Sprint 3** | Formula Masters & Namuna 8 / Splits (`#13–#17, #27`) | 22 | 0 | 0% | Todo |
+| **Sprint 4** | Namuna 9 Demand & 9-Ka QR Bills (`#18–#19`) | 10 | 0 | 0% | Todo |
+| **Sprint 5** | Namuna 10 Collection, SuperAdmin & Agent Payouts (`#20–#23, #28, #29`) | 21 | 0 | 0% | Todo |
+| **Sprint 6** | Phase-1 Completeness (`#31–#35`) | 22 | 0 | 0% | Todo |
+| **Total** | Full Reconciled SaaS Backlog | **120** | **23** | **19%** | **In Progress** |
 

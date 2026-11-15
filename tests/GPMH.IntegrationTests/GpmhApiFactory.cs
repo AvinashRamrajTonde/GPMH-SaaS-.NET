@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text.Encodings.Web;
 using GPMH.Application.Common.Interfaces;
 using GPMH.Infrastructure.Auditing;
@@ -7,12 +8,14 @@ using GPMH.Infrastructure.Services.LgdDirectory;
 using GPMH.Infrastructure.Tenancy;
 using GPMH.WebAPI;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -28,23 +31,119 @@ public sealed class RecordingHttpMessageHandler : HttpMessageHandler
     protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         RecordedUris.Add(request.RequestUri);
+        string pathAndQuery = request.RequestUri?.PathAndQuery ?? string.Empty;
 
-        string json = """
+        if (pathAndQuery.Contains("/panchayat/999999", StringComparison.Ordinal))
         {
-          "success": true,
-          "execution_time_ms": 1.2,
-          "data": {
-            "lgd_code": "171391",
-            "gp_name_en": "Chincholi Khurd",
-            "gp_name_mr": "चिंचोली खुर्द",
-            "district": "Beed",
-            "district_code": "497",
-            "tehsil": "Dharur",
-            "tehsil_code": "4192",
-            "pincode": "431124"
-          }
+            return Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.NotFound)
+            {
+                Content = new StringContent(
+                    """{"success":false,"error":{"code":"NOT_FOUND","message":"Panchayat not found"}}""",
+                    System.Text.Encoding.UTF8,
+                    "application/json"),
+            });
         }
-        """;
+
+        string json = pathAndQuery switch
+        {
+            _ when pathAndQuery.Contains("/districts", StringComparison.Ordinal) => """
+            {
+              "success": true,
+              "execution_time_ms": 1.1,
+              "data": {
+                "count": 2,
+                "districts": [
+                  { "district": "Beed", "district_code": "497", "gp_count": 1020 },
+                  { "district": "Amravati", "district_code": "496", "gp_count": 840 }
+                ]
+              }
+            }
+            """,
+            _ when pathAndQuery.Contains("/tehsils", StringComparison.Ordinal) => """
+            {
+              "success": true,
+              "execution_time_ms": 1.0,
+              "data": {
+                "district": "Beed",
+                "count": 1,
+                "tehsils": [
+                  { "tehsil": "Dharur", "tehsil_code": "4192", "gp_count": 56 }
+                ]
+              }
+            }
+            """,
+            _ when pathAndQuery.Contains("/panchayats", StringComparison.Ordinal) => """
+            {
+              "success": true,
+              "execution_time_ms": 1.0,
+              "data": {
+                "district": "Beed",
+                "tehsil": "Dharur",
+                "count": 1,
+                "panchayats": [
+                  {
+                    "lgd_code": "171391",
+                    "gp_name_en": "Sonimoha",
+                    "gp_name_mr": "सोनीमोहा",
+                    "district": "Beed",
+                    "tehsil": "Dharur",
+                    "pincode": "431124"
+                  }
+                ]
+              }
+            }
+            """,
+            _ when pathAndQuery.Contains("/search", StringComparison.Ordinal) => """
+            {
+              "success": true,
+              "execution_time_ms": 1.4,
+              "data": {
+                "query": "Sonimoha",
+                "count": 1,
+                "results": [
+                  {
+                    "lgd_code": "171391",
+                    "gp_name_en": "Sonimoha",
+                    "gp_name_mr": "सोनीमोहा",
+                    "district": "Beed",
+                    "tehsil": "Dharur",
+                    "pincode": "431124"
+                  }
+                ]
+              }
+            }
+            """,
+            _ when pathAndQuery.Contains("/stats", StringComparison.Ordinal) => """
+            {
+              "success": true,
+              "execution_time_ms": 0.8,
+              "data": {
+                "state": "Maharashtra",
+                "state_code": 27,
+                "total_districts": 34,
+                "total_tehsils": 351,
+                "total_panchayats": 27931,
+                "api_version": "1.0.0"
+              }
+            }
+            """,
+            _ => """
+            {
+              "success": true,
+              "execution_time_ms": 1.2,
+              "data": {
+                "lgd_code": "171391",
+                "gp_name_en": "Sonimoha",
+                "gp_name_mr": "सोनीमोहा",
+                "district": "Beed",
+                "district_code": "497",
+                "tehsil": "Dharur",
+                "tehsil_code": "4192",
+                "pincode": "431124"
+              }
+            }
+            """,
+        };
 
         return Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK)
         {
@@ -91,6 +190,7 @@ public sealed class TestAuthHandler(
 public sealed class GpmhApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     private SqliteConnection _sqliteConnection = null!;
+    private readonly string _testSigningKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(48));
     public RecordingHttpMessageHandler LgdHandler { get; } = new();
 
     public async Task InitializeAsync()
@@ -113,6 +213,15 @@ public sealed class GpmhApiFactory : WebApplicationFactory<Program>, IAsyncLifet
     {
         ArgumentNullException.ThrowIfNull(builder);
         builder.UseEnvironment("Testing");
+        builder.ConfigureAppConfiguration((_, config) =>
+        {
+            config.AddInMemoryCollection(new Dictionary<string, string?>(StringComparer.Ordinal)
+            {
+                ["Jwt:SigningKey"] = _testSigningKey,
+                ["Jwt:Issuer"] = "gpmh-api",
+                ["Jwt:Audience"] = "gpmh-clients",
+            });
+        });
 
         builder.ConfigureTestServices(services =>
         {
@@ -124,14 +233,24 @@ public sealed class GpmhApiFactory : WebApplicationFactory<Program>, IAsyncLifet
                 options.UseSqlite(_sqliteConnection);
                 options.AddInterceptors(
                     sp.GetRequiredService<TenantRlsConnectionInterceptor>(),
+                    sp.GetRequiredService<TenantRlsConnectionOpenedInterceptor>(),
                     sp.GetRequiredService<AuditSaveChangesInterceptor>());
             });
 
+            const string dualScheme = "TestOrBearer";
             services.AddAuthentication(options =>
             {
-                options.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
-                options.DefaultChallengeScheme = TestAuthHandler.SchemeName;
-            }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
+                options.DefaultAuthenticateScheme = dualScheme;
+                options.DefaultChallengeScheme = dualScheme;
+            })
+            .AddPolicyScheme(dualScheme, dualScheme, options =>
+            {
+                options.ForwardDefaultSelector = context =>
+                    context.Request.Headers.ContainsKey(TestAuthHandler.TestUserIdHeader)
+                        ? TestAuthHandler.SchemeName
+                        : JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
 
             // Replace LGD client HTTP transport intentionally without trailing '/' in config URL
             // to prove LgdDirectoryClient.NormalizeBaseUri prevents dropping "/api/v1/".

@@ -31,6 +31,13 @@ public sealed class GlobalExceptionHandler(
                 Detail = validationEx.Message,
                 Type = "https://tools.ietf.org/html/rfc9457#section-3.1",
             },
+            AuthenticationFailedException authEx => new ProblemDetails
+            {
+                Status = StatusCodes.Status401Unauthorized,
+                Title = "Authentication Failed",
+                Detail = authEx.Message,
+                Type = "https://tools.ietf.org/html/rfc9457#section-3.1",
+            },
             TenantAccessDeniedException deniedEx => new ProblemDetails
             {
                 Status = StatusCodes.Status403Forbidden,

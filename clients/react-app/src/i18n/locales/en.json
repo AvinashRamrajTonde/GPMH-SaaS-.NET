@@ -32,7 +32,7 @@
     "title": "LGD Code Discovery & GP Onboarding Lookup",
     "subtitle": "Fetch authoritative profile from the 27,931-GP Maharashtra LGD Directory REST API.",
     "byCode": "Lookup by LGD Code",
-    "codePlaceholder": "e.g. 171391 (Chincholi Khurd)",
+    "codePlaceholder": "e.g. 171391 (Sonimoha)",
     "verifyBtn": "Verify LGD",
     "orCascade": "Or Select District -> Tehsil -> Gram Panchayat",
     "district": "District",

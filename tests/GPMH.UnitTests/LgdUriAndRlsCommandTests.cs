@@ -30,5 +30,21 @@ public sealed class LgdUriAndRlsCommandTests
         Assert.Equal(TenantRlsConnectionInterceptor.RlsSettingKey, cmd.Parameters["@settingKey"].Value);
         Assert.Equal(tenantId.ToString("D"), cmd.Parameters["@tenantId"].Value);
     }
+
+    [Fact]
+    public void BuildSetTenantCommand_ClearsSessionGucOnUnresolvedTenant()
+    {
+        using SqliteConnection connection = new("DataSource=:memory:");
+
+        using System.Data.Common.DbCommand cmd = TenantRlsConnectionInterceptor.BuildSetTenantCommand(
+            connection,
+            transaction: null,
+            tenantValue: string.Empty,
+            isLocal: false);
+
+        Assert.Equal("SELECT set_config(@settingKey, @tenantId, false);", cmd.CommandText);
+        Assert.Equal(TenantRlsConnectionInterceptor.RlsSettingKey, cmd.Parameters["@settingKey"].Value);
+        Assert.Equal(string.Empty, cmd.Parameters["@tenantId"].Value);
+    }
 }
 

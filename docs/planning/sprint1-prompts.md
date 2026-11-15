@@ -38,3 +38,17 @@ Extend the existing `AuditSaveChangesInterceptor` scaffold in `src/Infrastructur
 1. Connect `clients/react-app` LGD lookup screen to `GET /api/v1/lgd/panchayat/{code}` (or direct `https://api.grampanchayatmh.in/api/v1/`).
 2. Run `.agents/workflows/verification-loop.md`: `dotnet build`, `dotnet test`, `npm run lint && npm run build`, and `bash external-api-proj/tests/test_api.sh`.
 
+---
+
+## Sprint 1 Completion & Progress Matrix
+
+| Issue | Deliverable | Points | GitHub Project #2 Status |
+| :--- | :--- | :---: | :--- |
+| `#5` | Clean Architecture Solution Scaffold & React 19.3 + i18n | 5 | **Done** |
+| `#6` | Multi-Tenant Schema, EF Core Migrations & PostgreSQL `FORCE RLS` | 5 | **Done** |
+| `#7` | Identity, 8+1 Role RBAC & Rotating Refresh Tokens | 3 | **Done** |
+| `#8` | Public LGD Directory REST Client & Endpoints | 3 | **Done** |
+| `#9` | LGD SQLite Directory Hardening & API Tests | 2 | **Done** |
+| `#24` | Immutable Audit Trail, SoftDelete Diffs & Query API | 5 | **Done** |
+| **Total** | **Sprint 1** | **23 / 23** | **100% Complete** |
+

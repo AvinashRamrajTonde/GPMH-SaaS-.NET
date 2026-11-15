@@ -1,18 +1,22 @@
+using System.Security.Cryptography;
 using System.Text;
 using GPMH.Application;
 using GPMH.Application.Common.Interfaces;
 using GPMH.Infrastructure;
+using GPMH.Infrastructure.Identity;
+using GPMH.WebAPI.Authorization;
 using GPMH.WebAPI.Logging;
 using GPMH.WebAPI.Middleware;
 using GPMH.WebAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
-    .CreateBootstrapLogger();
+    .CreateLogger();
 
 try
 {
@@ -43,35 +47,46 @@ try
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
 
-    string? signingKey = builder.Configuration["Jwt:SigningKey"];
-    if (!builder.Environment.IsDevelopment()
-        && !builder.Environment.IsEnvironment("Testing")
-        && string.IsNullOrWhiteSpace(signingKey))
+    string? ephemeralKey = (builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Testing"))
+        ? Convert.ToBase64String(RandomNumberGenerator.GetBytes(48))
+        : null;
+
+    builder.Services.PostConfigure<JwtOptions>(opts =>
     {
-        throw new InvalidOperationException("Jwt:SigningKey must be configured outside Development/Testing environments.");
-    }
+        if (string.IsNullOrWhiteSpace(opts.SigningKey) && ephemeralKey is not null)
+        {
+            opts.SigningKey = ephemeralKey;
+        }
+    });
 
     builder.Services
         .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(options =>
+        .AddJwtBearer();
+
+    builder.Services
+        .AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme)
+        .Configure<IOptions<JwtOptions>>((jwtBearer, jwtOpts) =>
         {
-            if (!string.IsNullOrWhiteSpace(signingKey))
+            JwtOptions resolved = jwtOpts.Value;
+            if (string.IsNullOrWhiteSpace(resolved.SigningKey))
             {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "gpmh-api",
-                    ValidAudience = builder.Configuration["Jwt:Audience"] ?? "gpmh-clients",
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(signingKey)),
-                    ClockSkew = TimeSpan.Zero,
-                };
+                throw new InvalidOperationException("Jwt:SigningKey must be configured.");
             }
+
+            jwtBearer.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = resolved.Issuer,
+                ValidAudience = resolved.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(resolved.SigningKey)),
+                ClockSkew = TimeSpan.Zero,
+            };
         });
 
-    builder.Services.AddAuthorization();
+    builder.Services.AddGpmhAuthorization();
 
     string[] allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
         ?? ["http://localhost:5173"];
@@ -91,6 +106,13 @@ try
     builder.Services.AddOpenApi();
 
     WebApplication app = builder.Build();
+
+    if (!app.Environment.IsDevelopment()
+        && !app.Environment.IsEnvironment("Testing")
+        && string.IsNullOrWhiteSpace(app.Configuration["Jwt:SigningKey"]))
+    {
+        throw new InvalidOperationException("Jwt:SigningKey must be configured outside Development/Testing environments.");
+    }
 
     app.UseMiddleware<CorrelationIdMiddleware>();
     app.UseExceptionHandler();

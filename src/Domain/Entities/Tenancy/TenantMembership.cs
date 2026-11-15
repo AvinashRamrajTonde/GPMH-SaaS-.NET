@@ -12,6 +12,6 @@ public sealed class TenantMembership : BaseEntity, IGlobalEntity
     public Guid UserId { get; set; }
     public Guid TenantId { get; set; }
     public ApplicationRole Role { get; set; }
+    public bool IsDefault { get; set; }
     public bool IsActive { get; set; } = true;
 }
-

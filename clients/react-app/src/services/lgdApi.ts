@@ -24,6 +24,15 @@ export interface LgdPanchayatDetail extends LgdPanchayatSummary {
   tehsil_code: string | null;
 }
 
+export interface LgdStats {
+  state: string;
+  state_code: number;
+  total_districts: number;
+  total_tehsils: number;
+  total_panchayats: number;
+  api_version: string;
+}
+
 interface LgdEnvelope<T> {
   success: boolean;
   execution_time_ms: number;
@@ -79,5 +88,19 @@ export async function getPanchayats(
 
 export async function getPanchayatByLgd(lgdCode: string): Promise<LgdPanchayatDetail> {
   return fetchLgd<LgdPanchayatDetail>(`panchayat/${encodeURIComponent(lgdCode.trim())}`);
+}
+
+export async function searchPanchayats(
+  query: string,
+  limit = 20,
+): Promise<LgdPanchayatSummary[]> {
+  const data = await fetchLgd<{ results: LgdPanchayatSummary[] }>(
+    `search?q=${encodeURIComponent(query.trim())}&limit=${limit}`,
+  );
+  return data.results;
+}
+
+export async function getLgdStats(): Promise<LgdStats> {
+  return fetchLgd<LgdStats>('stats');
 }
 

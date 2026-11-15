@@ -1,8 +1,10 @@
 using GPMH.Application.Common.Interfaces;
 using GPMH.Infrastructure.Auditing;
 using GPMH.Infrastructure.Caching;
+using GPMH.Infrastructure.Identity;
 using GPMH.Infrastructure.Notifications;
 using GPMH.Infrastructure.Persistence;
+using GPMH.Infrastructure.Persistence.Repositories;
 using GPMH.Infrastructure.Services.LgdDirectory;
 using GPMH.Infrastructure.Tenancy;
 using GPMH.Infrastructure.Time;
@@ -23,8 +25,15 @@ public static class DependencyInjection
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
         services.AddScoped<ITenantContext, TenantContext>();
         services.AddScoped<TenantRlsConnectionInterceptor>();
+        services.AddScoped<TenantRlsConnectionOpenedInterceptor>();
         services.AddScoped<AuditSaveChangesInterceptor>();
+        services.AddScoped<IAuditLogReader, AuditLogReader>();
         services.AddScoped<ITenantMembershipValidator, TenantMembershipValidator>();
+        services.AddScoped<IPropertyRepository, PropertyRepository>();
+        services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
+        services.AddSingleton<IPasswordHasherService, PasswordHasherService>();
+        services.AddSingleton<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<IAuthIdentityRepository, AuthIdentityRepository>();
         services.AddSingleton<ICacheService, DistributedCacheService>();
         services.AddSingleton<IEmailService, LoggingEmailService>();
         services.AddSingleton<ISmsService, LoggingSmsService>();
@@ -56,6 +65,7 @@ public static class DependencyInjection
 
             options.AddInterceptors(
                 sp.GetRequiredService<TenantRlsConnectionInterceptor>(),
+                sp.GetRequiredService<TenantRlsConnectionOpenedInterceptor>(),
                 sp.GetRequiredService<AuditSaveChangesInterceptor>());
         });
 

@@ -20,8 +20,13 @@ public sealed class AuditSaveChangesInterceptor(
 {
     private static readonly string[] SensitiveKeywords =
     [
-        "password", "secret", "token", "aadhaar", "aadhar", "pan", "salt", "apikey", "hash",
+        "password", "secret", "token", "aadhaar", "aadhar", "pan", "salt", "apikey", "hash", "encrypted",
     ];
+
+    private static readonly HashSet<string> IgnoredDiffColumns = new(StringComparer.Ordinal)
+    {
+        "ConcurrencyStamp",
+    };
 
     public override InterceptionResult<int> SavingChanges(
         DbContextEventData eventData,
@@ -99,6 +104,11 @@ public sealed class AuditSaveChangesInterceptor(
         foreach (PropertyEntry prop in entry.Properties)
         {
             string propName = prop.Metadata.Name;
+            if (IgnoredDiffColumns.Contains(propName))
+            {
+                continue;
+            }
+
             bool isSensitive = IsSensitiveProperty(propName);
 
             switch (entry.State)
@@ -119,6 +129,8 @@ public sealed class AuditSaveChangesInterceptor(
             }
         }
 
+        string action = ResolveAuditAction(entry);
+
         Guid? entityTenantId = entry.Entity is ITenantEntity t && t.TenantId != Guid.Empty
             ? t.TenantId
             : tenantContext.CurrentTenantId;
@@ -132,15 +144,34 @@ public sealed class AuditSaveChangesInterceptor(
             TenantId = entityTenantId,
             EntityName = entry.Metadata.ClrType.Name,
             EntityId = entityId,
-            Action = entry.State.ToString(),
+            Action = action,
             ActorId = currentUserService.UserId?.ToString(),
             ActorRole = currentUserService.Role?.ToString(),
             CorrelationId = currentUserService.CorrelationId,
+            IpAddress = currentUserService.IpAddress,
+            UserAgent = currentUserService.UserAgent,
             OldValuesJson = oldValues.Count > 0 ? JsonSerializer.Serialize(oldValues) : null,
             NewValuesJson = newValues.Count > 0 ? JsonSerializer.Serialize(newValues) : null,
             ChangedColumnsJson = changedColumns.Count > 0 ? JsonSerializer.Serialize(changedColumns) : null,
             TimestampUtc = timestampUtc,
         };
+    }
+
+    private static string ResolveAuditAction(EntityEntry entry)
+    {
+        if (entry.State == EntityState.Modified)
+        {
+            PropertyEntry? isDeletedProp = entry.Properties.FirstOrDefault(p => p.Metadata.Name == "IsDeleted");
+            if (isDeletedProp is not null
+                && isDeletedProp.IsModified
+                && isDeletedProp.OriginalValue is false
+                && isDeletedProp.CurrentValue is true)
+            {
+                return "SoftDeleted";
+            }
+        }
+
+        return entry.State.ToString();
     }
 
     private static bool IsSensitiveProperty(string propertyName)

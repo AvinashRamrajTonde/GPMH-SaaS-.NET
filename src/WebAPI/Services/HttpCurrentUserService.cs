@@ -43,7 +43,12 @@ public sealed class HttpCurrentUserService(IHttpContextAccessor httpContextAcces
         httpContextAccessor.HttpContext?.Items["CorrelationId"] as string
         ?? httpContextAccessor.HttpContext?.TraceIdentifier;
 
+    public string? IpAddress =>
+        httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString();
+
+    public string? UserAgent =>
+        httpContextAccessor.HttpContext?.Request.Headers.UserAgent.ToString();
+
     public bool IsAuthenticated =>
         httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated == true && UserId.HasValue;
 }
-
