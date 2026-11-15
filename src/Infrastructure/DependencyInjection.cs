@@ -1,5 +1,7 @@
 using GPMH.Application.Common.Interfaces;
 using GPMH.Infrastructure.Auditing;
+using GPMH.Infrastructure.Caching;
+using GPMH.Infrastructure.Notifications;
 using GPMH.Infrastructure.Persistence;
 using GPMH.Infrastructure.Services.LgdDirectory;
 using GPMH.Infrastructure.Tenancy;
@@ -23,6 +25,23 @@ public static class DependencyInjection
         services.AddScoped<TenantRlsConnectionInterceptor>();
         services.AddScoped<AuditSaveChangesInterceptor>();
         services.AddScoped<ITenantMembershipValidator, TenantMembershipValidator>();
+        services.AddSingleton<ICacheService, DistributedCacheService>();
+        services.AddSingleton<IEmailService, LoggingEmailService>();
+        services.AddSingleton<ISmsService, LoggingSmsService>();
+
+        string? redisConnection = configuration.GetConnectionString("Redis");
+        if (!string.IsNullOrWhiteSpace(redisConnection))
+        {
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = redisConnection;
+                options.InstanceName = "gpmh:";
+            });
+        }
+        else
+        {
+            services.AddDistributedMemoryCache();
+        }
 
         string connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is not configured.");

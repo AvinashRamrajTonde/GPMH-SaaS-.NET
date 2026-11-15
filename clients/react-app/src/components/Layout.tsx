@@ -14,10 +14,9 @@ export function Layout({ children }: PropsWithChildren) {
   const { t, i18n } = useTranslation();
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-      isActive
-        ? 'bg-emerald-700 text-white shadow-sm'
-        : 'text-slate-700 hover:bg-slate-200/70'
+    `inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isActive
+      ? 'bg-emerald-700 text-white shadow-sm'
+      : 'text-slate-700 hover:bg-slate-200/70'
     }`;
 
   return (
@@ -58,11 +57,10 @@ export function Layout({ children }: PropsWithChildren) {
                   key={loc.code}
                   type="button"
                   onClick={() => setAppLanguage(loc.code)}
-                  className={`rounded-md px-2.5 py-1 text-xs font-semibold transition ${
-                    active
+                  className={`rounded-md px-2.5 py-1 text-xs font-semibold transition ${active
                       ? 'bg-white text-emerald-700 shadow-sm'
                       : 'text-slate-600 hover:text-slate-900'
-                  }`}
+                    }`}
                 >
                   {t(loc.labelKey)}
                 </button>

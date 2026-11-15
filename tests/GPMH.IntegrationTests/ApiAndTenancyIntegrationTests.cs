@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Json;
 using GPMH.Application.Common.Interfaces;
@@ -7,9 +8,13 @@ using GPMH.Domain.Entities.Tenancy;
 using GPMH.Domain.Enums;
 using GPMH.Domain.Services;
 using GPMH.Infrastructure.Persistence;
+using GPMH.WebAPI.Logging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog.Core;
+using Serilog.Events;
+using Serilog.Parsing;
 using Xunit;
 
 namespace GPMH.IntegrationTests;
@@ -192,6 +197,41 @@ public sealed class ApiAndTenancyIntegrationTests(GpmhApiFactory factory)
             Assert.Contains("UpiId", betaModifiedLogs[0].ChangedColumnsJson, StringComparison.Ordinal);
             Assert.Contains("betagp@sbi", betaModifiedLogs[0].NewValuesJson, StringComparison.Ordinal);
         }
+    }
+
+    [Fact]
+    public async Task InfrastructureServices_And_SerilogEnricher_AreProperlyConfigured()
+    {
+        using IServiceScope scope = factory.Services.CreateScope();
+        ICacheService cache = scope.ServiceProvider.GetRequiredService<ICacheService>();
+        IEmailService email = scope.ServiceProvider.GetRequiredService<IEmailService>();
+        ISmsService sms = scope.ServiceProvider.GetRequiredService<ISmsService>();
+
+        await cache.SetAsync("probe-key", "ok", TimeSpan.FromMinutes(1));
+        Assert.Equal("ok", await cache.GetAsync<string>("probe-key"));
+        await email.SendAsync("clerk@grampanchayat.in", "Test", "<p>Body</p>");
+        await sms.SendAsync("9876543210", "Namuna 9-Ka notice ready.");
+
+        using Activity activity = new("test-span");
+        activity.Start();
+
+        SerilogTelemetryEnricher enricher = new("Testing");
+        LogEvent logEvent = new(
+            DateTimeOffset.UtcNow,
+            LogEventLevel.Information,
+            null,
+            new MessageTemplateParser().Parse("Test"),
+            []);
+
+        enricher.Enrich(logEvent, new PropertyFactoryStub());
+        Assert.Equal("\"Testing\"", logEvent.Properties["Environment"].ToString());
+        Assert.Equal($"\"{activity.TraceId}\"", logEvent.Properties["TraceId"].ToString());
+    }
+
+    private sealed class PropertyFactoryStub : ILogEventPropertyFactory
+    {
+        public LogEventProperty CreateProperty(string name, object? value, bool destructureObjects = false) =>
+            new(name, new ScalarValue(value));
     }
 }
 

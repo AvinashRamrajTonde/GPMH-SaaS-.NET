@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
-@layer base {
-  body {
-    font-family: "Noto Sans Devanagari", "Inter", system-ui, -apple-system, sans-serif;
-  }
+@theme {
+  --font-sans: "Noto Sans Devanagari", "Inter", system-ui, -apple-system, sans-serif;
 }
 
+@layer base {
+  body {
+    font-family: var(--font-sans);
+  }
+}

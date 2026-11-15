@@ -2,6 +2,7 @@ using System.Text;
 using GPMH.Application;
 using GPMH.Application.Common.Interfaces;
 using GPMH.Infrastructure;
+using GPMH.WebAPI.Logging;
 using GPMH.WebAPI.Middleware;
 using GPMH.WebAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -17,11 +18,24 @@ try
 {
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-    builder.Host.UseSerilog((context, services, configuration) => configuration
-        .ReadFrom.Configuration(context.Configuration)
-        .ReadFrom.Services(services)
-        .Enrich.FromLogContext()
-        .WriteTo.Console());
+    builder.Host.UseSerilog((context, services, configuration) =>
+    {
+        configuration
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext()
+            .Enrich.With(new SerilogTelemetryEnricher(context.HostingEnvironment.EnvironmentName))
+            .WriteTo.Console();
+
+        if (!context.HostingEnvironment.IsEnvironment("Testing"))
+        {
+            configuration.WriteTo.File(
+                path: "logs/gpmh-.log",
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 14,
+                shared: true);
+        }
+    });
 
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddScoped<ICurrentUserService, HttpCurrentUserService>();
@@ -85,6 +99,7 @@ try
     {
         app.MapOpenApi();
         app.MapScalarApiReference();
+        app.MapGet("/swagger", () => Results.Redirect("/scalar/v1")).ExcludeFromDescription();
     }
 
     app.UseCors("FrontendPolicy");
