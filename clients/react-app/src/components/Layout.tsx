@@ -14,6 +14,7 @@ import {
   PanelLeftOpen,
   Printer,
   ReceiptText,
+  Scissors,
   ShieldCheck,
   SlidersHorizontal,
   UserCheck,
@@ -515,6 +516,20 @@ export function Layout({ children }: PropsWithChildren) {
                       <GitBranch className="h-[18px] w-[18px]" />
                     </span>
                     {!sidebarCollapsed && <span className="truncate">{t('nav.mutations')}</span>}
+                  </>
+                )}
+              </NavLink>
+
+              <NavLink to="/namuna-8/partition" className={navLinkClass} onClick={() => setMobileOpen(false)}>
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-brand-700" />
+                    )}
+                    <span className={iconBoxClass(isActive)}>
+                      <Scissors className="h-[18px] w-[18px]" />
+                    </span>
+                    {!sidebarCollapsed && <span className="truncate">{t('nav.partition')}</span>}
                   </>
                 )}
               </NavLink>

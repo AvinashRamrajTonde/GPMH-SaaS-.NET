@@ -36,6 +36,11 @@ const MutationRegisterPage = lazy(() =>
     default: m.MutationRegisterPage,
   })),
 );
+const PropertyPartitionWizardPage = lazy(() =>
+  import('./features/partitions/PropertyPartitionWizardPage').then((m) => ({
+    default: m.PropertyPartitionWizardPage,
+  })),
+);
 const MutationFormPage = lazy(() =>
   import('./features/mutations/MutationFormPage').then((m) => ({
     default: m.MutationFormPage,
@@ -103,10 +108,8 @@ export function App() {
                 <Route path="/namuna-8/print" element={<Namuna8PrintPage />} />
                 <Route path="/namuna-8/print/:id" element={<Namuna8PrintPage />} />
                 <Route path="/verify/extract/:token" element={<ExtractVerifyPage />} />
-                <Route
-                  path="/namuna-8/partition/:id"
-                  element={<PlannedModulePage titleKey="properties.partitionBtn" sprintNumber={3} />}
-                />
+                <Route path="/namuna-8/partition" element={<PropertyPartitionWizardPage />} />
+                <Route path="/namuna-8/partition/:id" element={<PropertyPartitionWizardPage />} />
                 <Route path="/citizens" element={<CitizensPage />} />
                 <Route path="/formula" element={<FormulaMastersPage />} />
                 <Route path="/namuna-8/formula" element={<FormulaMastersPage />} />
