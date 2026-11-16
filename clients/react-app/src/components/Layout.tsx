@@ -12,6 +12,7 @@ import {
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
+  Printer,
   ReceiptText,
   ShieldCheck,
   SlidersHorizontal,
@@ -443,6 +444,19 @@ export function Layout({ children }: PropsWithChildren) {
                       <Users className="h-[18px] w-[18px]" />
                     </span>
                     {!sidebarCollapsed && <span className="truncate">{t('nav.citizens')}</span>}
+                  </>
+                )}
+              </NavLink>
+              <NavLink to="/namuna-8/print" className={navLinkClass} onClick={() => setMobileOpen(false)}>
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-brand-700" />
+                    )}
+                    <span className={iconBoxClass(isActive)}>
+                      <Printer className="h-[18px] w-[18px]" />
+                    </span>
+                    {!sidebarCollapsed && <span className="truncate">{t('nav.namuna8Print')}</span>}
                   </>
                 )}
               </NavLink>

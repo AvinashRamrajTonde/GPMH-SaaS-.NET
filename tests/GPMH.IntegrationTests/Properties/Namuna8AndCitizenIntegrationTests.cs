@@ -24,12 +24,14 @@ namespace GPMH.IntegrationTests.Properties;
 public sealed class Namuna8AndCitizenIntegrationTests(GpmhApiFactory factory)
     : IClassFixture<GpmhApiFactory>
 {
+    private static int _lgdSequence = 570000;
+
     private async Task<(Guid TenantId, Guid GramsevakUserId, Guid AuditorUserId)> SeedTenantAsync(bool seedFormulasAndYear = true)
     {
         Guid tenantId = Guid.NewGuid();
         Guid gramsevakUserId = Guid.NewGuid();
         Guid auditorUserId = Guid.NewGuid();
-        string lgdCode = $"57{Random.Shared.Next(1000, 9999)}";
+        string lgdCode = Interlocked.Increment(ref _lgdSequence).ToString();
 
         using IServiceScope scope = factory.Services.CreateScope();
         AppDbContext db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

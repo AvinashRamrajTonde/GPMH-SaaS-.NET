@@ -25,6 +25,12 @@ const PropertyDetailPage = lazy(() =>
 const CitizensPage = lazy(() =>
   import('./features/citizens/CitizensPage').then((m) => ({ default: m.CitizensPage })),
 );
+const Namuna8PrintPage = lazy(() =>
+  import('./features/print/Namuna8PrintPage').then((m) => ({ default: m.Namuna8PrintPage })),
+);
+const ExtractVerifyPage = lazy(() =>
+  import('./features/print/ExtractVerifyPage').then((m) => ({ default: m.ExtractVerifyPage })),
+);
 const FormulaMastersPage = lazy(() =>
   import('./features/formula/FormulaMastersPage').then((m) => ({ default: m.FormulaMastersPage })),
 );
@@ -84,10 +90,9 @@ export function App() {
                 <Route path="/namuna-8/add" element={<PropertyFormPage />} />
                 <Route path="/namuna-8/edit/:id" element={<PropertyFormPage />} />
                 <Route path="/namuna-8/view/:id" element={<PropertyDetailPage />} />
-                <Route
-                  path="/namuna-8/print"
-                  element={<PlannedModulePage titleKey="properties.printExtractBtn" sprintNumber={3} />}
-                />
+                <Route path="/namuna-8/print" element={<Namuna8PrintPage />} />
+                <Route path="/namuna-8/print/:id" element={<Namuna8PrintPage />} />
+                <Route path="/verify/extract/:token" element={<ExtractVerifyPage />} />
                 <Route
                   path="/namuna-8/partition/:id"
                   element={<PlannedModulePage titleKey="properties.partitionBtn" sprintNumber={3} />}

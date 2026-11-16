@@ -103,3 +103,41 @@ export async function apiFetchBlobUrl(relativePath: string): Promise<string> {
   const blob = await response.blob();
   return URL.createObjectURL(blob);
 }
+
+export async function apiDownloadFile(
+  relativePath: string,
+  fallbackFilename: string,
+): Promise<{ blob: Blob; fileName: string }> {
+  const cleanPath = relativePath.replace(/^\/+/, '');
+  const headers = buildAuthHeaders();
+  headers.set('Accept', 'application/pdf, application/json');
+
+  const response = await fetch(`${API_BASE_URL}${cleanPath}`, {
+    headers,
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    let problem: ProblemDetails = {
+      title: 'Download Failed',
+      status: response.status,
+      detail: response.statusText,
+    };
+    try {
+      problem = (await response.json()) as ProblemDetails;
+    } catch {
+      // Non-JSON failure
+    }
+    throw new ApiProblemError(problem);
+  }
+
+  const disp = response.headers.get('Content-Disposition') || '';
+  const match = /filename="?([^";\n]+)"?/i.exec(disp);
+  const fileName = match?.[1]?.trim() || fallbackFilename;
+  const blob = await response.blob();
+  return { blob, fileName };
+}
+
+export function getApiBaseUrl(): string {
+  return API_BASE_URL;
+}

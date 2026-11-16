@@ -19,12 +19,14 @@ namespace GPMH.IntegrationTests.Formula;
 public sealed class FormulaMastersIntegrationTests(GpmhApiFactory factory)
     : IClassFixture<GpmhApiFactory>
 {
+    private static int _lgdSequence = 550000;
+
     private async Task<(Guid TenantId, Guid GramsevakUserId, Guid OperatorUserId)> SeedTenantWithFormulasAsync()
     {
         Guid tenantId = Guid.NewGuid();
         Guid gramsevakUserId = Guid.NewGuid();
         Guid operatorUserId = Guid.NewGuid();
-        string lgdCode = $"55{Random.Shared.Next(1000, 9999)}";
+        string lgdCode = Interlocked.Increment(ref _lgdSequence).ToString();
 
         using IServiceScope scope = factory.Services.CreateScope();
         AppDbContext db = scope.ServiceProvider.GetRequiredService<AppDbContext>();

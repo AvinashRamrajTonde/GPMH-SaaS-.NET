@@ -29,6 +29,10 @@
     <!-- Logging -->
     <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
 
+    <!-- Statutory Printing & QR Codes -->
+    <PackageVersion Include="QuestPDF" Version="2026.9.2" />
+    <PackageVersion Include="QRCoder" Version="1.8.1" />
+
     <!-- Testing & Architecture Enforcement -->
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.1" />

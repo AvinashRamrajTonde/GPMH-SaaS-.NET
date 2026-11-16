@@ -159,6 +159,13 @@ export function PropertiesPage() {
               <Users className="h-4 w-4" />
               {t('nav.citizens')}
             </Link>
+            <Link
+              to="/namuna-8/print"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface px-3.5 py-2 text-xs font-bold text-slate-700 hover:border-brand-300 hover:bg-brand-50 hover:text-brand-800"
+            >
+              <Printer className="h-4 w-4" />
+              {t('nav.namuna8Print')}
+            </Link>
             {canWrite && (
               <Link
                 to="/namuna-8/add"
