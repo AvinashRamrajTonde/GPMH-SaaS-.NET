@@ -7,6 +7,7 @@ using GPMH.Application.Features.Tax.Queries;
 using GPMH.Domain.Entities.Assessments;
 using GPMH.Domain.Entities.Tenancy;
 using GPMH.Domain.Services;
+using GPMH.Domain.ValueObjects;
 using MediatR;
 
 namespace GPMH.Application.Features.Properties.Commands;
@@ -229,6 +230,19 @@ internal static class PropertyAssessmentHelper
             };
 
             decimal assessedCurrentDemand = property.IsTaxExempt ? 0m : r.TotalTax;
+            DemandHeadBreakdown currentHeads = property.IsTaxExempt
+                ? DemandHeadBreakdown.Empty
+                : DemandHeadMapper.FromTaxHeads(
+                    r.BuildingTax,
+                    r.OpenLandTax,
+                    r.LightingTax,
+                    r.HealthTax,
+                    r.SanitationTax,
+                    r.ToiletTax,
+                    r.WaterTax,
+                    r.OtherTax,
+                    property.WaterConnectionCode);
+
             draftDemand = new PropertyDemand
             {
                 TenantId = tenantId,
@@ -238,9 +252,14 @@ internal static class PropertyAssessmentHelper
                 CurrentDemand = assessedCurrentDemand,
                 RebateAmount = 0m,
                 PenaltyAmount = 0m,
+                NoticeFee = 0m,
+                WarrantFee = 0m,
                 PaidAmount = 0m,
                 PendingBalance = assessedCurrentDemand,
-                Status = "DraftAssessment",
+                EarlyRebateEligible = assessedCurrentDemand > 0m,
+                RebateCutoffDate = Namuna9RebateAndPenaltyCalculator.DefaultRebateCutoff(activeYear.StartYear),
+                CurrentByHeadJson = currentHeads.ToJson(),
+                Status = PropertyDemand.StatusDraft,
             };
         }
 

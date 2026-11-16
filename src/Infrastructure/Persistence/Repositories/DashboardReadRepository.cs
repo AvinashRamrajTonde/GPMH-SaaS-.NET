@@ -81,15 +81,17 @@ public sealed class DashboardReadRepository(AppDbContext dbContext) : IDashboard
         int setupProgress = Math.Max(gp?.SetupProgressPct ?? 0, computedPct);
 
         decimal currentFyDemand = 0m;
+        decimal outstandingArrears = 0m;
         if (activeYear is not null)
         {
-            List<decimal> demands = await dbContext.PropertyDemands
+            var demands = await dbContext.PropertyDemands
                 .AsNoTracking()
                 .Where(d => d.AssessmentYearId == activeYear.Id)
-                .Select(d => d.CurrentDemand)
+                .Select(d => new { d.CurrentDemand, d.ArrearsBalance, d.PendingBalance })
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
-            currentFyDemand = demands.Sum();
+            currentFyDemand = demands.Sum(d => d.CurrentDemand);
+            outstandingArrears = demands.Sum(d => Math.Min(d.ArrearsBalance, d.PendingBalance));
         }
 
         int pendingMutations = await dbContext.PropertyMutations
@@ -108,7 +110,7 @@ public sealed class DashboardReadRepository(AppDbContext dbContext) : IDashboard
             CurrentFyDemand: currentFyDemand,
             TodayCollection: 0m,
             MonthCollection: 0m,
-            OutstandingArrears: 0m,
+            OutstandingArrears: outstandingArrears,
             PendingMutations: pendingMutations,
             WaterAndSpecialCollection: 0m,
             TodayReceipts: 0,

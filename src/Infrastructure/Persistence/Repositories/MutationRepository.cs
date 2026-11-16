@@ -1,11 +1,11 @@
 using System.Globalization;
-using System.Security.Cryptography;
 using System.Text.Json;
 using GPMH.Application.Common.Interfaces;
 using GPMH.Application.DTOs.Mutations;
 using GPMH.Domain.Entities.Assessments;
 using GPMH.Domain.Entities.Auditing;
 using GPMH.Domain.Entities.Tenancy;
+using GPMH.Infrastructure.Printing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -384,25 +384,9 @@ public sealed class MutationRepository(
                 ResolutionDisplay: resolutionText));
         }
 
-        byte[]? gsSig = null;
-        if (gp is not null && !string.IsNullOrWhiteSpace(gp.GramsevakSignatureKey))
-        {
-            ProtectedAsset? asset = await dbContext.ProtectedAssets
-                .AsNoTracking()
-                .FirstOrDefaultAsync(a => a.TenantId == tenantId && a.AssetKey == gp.GramsevakSignatureKey, cancellationToken)
-                .ConfigureAwait(false);
-            if (asset is not null)
-            {
-                try
-                {
-                    gsSig = piiProtectionService.DecryptBytes(asset.EncryptedContent);
-                }
-                catch (CryptographicException)
-                {
-                    gsSig = null;
-                }
-            }
-        }
+        byte[]? gsSig = await StatutoryPrintAssetHelper
+            .TryLoadProtectedImageAsync(dbContext, piiProtectionService, tenantId, gp?.GramsevakSignatureKey, cancellationToken)
+            .ConfigureAwait(false);
 
         return new MutationRegisterPdfDocumentModel(
             TenantId: tenantId,

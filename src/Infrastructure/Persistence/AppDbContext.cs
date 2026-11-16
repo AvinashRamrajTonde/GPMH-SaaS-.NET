@@ -30,6 +30,8 @@ public sealed class AppDbContext(
     public DbSet<PropertyConstruction> PropertyConstructions => Set<PropertyConstruction>();
     public DbSet<PropertyTaxCalc> PropertyTaxCalcs => Set<PropertyTaxCalc>();
     public DbSet<PropertyDemand> PropertyDemands => Set<PropertyDemand>();
+    public DbSet<PropertyDemandBill> PropertyDemandBills => Set<PropertyDemandBill>();
+    public DbSet<BillCounter> BillCounters => Set<BillCounter>();
     public DbSet<PropertyMutation> PropertyMutations => Set<PropertyMutation>();
     public DbSet<FormulaSetting> FormulaSettings => Set<FormulaSetting>();
     public DbSet<ConstructionTypeMaster> ConstructionTypeMasters => Set<ConstructionTypeMaster>();
@@ -332,9 +334,17 @@ public sealed class AppDbContext(
             entity.Property(e => e.CurrentDemand).HasPrecision(14, 2);
             entity.Property(e => e.RebateAmount).HasPrecision(14, 2);
             entity.Property(e => e.PenaltyAmount).HasPrecision(14, 2);
+            entity.Property(e => e.NoticeFee).HasPrecision(14, 2).HasDefaultValue(0m);
+            entity.Property(e => e.WarrantFee).HasPrecision(14, 2).HasDefaultValue(0m);
             entity.Property(e => e.PaidAmount).HasPrecision(14, 2);
             entity.Property(e => e.PendingBalance).HasPrecision(14, 2);
             entity.Property(e => e.Status).HasMaxLength(32).IsRequired();
+            entity.Property(e => e.EarlyRebateEligible).HasDefaultValue(false);
+            entity.Property(e => e.EarlyRebateApplied).HasDefaultValue(false);
+            entity.Property(e => e.DemandRemarks).HasMaxLength(600);
+            entity.Property(e => e.ArrearsByHeadJson).HasDefaultValue("{}").IsRequired();
+            entity.Property(e => e.CurrentByHeadJson).HasDefaultValue("{}").IsRequired();
+            entity.Property(e => e.CollectedByHeadJson).HasDefaultValue("{}").IsRequired();
             entity.HasIndex(e => new { e.TenantId, e.PropertyId, e.AssessmentYearId }).IsUnique();
             entity.HasOne<Property>()
                 .WithMany()
@@ -344,6 +354,50 @@ public sealed class AppDbContext(
                 .WithMany()
                 .HasForeignKey(e => e.AssessmentYearId)
                 .OnDelete(DeleteBehavior.Restrict);
+            entity.HasQueryFilter(e =>
+                tenantContext.CurrentTenantId != null &&
+                (Guid?)e.TenantId == tenantContext.CurrentTenantId);
+        });
+
+        modelBuilder.Entity<PropertyDemandBill>(entity =>
+        {
+            entity.ToTable("property_demand_bills");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.BillNo).HasMaxLength(40).IsRequired();
+            entity.Property(e => e.ArrearsAmount).HasPrecision(14, 2);
+            entity.Property(e => e.CurrentAmount).HasPrecision(14, 2);
+            entity.Property(e => e.NoticeAndPenaltyAmount).HasPrecision(14, 2);
+            entity.Property(e => e.RebateAmount).HasPrecision(14, 2);
+            entity.Property(e => e.NetPayableAmount).HasPrecision(14, 2);
+            entity.Property(e => e.HeadBreakdownJson).HasDefaultValue("{}").IsRequired();
+            entity.Property(e => e.UpiIdUsed).HasMaxLength(120);
+            entity.Property(e => e.UpiPayUri).HasMaxLength(512);
+            entity.Property(e => e.Status).HasMaxLength(32).IsRequired();
+            entity.HasIndex(e => new { e.TenantId, e.BillNo }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.PropertyId, e.AssessmentYearId, e.Status });
+            entity.HasIndex(e => new { e.TenantId, e.PropertyDemandId });
+            entity.HasOne<Property>()
+                .WithMany()
+                .HasForeignKey(e => e.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<PropertyDemand>()
+                .WithMany()
+                .HasForeignKey(e => e.PropertyDemandId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<AssessmentYear>()
+                .WithMany()
+                .HasForeignKey(e => e.AssessmentYearId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasQueryFilter(e =>
+                tenantContext.CurrentTenantId != null &&
+                (Guid?)e.TenantId == tenantContext.CurrentTenantId);
+        });
+
+        modelBuilder.Entity<BillCounter>(entity =>
+        {
+            entity.ToTable("bill_counters");
+            entity.HasKey(e => new { e.TenantId, e.FinancialYear });
+            entity.Property(e => e.FinancialYear).HasMaxLength(16).IsRequired();
             entity.HasQueryFilter(e =>
                 tenantContext.CurrentTenantId != null &&
                 (Guid?)e.TenantId == tenantContext.CurrentTenantId);

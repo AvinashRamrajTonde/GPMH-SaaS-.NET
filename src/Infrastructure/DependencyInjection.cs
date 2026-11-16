@@ -37,6 +37,8 @@ public static class DependencyInjection
         services.AddScoped<ICitizenRepository, CitizenRepository>();
         services.AddScoped<IMutationRepository, MutationRepository>();
         services.AddScoped<IPartitionRepository, PartitionRepository>();
+        services.AddScoped<INamuna9Repository, Namuna9Repository>();
+        services.AddScoped<INamuna9KaRepository, Namuna9KaRepository>();
         services.AddScoped<IFormulaMasterRepository, FormulaMasterRepository>();
         services.AddScoped<IDefaultFormulaSeeder, DefaultFormulaSeeder>();
         services.AddScoped<IOnboardingRepository, OnboardingRepository>();
