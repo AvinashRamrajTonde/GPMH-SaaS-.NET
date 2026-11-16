@@ -20,7 +20,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        bool allowDevelopmentSqlite = false)
     {
         ArgumentNullException.ThrowIfNull(configuration);
 
@@ -64,13 +65,29 @@ public static class DependencyInjection
         string connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? throw new InvalidOperationException("ConnectionStrings:DefaultConnection is not configured.");
 
+        string databaseProvider = configuration["Database:Provider"] ?? "Postgres";
+        bool useSqlite = string.Equals(databaseProvider, "Sqlite", StringComparison.OrdinalIgnoreCase);
+
+        if (useSqlite && !allowDevelopmentSqlite)
+        {
+            throw new InvalidOperationException(
+                "Database:Provider=Sqlite is permitted only in Development or Testing environments.");
+        }
+
         services.AddDbContext<AppDbContext>((sp, options) =>
         {
-            options.UseNpgsql(connectionString, npgsql =>
+            if (useSqlite)
             {
-                npgsql.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
-                npgsql.EnableRetryOnFailure(maxRetryCount: 3);
-            });
+                options.UseSqlite(connectionString);
+            }
+            else
+            {
+                options.UseNpgsql(connectionString, npgsql =>
+                {
+                    npgsql.MigrationsAssembly(typeof(AppDbContext).Assembly.FullName);
+                    npgsql.EnableRetryOnFailure(maxRetryCount: 3);
+                });
+            }
 
             options.AddInterceptors(
                 sp.GetRequiredService<TenantRlsConnectionInterceptor>(),
@@ -88,7 +105,7 @@ public static class DependencyInjection
         }).AddStandardResilienceHandler();
 
         services.AddHealthChecks()
-            .AddDbContextCheck<AppDbContext>("postgresql");
+            .AddDbContextCheck<AppDbContext>(useSqlite ? "sqlite" : "postgresql");
 
         return services;
     }

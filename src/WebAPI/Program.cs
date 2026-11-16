@@ -45,8 +45,9 @@ try
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddScoped<ICurrentUserService, HttpCurrentUserService>();
 
+    bool allowDevelopmentSqlite = builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Testing");
     builder.Services.AddApplication();
-    builder.Services.AddInfrastructure(builder.Configuration);
+    builder.Services.AddInfrastructure(builder.Configuration, allowDevelopmentSqlite);
 
     string? ephemeralKey = (builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Testing"))
         ? Convert.ToBase64String(RandomNumberGenerator.GetBytes(48))
@@ -135,6 +136,19 @@ try
             string.IsNullOrWhiteSpace(app.Configuration["Security:BlindIndexKey"])))
     {
         throw new InvalidOperationException("Jwt:SigningKey and Security PII keys must be configured outside Development/Testing environments.");
+    }
+
+    if (!app.Environment.IsDevelopment()
+        && !app.Environment.IsEnvironment("Testing")
+        && string.Equals(app.Configuration["Database:Provider"], "Sqlite", StringComparison.OrdinalIgnoreCase))
+    {
+        throw new InvalidOperationException("Database:Provider=Sqlite is strictly disallowed outside Development/Testing environments.");
+    }
+
+    if (app.Environment.IsDevelopment()
+        && string.Equals(app.Configuration["Database:Provider"], "Sqlite", StringComparison.OrdinalIgnoreCase))
+    {
+        await app.Services.InitializeDevelopmentDatabaseAsync(app.Configuration, CancellationToken.None);
     }
 
     app.UseMiddleware<CorrelationIdMiddleware>();
