@@ -10,6 +10,11 @@ import { formatDateTime } from '../../utils/formatters';
 
 const ENTITY_TYPES = [
   'Property',
+  'Citizen',
+  'PropertyOwner',
+  'PropertyConstruction',
+  'PropertyTaxCalc',
+  'PropertyDemand',
   'FormulaSetting',
   'ConstructionTypeMaster',
   'DepreciationSlab',

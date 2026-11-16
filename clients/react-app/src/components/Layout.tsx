@@ -16,6 +16,7 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   UserCheck,
+  Users,
   X,
 } from 'lucide-react';
 import { useEffect, useState, type PropsWithChildren } from 'react';
@@ -429,6 +430,19 @@ export function Layout({ children }: PropsWithChildren) {
                       <SlidersHorizontal className="h-[18px] w-[18px]" />
                     </span>
                     {!sidebarCollapsed && <span className="truncate">{t('nav.formula')}</span>}
+                  </>
+                )}
+              </NavLink>
+              <NavLink to="/citizens" className={navLinkClass} onClick={() => setMobileOpen(false)}>
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-brand-700" />
+                    )}
+                    <span className={iconBoxClass(isActive)}>
+                      <Users className="h-[18px] w-[18px]" />
+                    </span>
+                    {!sidebarCollapsed && <span className="truncate">{t('nav.citizens')}</span>}
                   </>
                 )}
               </NavLink>

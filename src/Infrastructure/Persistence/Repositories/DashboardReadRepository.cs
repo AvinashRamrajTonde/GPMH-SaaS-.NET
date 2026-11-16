@@ -80,6 +80,18 @@ public sealed class DashboardReadRepository(AppDbContext dbContext) : IDashboard
         int computedPct = (checklist.Count(s => s.IsCompleted) * 100) / checklist.Length;
         int setupProgress = Math.Max(gp?.SetupProgressPct ?? 0, computedPct);
 
+        decimal currentFyDemand = 0m;
+        if (activeYear is not null)
+        {
+            List<decimal> demands = await dbContext.PropertyDemands
+                .AsNoTracking()
+                .Where(d => d.AssessmentYearId == activeYear.Id)
+                .Select(d => d.CurrentDemand)
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+            currentFyDemand = demands.Sum();
+        }
+
         return new DashboardSummaryDto(
             TenantId: tenantId,
             PanchayatNameEn: gp?.PanchayatNameEn ?? tenant.NameEn,
@@ -88,7 +100,7 @@ public sealed class DashboardReadRepository(AppDbContext dbContext) : IDashboard
             ActiveAssessmentYear: activeYear?.YearLabel ?? "2026-27",
             SetupProgressPct: setupProgress,
             TotalProperties: totalProperties,
-            CurrentFyDemand: 0m,
+            CurrentFyDemand: currentFyDemand,
             TodayCollection: 0m,
             MonthCollection: 0m,
             OutstandingArrears: 0m,

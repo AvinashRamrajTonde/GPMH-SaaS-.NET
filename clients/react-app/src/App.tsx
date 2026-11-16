@@ -14,6 +14,17 @@ const OnboardingLgdPage = lazy(() =>
 const PropertiesPage = lazy(() =>
   import('./features/properties/PropertiesPage').then((m) => ({ default: m.PropertiesPage })),
 );
+const PropertyFormPage = lazy(() =>
+  import('./features/properties/PropertyFormPage').then((m) => ({ default: m.PropertyFormPage })),
+);
+const PropertyDetailPage = lazy(() =>
+  import('./features/properties/PropertyDetailPage').then((m) => ({
+    default: m.PropertyDetailPage,
+  })),
+);
+const CitizensPage = lazy(() =>
+  import('./features/citizens/CitizensPage').then((m) => ({ default: m.CitizensPage })),
+);
 const FormulaMastersPage = lazy(() =>
   import('./features/formula/FormulaMastersPage').then((m) => ({ default: m.FormulaMastersPage })),
 );
@@ -69,7 +80,19 @@ export function App() {
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/onboarding" element={<OnboardingLgdPage />} />
                 <Route path="/properties" element={<PropertiesPage />} />
-                <Route path="/namuna-8/add" element={<PropertiesPage />} />
+                <Route path="/namuna-8" element={<PropertiesPage />} />
+                <Route path="/namuna-8/add" element={<PropertyFormPage />} />
+                <Route path="/namuna-8/edit/:id" element={<PropertyFormPage />} />
+                <Route path="/namuna-8/view/:id" element={<PropertyDetailPage />} />
+                <Route
+                  path="/namuna-8/print"
+                  element={<PlannedModulePage titleKey="properties.printExtractBtn" sprintNumber={3} />}
+                />
+                <Route
+                  path="/namuna-8/partition/:id"
+                  element={<PlannedModulePage titleKey="properties.partitionBtn" sprintNumber={3} />}
+                />
+                <Route path="/citizens" element={<CitizensPage />} />
                 <Route path="/formula" element={<FormulaMastersPage />} />
                 <Route path="/namuna-8/formula" element={<FormulaMastersPage />} />
                 <Route path="/audit" element={<AuditLogPage />} />

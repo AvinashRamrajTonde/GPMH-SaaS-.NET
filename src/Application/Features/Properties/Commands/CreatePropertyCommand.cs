@@ -18,7 +18,16 @@ public sealed record CreatePropertyCommand(
     string? BoundarySouth = null,
     string WaterConnectionCode = "NONE",
     bool IsTaxExempt = false,
-    Guid? ParentPropertyId = null) : IRequest<PropertyDto>;
+    Guid? ParentPropertyId = null,
+    string? StreetOrLaneName = null,
+    string? CitySurveyOrGutNo = null,
+    string? OccupierName = null,
+    string? PropertyDescription = null,
+    decimal OtherTax = 0m,
+    string? OpenPlotConstructionCode = null,
+    IReadOnlyList<PropertyOwnerRequestItem>? Owners = null,
+    IReadOnlyList<PropertyFloorRequestItem>? Floors = null,
+    bool CalculateTax = false) : IRequest<PropertyDto>;
 
 public sealed class CreatePropertyCommandValidator : AbstractValidator<CreatePropertyCommand>
 {
@@ -26,10 +35,15 @@ public sealed class CreatePropertyCommandValidator : AbstractValidator<CreatePro
     {
         RuleFor(x => x.WardNo).NotEmpty().MaximumLength(40);
         RuleFor(x => x.PropertyNo).NotEmpty().MaximumLength(40);
+        RuleFor(x => x.StreetOrLaneName).MaximumLength(160);
+        RuleFor(x => x.CitySurveyOrGutNo).MaximumLength(60);
+        RuleFor(x => x.OccupierName).MaximumLength(200);
+        RuleFor(x => x.PropertyDescription).MaximumLength(300);
         RuleFor(x => x.BuiltUpAreaSqFt).GreaterThanOrEqualTo(0m);
         RuleFor(x => x.OpenPlotAreaSqFt).GreaterThanOrEqualTo(0m);
-        RuleFor(x => x.BuiltUpAreaSqFt + x.OpenPlotAreaSqFt)
-            .GreaterThan(0m)
+        RuleFor(x => x.OtherTax).GreaterThanOrEqualTo(0m);
+        RuleFor(x => x)
+            .Must(x => x.BuiltUpAreaSqFt + x.OpenPlotAreaSqFt > 0m || (x.Floors is { Count: > 0 }))
             .WithMessage("Total property area must be greater than zero.");
         RuleFor(x => x.WaterConnectionCode).NotEmpty().MaximumLength(24);
     }
@@ -37,7 +51,9 @@ public sealed class CreatePropertyCommandValidator : AbstractValidator<CreatePro
 
 public sealed class CreatePropertyCommandHandler(
     IPropertyRepository propertyRepository,
-    ITenantContext tenantContext)
+    ICitizenRepository citizenRepository,
+    ITenantContext tenantContext,
+    ISender sender)
     : IRequestHandler<CreatePropertyCommand, PropertyDto>
 {
     public async Task<PropertyDto> Handle(CreatePropertyCommand request, CancellationToken cancellationToken)
@@ -62,6 +78,10 @@ public sealed class CreatePropertyCommandHandler(
             ParentPropertyId = request.ParentPropertyId,
             WardNo = wardNo,
             PropertyNo = propertyNo,
+            StreetOrLaneName = string.IsNullOrWhiteSpace(request.StreetOrLaneName) ? null : request.StreetOrLaneName.Trim(),
+            CitySurveyOrGutNo = string.IsNullOrWhiteSpace(request.CitySurveyOrGutNo) ? null : request.CitySurveyOrGutNo.Trim(),
+            OccupierName = string.IsNullOrWhiteSpace(request.OccupierName) ? null : request.OccupierName.Trim(),
+            PropertyDescription = string.IsNullOrWhiteSpace(request.PropertyDescription) ? null : request.PropertyDescription.Trim(),
             BuiltUpAreaSqFt = request.BuiltUpAreaSqFt,
             OpenPlotAreaSqFt = request.OpenPlotAreaSqFt,
             TotalAreaSqFt = request.BuiltUpAreaSqFt + request.OpenPlotAreaSqFt,
@@ -70,34 +90,55 @@ public sealed class CreatePropertyCommandHandler(
             BoundaryNorth = request.BoundaryNorth?.Trim(),
             BoundarySouth = request.BoundarySouth?.Trim(),
             WaterConnectionCode = request.WaterConnectionCode.Trim().ToUpperInvariant(),
+            OtherTax = request.OtherTax,
             IsTaxExempt = request.IsTaxExempt,
+            Status = "Active",
         };
 
-        await propertyRepository.AddAsync(property, cancellationToken).ConfigureAwait(false);
-        await propertyRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        (
+            IReadOnlyList<PropertyOwner>? owners,
+            IReadOnlyList<PropertyConstruction>? constructions,
+            PropertyTaxCalc? taxCalc,
+            PropertyDemand? draftDemand,
+            decimal computedBuiltUpSqFt,
+            string? primaryOwnerNameMr,
+            string? primaryOwnerNameEn) = await PropertyAssessmentHelper.PrepareAssessmentAsync(
+                tenantId,
+                property,
+                request.Owners,
+                request.Floors,
+                request.CalculateTax || (request.Owners is { Count: > 0 }),
+                request.OpenPlotConstructionCode,
+                propertyRepository,
+                citizenRepository,
+                sender,
+                cancellationToken).ConfigureAwait(false);
 
-        return property.ToDto();
+        if (request.Floors is { Count: > 0 })
+        {
+            property.BuiltUpAreaSqFt = computedBuiltUpSqFt;
+            property.TotalAreaSqFt = computedBuiltUpSqFt + property.OpenPlotAreaSqFt;
+        }
+
+        await propertyRepository.AddAsync(property, cancellationToken).ConfigureAwait(false);
+        await propertyRepository
+            .PersistFullAssessmentAsync(
+                property,
+                owners,
+                constructions,
+                taxCalc,
+                draftDemand,
+                replaceOwnersAndConstructions: false,
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        return property.ToDto() with
+        {
+            PrimaryOwnerNameMr = primaryOwnerNameMr,
+            PrimaryOwnerNameEn = primaryOwnerNameEn,
+            TotalAnnualTax = taxCalc?.TotalTax,
+            PendingBalance = draftDemand?.PendingBalance,
+            FloorCount = constructions?.Count ?? 0,
+        };
     }
 }
-
-internal static class PropertyMappingExtensions
-{
-    public static PropertyDto ToDto(this Property property) =>
-        new(
-            property.Id,
-            property.TenantId,
-            property.ParentPropertyId,
-            property.WardNo,
-            property.PropertyNo,
-            property.BuiltUpAreaSqFt,
-            property.OpenPlotAreaSqFt,
-            property.TotalAreaSqFt,
-            property.BoundaryEast,
-            property.BoundaryWest,
-            property.BoundaryNorth,
-            property.BoundarySouth,
-            property.WaterConnectionCode,
-            property.IsTaxExempt,
-            property.IsActive);
-}
-

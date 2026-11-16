@@ -33,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<IAuditLogReader, AuditLogReader>();
         services.AddScoped<ITenantMembershipValidator, TenantMembershipValidator>();
         services.AddScoped<IPropertyRepository, PropertyRepository>();
+        services.AddScoped<ICitizenRepository, CitizenRepository>();
         services.AddScoped<IFormulaMasterRepository, FormulaMasterRepository>();
         services.AddScoped<IDefaultFormulaSeeder, DefaultFormulaSeeder>();
         services.AddScoped<IOnboardingRepository, OnboardingRepository>();

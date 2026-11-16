@@ -290,6 +290,10 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                         .HasPrecision(12, 4)
                         .HasColumnType("numeric(12,4)");
 
+                    b.Property<string>("CitySurveyOrGutNo")
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)");
+
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
@@ -302,17 +306,38 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsTaxExempt")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("OccupierName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
                     b.Property<decimal>("OpenPlotAreaSqFt")
                         .HasPrecision(12, 4)
                         .HasColumnType("numeric(12,4)");
 
+                    b.Property<decimal>("OtherTax")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
                     b.Property<Guid?>("ParentPropertyId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("PropertyDescription")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)");
 
                     b.Property<string>("PropertyNo")
                         .IsRequired()
                         .HasMaxLength(40)
                         .HasColumnType("character varying(40)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)");
+
+                    b.Property<string>("StreetOrLaneName")
+                        .HasMaxLength(160)
+                        .HasColumnType("character varying(160)");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
@@ -342,6 +367,250 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("properties", (string)null);
+                });
+
+            modelBuilder.Entity("GPMH.Domain.Entities.Assessments.PropertyConstruction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("AreaSqFt")
+                        .HasPrecision(12, 4)
+                        .HasColumnType("numeric(12,4)");
+
+                    b.Property<decimal>("AreaSqM")
+                        .HasPrecision(12, 4)
+                        .HasColumnType("numeric(12,4)");
+
+                    b.Property<int>("ConstructionStartYear")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ConstructionTypeCode")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FloorLabel")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<int>("FloorNo")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("LengthFt")
+                        .HasPrecision(10, 4)
+                        .HasColumnType("numeric(10,4)");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UsageCode")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<decimal>("WidthFt")
+                        .HasPrecision(10, 4)
+                        .HasColumnType("numeric(10,4)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("TenantId", "PropertyId", "FloorNo");
+
+                    b.ToTable("property_constructions", (string)null);
+                });
+
+            modelBuilder.Entity("GPMH.Domain.Entities.Assessments.PropertyDemand", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("ArrearsBalance")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<Guid>("AssessmentYearId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("CurrentDemand")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<decimal>("PaidAmount")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<decimal>("PenaltyAmount")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<decimal>("PendingBalance")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("RebateAmount")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentYearId");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("TenantId", "PropertyId", "AssessmentYearId")
+                        .IsUnique();
+
+                    b.ToTable("property_demands", (string)null);
+                });
+
+            modelBuilder.Entity("GPMH.Domain.Entities.Assessments.PropertyOwner", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("CitizenId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsPrimaryOwner")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("OwnershipSharePct")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CitizenId");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("TenantId", "PropertyId", "CitizenId");
+
+                    b.ToTable("property_owners", (string)null);
+                });
+
+            modelBuilder.Entity("GPMH.Domain.Entities.Assessments.PropertyTaxCalc", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AssessmentYearId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("BuildingTax")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<string>("CalculationSnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("HealthTax")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<decimal>("LightingTax")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<decimal>("OpenLandTax")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<decimal>("OtherTax")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("SanitationTax")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("ToiletTax")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<decimal>("TotalTax")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("WaterTax")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentYearId");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("TenantId", "PropertyId", "AssessmentYearId")
+                        .IsUnique();
+
+                    b.ToTable("property_tax_calcs", (string)null);
                 });
 
             modelBuilder.Entity("GPMH.Domain.Entities.Auditing.AuditLog", b =>
@@ -1359,6 +1628,60 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("ParentPropertyId")
                         .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("GPMH.Domain.Entities.Assessments.PropertyConstruction", b =>
+                {
+                    b.HasOne("GPMH.Domain.Entities.Assessments.Property", null)
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("GPMH.Domain.Entities.Assessments.PropertyDemand", b =>
+                {
+                    b.HasOne("GPMH.Domain.Entities.Tenancy.AssessmentYear", null)
+                        .WithMany()
+                        .HasForeignKey("AssessmentYearId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GPMH.Domain.Entities.Assessments.Property", null)
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("GPMH.Domain.Entities.Assessments.PropertyOwner", b =>
+                {
+                    b.HasOne("GPMH.Domain.Entities.Assessments.Citizen", null)
+                        .WithMany()
+                        .HasForeignKey("CitizenId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GPMH.Domain.Entities.Assessments.Property", null)
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("GPMH.Domain.Entities.Assessments.PropertyTaxCalc", b =>
+                {
+                    b.HasOne("GPMH.Domain.Entities.Tenancy.AssessmentYear", null)
+                        .WithMany()
+                        .HasForeignKey("AssessmentYearId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GPMH.Domain.Entities.Assessments.Property", null)
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("GPMH.Domain.Entities.Identity.RefreshToken", b =>
