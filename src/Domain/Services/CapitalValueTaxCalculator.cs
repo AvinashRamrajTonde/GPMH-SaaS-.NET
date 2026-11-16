@@ -10,7 +10,8 @@ public sealed record FloorTaxInput(
     decimal ConstructionReadyReckonerRate,
     decimal UsageWeightage,
     decimal TaxRate,
-    int ConstructionStartYear);
+    int ConstructionStartYear,
+    IReadOnlyList<DepreciationSlabInput>? DepreciationSlabsOverride = null);
 
 public sealed record AreaSlabTaxInput(
     decimal LightingTax,
@@ -108,7 +109,11 @@ public static class CapitalValueTaxCalculator
                     $"Construction start year ({floor.ConstructionStartYear}) cannot exceed assessment start year ({input.AssessmentStartYear}).");
             }
 
-            decimal retentionPct = ResolveDepreciationPercentage(buildingAge, orderedSlabs);
+            IReadOnlyList<DepreciationSlabInput> floorSlabs = floor.DepreciationSlabsOverride is { Count: > 0 }
+                ? [.. floor.DepreciationSlabsOverride.OrderBy(s => s.AgeFrom).ThenBy(s => s.AgeTo)]
+                : orderedSlabs;
+
+            decimal retentionPct = ResolveDepreciationPercentage(buildingAge, floorSlabs);
             decimal landValue = areaSqm * floor.LandAnnualValueRate;
             decimal depreciatedBuildingValue = areaSqm * floor.ConstructionReadyReckonerRate * (retentionPct / 100m);
             decimal capitalValue = landValue + depreciatedBuildingValue;

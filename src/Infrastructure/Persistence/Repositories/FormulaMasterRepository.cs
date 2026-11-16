@@ -3,6 +3,7 @@ using GPMH.Application.DTOs.Formula;
 using GPMH.Domain.Entities.Taxation;
 using GPMH.Infrastructure.Taxation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace GPMH.Infrastructure.Persistence.Repositories;
 
@@ -49,6 +50,179 @@ public sealed class FormulaMasterRepository(
         CancellationToken cancellationToken) =>
         dbContext.ConstructionTypeMasters.FirstOrDefaultAsync(c => c.Code == code, cancellationToken);
 
+    public async Task<IReadOnlyList<UsageWeightage>> ListUsageWeightagesAsync(CancellationToken cancellationToken)
+    {
+        List<UsageWeightage> items = await dbContext.UsageWeightages
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return [.. items.OrderBy(u => u.Weightage).ThenBy(u => u.Code)];
+    }
+
+    public Task<UsageWeightage?> GetUsageWeightageByIdAsync(Guid id, CancellationToken cancellationToken) =>
+        dbContext.UsageWeightages.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+
+    public Task<UsageWeightage?> GetUsageWeightageByCodeAsync(string code, CancellationToken cancellationToken) =>
+        dbContext.UsageWeightages.FirstOrDefaultAsync(u => u.Code == code, cancellationToken);
+
+    public async Task<IReadOnlyList<DepreciationSlab>> ListDepreciationSlabsAsync(CancellationToken cancellationToken) =>
+        await dbContext.DepreciationSlabs
+            .OrderBy(d => d.AgeFrom)
+            .ThenBy(d => d.AgeTo)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+    public async Task ReplaceDepreciationSlabsAsync(
+        Guid tenantId,
+        IReadOnlyList<DepreciationSlab> slabs,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(slabs);
+
+        List<DepreciationSlab> existing = await dbContext.DepreciationSlabs
+            .OrderBy(d => d.AgeFrom)
+            .ThenBy(d => d.AgeTo)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        bool exactRangeMatch = existing.Count == slabs.Count &&
+            Enumerable.Range(0, slabs.Count).All(i =>
+                existing[i].AgeFrom == slabs[i].AgeFrom && existing[i].AgeTo == slabs[i].AgeTo);
+
+        if (exactRangeMatch)
+        {
+            for (int i = 0; i < slabs.Count; i++)
+            {
+                existing[i].FromInclusive = slabs[i].FromInclusive;
+                existing[i].ToInclusive = slabs[i].ToInclusive;
+                existing[i].HutMudPercent = slabs[i].HutMudPercent;
+                existing[i].StoneBrickRccPercent = slabs[i].StoneBrickRccPercent;
+                existing[i].LastResolutionNo = slabs[i].LastResolutionNo;
+                existing[i].LastResolutionDate = slabs[i].LastResolutionDate;
+                existing[i].LastChangeReason = slabs[i].LastChangeReason;
+            }
+            return;
+        }
+
+        // Flush deletions inside an explicit transaction before inserting modified boundaries so (TenantId, AgeFrom, AgeTo) never collides mid-batch.
+        IDbContextTransaction? ownedTx = dbContext.Database.CurrentTransaction is null
+            ? await dbContext.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false)
+            : null;
+        try
+        {
+            if (existing.Count > 0)
+            {
+                dbContext.DepreciationSlabs.RemoveRange(existing);
+                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            foreach (DepreciationSlab slab in slabs)
+            {
+                slab.TenantId = tenantId;
+            }
+            await dbContext.DepreciationSlabs.AddRangeAsync(slabs, cancellationToken).ConfigureAwait(false);
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            if (ownedTx is not null)
+            {
+                await ownedTx.CommitAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+        finally
+        {
+            if (ownedTx is not null)
+            {
+                await ownedTx.DisposeAsync().ConfigureAwait(false);
+            }
+        }
+    }
+
+    public async Task<IReadOnlyList<AreaSlabTax>> ListAreaSlabTaxesAsync(CancellationToken cancellationToken) =>
+        await dbContext.AreaSlabTaxes
+            .OrderBy(a => a.AreaFrom)
+            .ThenBy(a => a.AreaTo)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+    public async Task ReplaceAreaSlabTaxesAsync(
+        Guid tenantId,
+        IReadOnlyList<AreaSlabTax> slabs,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(slabs);
+
+        List<AreaSlabTax> existing = await dbContext.AreaSlabTaxes
+            .OrderBy(a => a.AreaFrom)
+            .ThenBy(a => a.AreaTo)
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        bool exactRangeMatch = existing.Count == slabs.Count &&
+            Enumerable.Range(0, slabs.Count).All(i =>
+                existing[i].AreaFrom == slabs[i].AreaFrom && existing[i].AreaTo == slabs[i].AreaTo);
+
+        if (exactRangeMatch)
+        {
+            for (int i = 0; i < slabs.Count; i++)
+            {
+                existing[i].LightingTax = slabs[i].LightingTax;
+                existing[i].HealthTax = slabs[i].HealthTax;
+                existing[i].SanitationTax = slabs[i].SanitationTax;
+                existing[i].ToiletTax = slabs[i].ToiletTax;
+                existing[i].LastResolutionNo = slabs[i].LastResolutionNo;
+                existing[i].LastResolutionDate = slabs[i].LastResolutionDate;
+                existing[i].LastChangeReason = slabs[i].LastChangeReason;
+            }
+            return;
+        }
+
+        IDbContextTransaction? ownedTx = dbContext.Database.CurrentTransaction is null
+            ? await dbContext.Database.BeginTransactionAsync(cancellationToken).ConfigureAwait(false)
+            : null;
+        try
+        {
+            if (existing.Count > 0)
+            {
+                dbContext.AreaSlabTaxes.RemoveRange(existing);
+                await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+
+            foreach (AreaSlabTax slab in slabs)
+            {
+                slab.TenantId = tenantId;
+            }
+            await dbContext.AreaSlabTaxes.AddRangeAsync(slabs, cancellationToken).ConfigureAwait(false);
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            if (ownedTx is not null)
+            {
+                await ownedTx.CommitAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+        finally
+        {
+            if (ownedTx is not null)
+            {
+                await ownedTx.DisposeAsync().ConfigureAwait(false);
+            }
+        }
+    }
+
+    public async Task<IReadOnlyList<WaterTaxMaster>> ListWaterTaxesAsync(CancellationToken cancellationToken)
+    {
+        List<WaterTaxMaster> items = await dbContext.WaterTaxMasters
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return [.. items.OrderBy(w => w.Amount).ThenBy(w => w.Code)];
+    }
+
+    public Task<WaterTaxMaster?> GetWaterTaxByIdAsync(Guid id, CancellationToken cancellationToken) =>
+        dbContext.WaterTaxMasters.FirstOrDefaultAsync(w => w.Id == id, cancellationToken);
+
+    public Task<WaterTaxMaster?> GetWaterTaxByCodeAsync(string code, CancellationToken cancellationToken) =>
+        dbContext.WaterTaxMasters.FirstOrDefaultAsync(w => w.Code == code, cancellationToken);
+
     public async Task<FormulaWorkspaceSummaryDto> GetWorkspaceSummaryCountsAsync(CancellationToken cancellationToken)
     {
         int constructionTypes = await dbContext.ConstructionTypeMasters.CountAsync(cancellationToken).ConfigureAwait(false);
@@ -77,6 +251,18 @@ public sealed class FormulaMasterRepository(
     {
         ArgumentNullException.ThrowIfNull(entity);
         await dbContext.ConstructionTypeMasters.AddAsync(entity, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task AddUsageWeightageAsync(UsageWeightage entity, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+        await dbContext.UsageWeightages.AddAsync(entity, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task AddWaterTaxMasterAsync(WaterTaxMaster entity, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+        await dbContext.WaterTaxMasters.AddAsync(entity, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task ResetCanonicalDefaultsAsync(
@@ -120,12 +306,41 @@ public sealed class FormulaMasterRepository(
         canonicalPeriod.LastResolutionDate = resolutionDate;
         canonicalPeriod.LastChangeReason = changeReason;
 
+        await ResetConstructionTypesAsync(tenantId, resolutionNo, resolutionDate, changeReason, cancellationToken).ConfigureAwait(false);
+        await ResetUsageWeightagesAsync(tenantId, resolutionNo, resolutionDate, changeReason, cancellationToken).ConfigureAwait(false);
+        await ResetWaterTaxesAsync(tenantId, resolutionNo, resolutionDate, changeReason, cancellationToken).ConfigureAwait(false);
+
+        List<DepreciationSlab> canonicalSlabs = [.. DefaultFormulaSeeder.CreateDepreciationSlabs(tenantId)];
+        foreach (DepreciationSlab slab in canonicalSlabs)
+        {
+            slab.LastResolutionNo = resolutionNo;
+            slab.LastResolutionDate = resolutionDate;
+            slab.LastChangeReason = changeReason;
+        }
+        await ReplaceDepreciationSlabsAsync(tenantId, canonicalSlabs, cancellationToken).ConfigureAwait(false);
+
+        List<AreaSlabTax> canonicalAreaSlabs = [.. DefaultFormulaSeeder.CreateAreaSlabTaxes(tenantId)];
+        foreach (AreaSlabTax slab in canonicalAreaSlabs)
+        {
+            slab.LastResolutionNo = resolutionNo;
+            slab.LastResolutionDate = resolutionDate;
+            slab.LastChangeReason = changeReason;
+        }
+        await ReplaceAreaSlabTaxesAsync(tenantId, canonicalAreaSlabs, cancellationToken).ConfigureAwait(false);
+    }
+
+    private async Task ResetConstructionTypesAsync(
+        Guid tenantId,
+        string? resolutionNo,
+        DateOnly? resolutionDate,
+        string? changeReason,
+        CancellationToken cancellationToken)
+    {
         Dictionary<string, ConstructionTypeMaster> existingByCode = await dbContext.ConstructionTypeMasters
             .ToDictionaryAsync(c => c.Code, StringComparer.OrdinalIgnoreCase, cancellationToken)
             .ConfigureAwait(false);
 
-        IReadOnlyList<ConstructionTypeMaster> canonicalTypes = DefaultFormulaSeeder.CreateConstructionTypes(tenantId);
-        foreach (ConstructionTypeMaster canonical in canonicalTypes)
+        foreach (ConstructionTypeMaster canonical in DefaultFormulaSeeder.CreateConstructionTypes(tenantId))
         {
             if (existingByCode.TryGetValue(canonical.Code, out ConstructionTypeMaster? existing))
             {
@@ -150,7 +365,70 @@ public sealed class FormulaMasterRepository(
         }
     }
 
+    private async Task ResetUsageWeightagesAsync(
+        Guid tenantId,
+        string? resolutionNo,
+        DateOnly? resolutionDate,
+        string? changeReason,
+        CancellationToken cancellationToken)
+    {
+        Dictionary<string, UsageWeightage> existingByCode = await dbContext.UsageWeightages
+            .ToDictionaryAsync(u => u.Code, StringComparer.OrdinalIgnoreCase, cancellationToken)
+            .ConfigureAwait(false);
+
+        foreach (UsageWeightage canonical in DefaultFormulaSeeder.CreateUsageWeightages(tenantId))
+        {
+            if (existingByCode.TryGetValue(canonical.Code, out UsageWeightage? existing))
+            {
+                existing.UsageName = canonical.UsageName;
+                existing.Weightage = canonical.Weightage;
+                existing.IsActive = true;
+                existing.LastResolutionNo = resolutionNo;
+                existing.LastResolutionDate = resolutionDate;
+                existing.LastChangeReason = changeReason;
+            }
+            else
+            {
+                canonical.LastResolutionNo = resolutionNo;
+                canonical.LastResolutionDate = resolutionDate;
+                canonical.LastChangeReason = changeReason;
+                await dbContext.UsageWeightages.AddAsync(canonical, cancellationToken).ConfigureAwait(false);
+            }
+        }
+    }
+
+    private async Task ResetWaterTaxesAsync(
+        Guid tenantId,
+        string? resolutionNo,
+        DateOnly? resolutionDate,
+        string? changeReason,
+        CancellationToken cancellationToken)
+    {
+        Dictionary<string, WaterTaxMaster> existingByCode = await dbContext.WaterTaxMasters
+            .ToDictionaryAsync(w => w.Code, StringComparer.OrdinalIgnoreCase, cancellationToken)
+            .ConfigureAwait(false);
+
+        foreach (WaterTaxMaster canonical in DefaultFormulaSeeder.CreateWaterTaxes(tenantId))
+        {
+            if (existingByCode.TryGetValue(canonical.Code, out WaterTaxMaster? existing))
+            {
+                existing.WaterTypeName = canonical.WaterTypeName;
+                existing.Amount = canonical.Amount;
+                existing.IsActive = true;
+                existing.LastResolutionNo = resolutionNo;
+                existing.LastResolutionDate = resolutionDate;
+                existing.LastChangeReason = changeReason;
+            }
+            else
+            {
+                canonical.LastResolutionNo = resolutionNo;
+                canonical.LastResolutionDate = resolutionDate;
+                canonical.LastChangeReason = changeReason;
+                await dbContext.WaterTaxMasters.AddAsync(canonical, cancellationToken).ConfigureAwait(false);
+            }
+        }
+    }
+
     public Task SaveChangesAsync(CancellationToken cancellationToken) =>
         dbContext.SaveChangesAsync(cancellationToken);
 }
-

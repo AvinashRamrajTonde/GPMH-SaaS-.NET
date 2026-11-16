@@ -357,6 +357,8 @@ public sealed class AppDbContext(
             entity.Property(e => e.Code).HasMaxLength(32).IsRequired();
             entity.Property(e => e.UsageName).HasMaxLength(80).IsRequired();
             entity.Property(e => e.Weightage).HasPrecision(8, 4);
+            entity.Property(e => e.LastResolutionNo).HasMaxLength(80);
+            entity.Property(e => e.LastChangeReason).HasMaxLength(400);
             entity.HasIndex(e => new { e.TenantId, e.Code }).IsUnique();
             entity.HasQueryFilter(e =>
                 tenantContext.CurrentTenantId != null &&
@@ -369,6 +371,8 @@ public sealed class AppDbContext(
             entity.HasKey(e => e.Id);
             entity.Property(e => e.HutMudPercent).HasPrecision(5, 2);
             entity.Property(e => e.StoneBrickRccPercent).HasPrecision(5, 2);
+            entity.Property(e => e.LastResolutionNo).HasMaxLength(80);
+            entity.Property(e => e.LastChangeReason).HasMaxLength(400);
             entity.HasIndex(e => new { e.TenantId, e.AgeFrom, e.AgeTo }).IsUnique();
             entity.HasQueryFilter(e =>
                 tenantContext.CurrentTenantId != null &&
@@ -383,6 +387,8 @@ public sealed class AppDbContext(
             entity.Property(e => e.HealthTax).HasPrecision(14, 2);
             entity.Property(e => e.SanitationTax).HasPrecision(14, 2);
             entity.Property(e => e.ToiletTax).HasPrecision(14, 2);
+            entity.Property(e => e.LastResolutionNo).HasMaxLength(80);
+            entity.Property(e => e.LastChangeReason).HasMaxLength(400);
             entity.HasIndex(e => new { e.TenantId, e.AreaFrom, e.AreaTo }).IsUnique();
             entity.HasQueryFilter(e =>
                 tenantContext.CurrentTenantId != null &&
@@ -396,6 +402,8 @@ public sealed class AppDbContext(
             entity.Property(e => e.Code).HasMaxLength(32).IsRequired();
             entity.Property(e => e.WaterTypeName).HasMaxLength(80).IsRequired();
             entity.Property(e => e.Amount).HasPrecision(14, 2);
+            entity.Property(e => e.LastResolutionNo).HasMaxLength(80);
+            entity.Property(e => e.LastChangeReason).HasMaxLength(400);
             entity.HasIndex(e => new { e.TenantId, e.Code }).IsUnique();
             entity.HasQueryFilter(e =>
                 tenantContext.CurrentTenantId != null &&

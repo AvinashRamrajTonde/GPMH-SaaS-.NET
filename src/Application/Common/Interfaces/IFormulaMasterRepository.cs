@@ -23,11 +23,41 @@ public interface IFormulaMasterRepository
 
     Task<ConstructionTypeMaster?> GetConstructionTypeByCodeAsync(string code, CancellationToken cancellationToken);
 
+    Task<IReadOnlyList<UsageWeightage>> ListUsageWeightagesAsync(CancellationToken cancellationToken);
+
+    Task<UsageWeightage?> GetUsageWeightageByIdAsync(Guid id, CancellationToken cancellationToken);
+
+    Task<UsageWeightage?> GetUsageWeightageByCodeAsync(string code, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<DepreciationSlab>> ListDepreciationSlabsAsync(CancellationToken cancellationToken);
+
+    Task ReplaceDepreciationSlabsAsync(
+        Guid tenantId,
+        IReadOnlyList<DepreciationSlab> slabs,
+        CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<AreaSlabTax>> ListAreaSlabTaxesAsync(CancellationToken cancellationToken);
+
+    Task ReplaceAreaSlabTaxesAsync(
+        Guid tenantId,
+        IReadOnlyList<AreaSlabTax> slabs,
+        CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<WaterTaxMaster>> ListWaterTaxesAsync(CancellationToken cancellationToken);
+
+    Task<WaterTaxMaster?> GetWaterTaxByIdAsync(Guid id, CancellationToken cancellationToken);
+
+    Task<WaterTaxMaster?> GetWaterTaxByCodeAsync(string code, CancellationToken cancellationToken);
+
     Task<FormulaWorkspaceSummaryDto> GetWorkspaceSummaryCountsAsync(CancellationToken cancellationToken);
 
     Task AddFormulaSettingAsync(FormulaSetting entity, CancellationToken cancellationToken);
 
     Task AddConstructionTypeAsync(ConstructionTypeMaster entity, CancellationToken cancellationToken);
+
+    Task AddUsageWeightageAsync(UsageWeightage entity, CancellationToken cancellationToken);
+
+    Task AddWaterTaxMasterAsync(WaterTaxMaster entity, CancellationToken cancellationToken);
 
     Task ResetCanonicalDefaultsAsync(
         Guid tenantId,
@@ -38,4 +68,3 @@ public interface IFormulaMasterRepository
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }
-

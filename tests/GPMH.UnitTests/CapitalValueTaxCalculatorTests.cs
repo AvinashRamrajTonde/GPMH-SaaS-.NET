@@ -129,5 +129,87 @@ public sealed class CapitalValueTaxCalculatorTests
 
         Assert.Throws<ArgumentOutOfRangeException>(() => CapitalValueTaxCalculator.Calculate(input));
     }
+
+    private static readonly IReadOnlyList<DepreciationSlabInput> StatutoryHutMudSlabs =
+    [
+        new(0, 2, 100m),
+        new(2, 5, 95m),
+        new(5, 10, 85m),
+        new(10, 20, 75m),
+        new(20, 30, 60m),
+        new(30, 40, 45m),
+        new(40, 50, 30m),
+        new(50, 60, 20m),
+        new(60, 100, 15m),
+    ];
+
+    private static readonly IReadOnlyList<DepreciationSlabInput> StatutoryStoneBrickRccSlabs =
+    [
+        new(0, 2, 100m),
+        new(2, 5, 95m),
+        new(5, 10, 90m),
+        new(10, 20, 80m),
+        new(20, 30, 70m),
+        new(30, 40, 60m),
+        new(40, 50, 50m),
+        new(50, 60, 40m),
+        new(60, 100, 30m),
+    ];
+
+    [Theory]
+    [InlineData(0, 100, 100)]
+    [InlineData(2, 100, 100)]
+    [InlineData(3, 95, 95)]
+    [InlineData(5, 95, 95)]
+    [InlineData(6, 85, 90)]
+    [InlineData(10, 85, 90)]
+    [InlineData(20, 75, 80)]
+    [InlineData(30, 60, 70)]
+    [InlineData(40, 45, 60)]
+    [InlineData(50, 30, 50)]
+    [InlineData(60, 20, 40)]
+    [InlineData(100, 15, 30)]
+    [InlineData(120, 15, 30)]
+    public void ResolveDepreciationPercentage_AllStatutoryCutoffsMatchBothCategories(
+        int buildingAge,
+        decimal expectedHutMudPct,
+        decimal expectedStoneBrickRccPct)
+    {
+        decimal actualHutMud = CapitalValueTaxCalculator.ResolveDepreciationPercentage(buildingAge, StatutoryHutMudSlabs);
+        decimal actualStoneRcc = CapitalValueTaxCalculator.ResolveDepreciationPercentage(buildingAge, StatutoryStoneBrickRccSlabs);
+
+        Assert.Equal(expectedHutMudPct, actualHutMud);
+        Assert.Equal(expectedStoneBrickRccPct, actualStoneRcc);
+    }
+
+    [Fact]
+    public void Calculate_MixedCategoryFloors_AppliesDistinctDepreciationCurvesPerFloor()
+    {
+        // Ground floor RCC (age 15 -> 80% retention): 100 sqm, Land 760, RR 18392, Weight 1.0, Tax 1.5
+        // First floor HUT_MUD (age 15 -> 75% retention): 100 sqm, Land 760, RR 5852, Weight 1.0, Tax 0.5
+        PropertyTaxCalculationInput input = new(
+            AssessmentStartYear: 2026,
+            Floors:
+            [
+                new FloorTaxInput(0m, 0m, 100m, 760m, 18392m, 1.0m, 1.5m, 2011, StatutoryStoneBrickRccSlabs),
+                new FloorTaxInput(0m, 0m, 100m, 760m, 5852m, 1.0m, 0.5m, 2011, StatutoryHutMudSlabs),
+            ],
+            DepreciationSlabs: StatutoryStoneBrickRccSlabs,
+            AreaSlabTaxes: new AreaSlabTaxInput(100m, 100m, 100m, 0m),
+            WaterTax: 720m);
+
+        PropertyTaxCalculationResult result = CapitalValueTaxCalculator.Calculate(input);
+
+        Assert.Equal(2, result.FloorBreakdowns.Count);
+        Assert.Equal(80m, result.FloorBreakdowns[0].DepreciationPercentage);
+        Assert.Equal(75m, result.FloorBreakdowns[1].DepreciationPercentage);
+        // Floor 0 raw = (76000 + 1839200 * 0.8) * 1.5 / 1000 = 1547360 * 0.0015 = 2321.04
+        // Floor 1 raw = (76000 + 585200 * 0.75) * 0.5 / 1000 = 514900 * 0.0005 = 257.45
+        // Sum = 2578.49 -> rounded 2578 + 300 area cess + 720 water = 3598
+        Assert.Equal(2321.04m, result.FloorBreakdowns[0].RawBuildingTax);
+        Assert.Equal(257.45m, result.FloorBreakdowns[1].RawBuildingTax);
+        Assert.Equal(2578m, result.BuildingTax);
+        Assert.Equal(3598m, result.TotalTax);
+    }
 }
 

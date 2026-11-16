@@ -31,6 +31,13 @@ import {
 } from '../../services/formulaApi';
 import { formatDateTime, formatInr } from '../../utils/formatters';
 import { extractProblemValidation, type ParsedValidationItem } from '../../utils/validation';
+import { FormulaSimulatorCard } from './FormulaSimulatorCard';
+import {
+  AreaSlabTaxesTab,
+  DepreciationSlabsTab,
+  UsageWeightagesTab,
+  WaterTaxMastersTab,
+} from './SecondaryFormulaTabs';
 
 type FormulaTab = 'construction' | 'depreciation' | 'usage' | 'areaSlabs' | 'waterTax';
 
@@ -767,16 +774,57 @@ export function FormulaMastersPage() {
             </div>
           )}
         </section>
+      ) : activeTab === 'depreciation' ? (
+        <DepreciationSlabsTab
+          key={`dep-${(workspaceQuery.data?.depreciationSlabs ?? [])
+            .map((s) => `${s.id}:${s.ageFrom}-${s.ageTo}:${s.hutMudPercent}:${s.stoneBrickRccPercent}`)
+            .join('|')}`}
+          slabs={workspaceQuery.data?.depreciationSlabs ?? []}
+          canWrite={canWrite}
+          onSaved={async (msg) => {
+            setToastMessage(msg);
+            await refreshWorkspace();
+          }}
+        />
+      ) : activeTab === 'usage' ? (
+        <UsageWeightagesTab
+          items={workspaceQuery.data?.usageWeightages ?? []}
+          canWrite={canWrite}
+          onSaved={async (msg) => {
+            setToastMessage(msg);
+            await refreshWorkspace();
+          }}
+        />
+      ) : activeTab === 'areaSlabs' ? (
+        <AreaSlabTaxesTab
+          key={`area-${(workspaceQuery.data?.areaSlabTaxes ?? [])
+            .map((s) => `${s.id}:${s.areaFrom}-${s.areaTo}:${s.lightingTax}:${s.healthTax}:${s.sanitationTax}:${s.toiletTax}`)
+            .join('|')}`}
+          slabs={workspaceQuery.data?.areaSlabTaxes ?? []}
+          canWrite={canWrite}
+          onSaved={async (msg) => {
+            setToastMessage(msg);
+            await refreshWorkspace();
+          }}
+        />
       ) : (
-        <section className="rounded-2xl border border-line bg-card p-6 shadow-xs space-y-3">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-base font-extrabold text-ink">{t(`formula.previewTitle.${activeTab}`)}</h2>
-            <span className="rounded-full bg-brand-50 border border-brand-200 px-2.5 py-0.5 text-[11px] font-bold text-brand-800">
-              {t('formula.issue14PreviewBadge')}
-            </span>
-          </div>
-          <p className="text-xs text-muted">{t(`formula.previewDesc.${activeTab}`)}</p>
-        </section>
+        <WaterTaxMastersTab
+          items={workspaceQuery.data?.waterTaxes ?? []}
+          canWrite={canWrite}
+          onSaved={async (msg) => {
+            setToastMessage(msg);
+            await refreshWorkspace();
+          }}
+        />
+      )}
+
+      {/* Interactive Live Tenant-Master Tax Simulator */}
+      {workspaceQuery.data && (
+        <FormulaSimulatorCard
+          constructionTypes={constructionTypes}
+          usageWeightages={workspaceQuery.data.usageWeightages ?? []}
+          waterTaxes={workspaceQuery.data.waterTaxes ?? []}
+        />
       )}
 
       {/* Formula Setting Drawer / Modal */}

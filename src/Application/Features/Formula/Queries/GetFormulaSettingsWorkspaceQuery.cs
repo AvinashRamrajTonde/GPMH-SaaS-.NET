@@ -47,6 +47,18 @@ public sealed class GetFormulaSettingsWorkspaceQueryHandler(
         IReadOnlyList<ConstructionTypeMaster> constructionTypes = await formulaRepository
             .ListConstructionTypesAsync(cancellationToken)
             .ConfigureAwait(false);
+        IReadOnlyList<UsageWeightage> usageWeightages = await formulaRepository
+            .ListUsageWeightagesAsync(cancellationToken)
+            .ConfigureAwait(false);
+        IReadOnlyList<DepreciationSlab> depreciationSlabs = await formulaRepository
+            .ListDepreciationSlabsAsync(cancellationToken)
+            .ConfigureAwait(false);
+        IReadOnlyList<AreaSlabTax> areaSlabs = await formulaRepository
+            .ListAreaSlabTaxesAsync(cancellationToken)
+            .ConfigureAwait(false);
+        IReadOnlyList<WaterTaxMaster> waterTaxes = await formulaRepository
+            .ListWaterTaxesAsync(cancellationToken)
+            .ConfigureAwait(false);
         FormulaWorkspaceSummaryDto summary = await formulaRepository
             .GetWorkspaceSummaryCountsAsync(cancellationToken)
             .ConfigureAwait(false);
@@ -59,7 +71,11 @@ public sealed class GetFormulaSettingsWorkspaceQueryHandler(
             ActiveSetting: activeSetting,
             RatePeriods: periodDtos,
             ConstructionTypes: [.. constructionTypes.Select(c => c.ToDto())],
-            Summary: summary);
+            Summary: summary,
+            UsageWeightages: [.. usageWeightages.Select(u => u.ToDto())],
+            DepreciationSlabs: [.. depreciationSlabs.Select(d => d.ToDto())],
+            AreaSlabTaxes: [.. areaSlabs.Select(a => a.ToDto())],
+            WaterTaxes: [.. waterTaxes.Select(w => w.ToDto())]);
 
         await cacheService
             .SetAsync(cacheKey, workspace, WorkspaceCacheTtl, cancellationToken)
@@ -68,4 +84,3 @@ public sealed class GetFormulaSettingsWorkspaceQueryHandler(
         return workspace;
     }
 }
-

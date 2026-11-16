@@ -43,6 +43,9 @@ public sealed class UsageWeightage : BaseEntity, ITenantEntity
     public required string UsageName { get; set; }
     public decimal Weightage { get; set; }
     public bool IsActive { get; set; } = true;
+    public string? LastResolutionNo { get; set; }
+    public DateOnly? LastResolutionDate { get; set; }
+    public string? LastChangeReason { get; set; }
 }
 
 public sealed class DepreciationSlab : BaseEntity, ITenantEntity
@@ -54,6 +57,9 @@ public sealed class DepreciationSlab : BaseEntity, ITenantEntity
     public bool ToInclusive { get; set; } = true;
     public decimal HutMudPercent { get; set; }
     public decimal StoneBrickRccPercent { get; set; }
+    public string? LastResolutionNo { get; set; }
+    public DateOnly? LastResolutionDate { get; set; }
+    public string? LastChangeReason { get; set; }
 }
 
 public sealed class AreaSlabTax : BaseEntity, ITenantEntity
@@ -65,6 +71,9 @@ public sealed class AreaSlabTax : BaseEntity, ITenantEntity
     public decimal HealthTax { get; set; }
     public decimal SanitationTax { get; set; }
     public decimal ToiletTax { get; set; }
+    public string? LastResolutionNo { get; set; }
+    public DateOnly? LastResolutionDate { get; set; }
+    public string? LastChangeReason { get; set; }
 }
 
 public sealed class WaterTaxMaster : BaseEntity, ITenantEntity
@@ -74,5 +83,8 @@ public sealed class WaterTaxMaster : BaseEntity, ITenantEntity
     public required string WaterTypeName { get; set; }
     public decimal Amount { get; set; }
     public bool IsActive { get; set; } = true;
+    public string? LastResolutionNo { get; set; }
+    public DateOnly? LastResolutionDate { get; set; }
+    public string? LastChangeReason { get; set; }
 }
 

@@ -2,6 +2,8 @@ using System.Net;
 using System.Net.Http.Json;
 using GPMH.Application.Common.Interfaces;
 using GPMH.Application.DTOs.Formula;
+using GPMH.Application.Features.Formula.Commands;
+using GPMH.Application.Features.Tax.Queries;
 using GPMH.Domain.Entities.Auditing;
 using GPMH.Domain.Entities.Tenancy;
 using GPMH.Domain.Enums;
@@ -434,6 +436,278 @@ public sealed class FormulaMastersIntegrationTests(GpmhApiFactory factory)
         Assert.Equal(760m, hut.LandAnnualValueRate);
         Assert.Equal(5852m, hut.ConstructionReadyReckonerRate);
         Assert.Equal(0.5m, hut.TaxRate);
+    }
+
+    [Fact]
+    public async Task SecondaryMasters_RejectsGapsOverlapsAndIncompleteRanges_WithRfc9457()
+    {
+        (Guid tenantId, Guid gramsevakId, _) = await SeedTenantWithFormulasAsync();
+        HttpClient client = factory.CreateClient();
+
+        // Gap between AgeTo = 2 and AgeFrom = 3 -> 400 Bad Request
+        SaveDepreciationSlabsBatchRequest gappedDep = new(
+            Slabs:
+            [
+                new DepreciationSlabBatchItem(0, 2, 100m, 100m),
+                new DepreciationSlabBatchItem(3, 100, 50m, 60m),
+            ],
+            ResolutionNo: "GP-RES/2026/21",
+            ResolutionDate: new DateOnly(2026, 11, 15),
+            ChangeReason: "Invalid gapped slabs");
+
+        using HttpRequestMessage gappedDepReq = CreateTenantRequest(
+            HttpMethod.Put,
+            "/api/v1/formula/depreciation-slabs",
+            gramsevakId,
+            ApplicationRole.Gramsevak,
+            tenantId,
+            gappedDep);
+        HttpResponseMessage gappedDepResp = await client.SendAsync(gappedDepReq);
+        Assert.Equal(HttpStatusCode.BadRequest, gappedDepResp.StatusCode);
+        ValidationProblemDetails? depProblem = await gappedDepResp.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        Assert.NotNull(depProblem);
+        Assert.True(depProblem.Errors.ContainsKey("Slabs"));
+
+        // Area slabs missing continuity (1..300 then 305..999999) -> 400 Bad Request
+        SaveAreaSlabTaxesBatchRequest gappedArea = new(
+            Slabs:
+            [
+                new AreaSlabTaxBatchItem(1, 300, 40m, 40m, 100m, 0m),
+                new AreaSlabTaxBatchItem(305, 999999, 100m, 100m, 100m, 0m),
+            ],
+            ResolutionNo: "GP-RES/2026/22",
+            ResolutionDate: new DateOnly(2026, 11, 15),
+            ChangeReason: "Invalid gapped area slabs");
+
+        using HttpRequestMessage gappedAreaReq = CreateTenantRequest(
+            HttpMethod.Put,
+            "/api/v1/formula/area-slabs",
+            gramsevakId,
+            ApplicationRole.Gramsevak,
+            tenantId,
+            gappedArea);
+        HttpResponseMessage gappedAreaResp = await client.SendAsync(gappedAreaReq);
+        Assert.Equal(HttpStatusCode.BadRequest, gappedAreaResp.StatusCode);
+        ValidationProblemDetails? areaProblem = await gappedAreaResp.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        Assert.NotNull(areaProblem);
+        Assert.True(areaProblem.Errors.ContainsKey("Slabs"));
+    }
+
+    [Fact]
+    public async Task SecondaryMasters_CrudUpdates_EvictCache_EmitAuditLogs_AndEnforceIsolation()
+    {
+        (Guid tenantA, Guid gramsevakA, Guid operatorA) = await SeedTenantWithFormulasAsync();
+        (Guid tenantB, Guid gramsevakB, _) = await SeedTenantWithFormulasAsync();
+        HttpClient client = factory.CreateClient();
+
+        // Warm workspace cache on Tenant A
+        FormulaWorkspaceDto? wsA = await (await client.SendAsync(
+            CreateTenantRequest(HttpMethod.Get, "/api/v1/formula/workspace", gramsevakA, ApplicationRole.Gramsevak, tenantA)))
+            .Content.ReadFromJsonAsync<FormulaWorkspaceDto>();
+        Assert.NotNull(wsA?.DepreciationSlabs);
+        Assert.Equal(9, wsA.DepreciationSlabs.Count);
+
+        // Update Depreciation Slabs (keeping 9 contiguous slabs with updated 2..5 HutMud 92%)
+        List<DepreciationSlabBatchItem> modifiedDep =
+        [
+            .. wsA.DepreciationSlabs.Select(s =>
+                s.AgeFrom == 2 && s.AgeTo == 5
+                    ? new DepreciationSlabBatchItem(2, 5, 92m, 95m)
+                    : new DepreciationSlabBatchItem(s.AgeFrom, s.AgeTo, s.HutMudPercent, s.StoneBrickRccPercent)),
+        ];
+        HttpResponseMessage depSaveResp = await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Put,
+            "/api/v1/formula/depreciation-slabs",
+            gramsevakA,
+            ApplicationRole.Gramsevak,
+            tenantA,
+            new SaveDepreciationSlabsBatchRequest(modifiedDep, "GP-RES/2026/31", new DateOnly(2026, 11, 16), "Updated 2-5 slab")));
+        Assert.Equal(HttpStatusCode.OK, depSaveResp.StatusCode);
+
+        // Update Usage Weightage (COMMERCIAL 1.25 -> 1.50) + Add custom usage
+        UsageWeightageDto commercial = Assert.Single(wsA.UsageWeightages!, u => u.Code == "COMMERCIAL");
+        HttpResponseMessage usagePutResp = await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Put,
+            $"/api/v1/formula/usage-weightages/{commercial.Id}",
+            gramsevakA,
+            ApplicationRole.Gramsevak,
+            tenantA,
+            new SaveUsageWeightageRequest(
+                commercial.Id,
+                "COMMERCIAL",
+                "वाणिज्य (सुधारित)",
+                1.50m,
+                true,
+                "GP-RES/2026/32",
+                new DateOnly(2026, 11, 16),
+                "Raised commercial factor")));
+        Assert.Equal(HttpStatusCode.OK, usagePutResp.StatusCode);
+
+        // Update Water Tax (SPECIAL 720 -> 960)
+        WaterTaxMasterDto specialWater = Assert.Single(wsA.WaterTaxes!, w => w.Code == "SPECIAL");
+        HttpResponseMessage waterPutResp = await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Put,
+            $"/api/v1/formula/water-taxes/{specialWater.Id}",
+            gramsevakA,
+            ApplicationRole.Gramsevak,
+            tenantA,
+            new SaveWaterTaxMasterRequest(
+                specialWater.Id,
+                "SPECIAL",
+                "विशेष पाणी कर",
+                960m,
+                true,
+                "GP-RES/2026/33",
+                new DateOnly(2026, 11, 16),
+                "Revised special tap fee")));
+        Assert.Equal(HttpStatusCode.OK, waterPutResp.StatusCode);
+
+        // Update Area Slab Taxes (custom boundary shift to prove index-safe batch replace)
+        HttpResponseMessage areaPutResp = await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Put,
+            "/api/v1/formula/area-slabs",
+            gramsevakA,
+            ApplicationRole.Gramsevak,
+            tenantA,
+            new SaveAreaSlabTaxesBatchRequest(
+                [
+                    new AreaSlabTaxBatchItem(1, 350, 50m, 50m, 100m, 0m),
+                    new AreaSlabTaxBatchItem(351, 999999, 120m, 120m, 100m, 30m),
+                ],
+                "GP-RES/2026/34",
+                new DateOnly(2026, 11, 16),
+                "Consolidated to 2 area brackets")));
+        Assert.Equal(HttpStatusCode.OK, areaPutResp.StatusCode);
+
+        // Verify Tenant A cache evicted and Tenant B masters untouched
+        FormulaWorkspaceDto? updatedWsA = await (await client.SendAsync(
+            CreateTenantRequest(HttpMethod.Get, "/api/v1/formula/workspace", gramsevakA, ApplicationRole.Gramsevak, tenantA)))
+            .Content.ReadFromJsonAsync<FormulaWorkspaceDto>();
+        Assert.Equal(92m, Assert.Single(updatedWsA!.DepreciationSlabs!, s => s.AgeFrom == 2).HutMudPercent);
+        Assert.Equal(1.50m, Assert.Single(updatedWsA.UsageWeightages!, u => u.Code == "COMMERCIAL").Weightage);
+        Assert.Equal(960m, Assert.Single(updatedWsA.WaterTaxes!, w => w.Code == "SPECIAL").Amount);
+        Assert.Equal(2, updatedWsA.AreaSlabTaxes!.Count);
+
+        FormulaWorkspaceDto? wsB = await (await client.SendAsync(
+            CreateTenantRequest(HttpMethod.Get, "/api/v1/formula/workspace", gramsevakB, ApplicationRole.Gramsevak, tenantB)))
+            .Content.ReadFromJsonAsync<FormulaWorkspaceDto>();
+        Assert.Equal(95m, Assert.Single(wsB!.DepreciationSlabs!, s => s.AgeFrom == 2).HutMudPercent);
+        Assert.Equal(1.25m, Assert.Single(wsB.UsageWeightages!, u => u.Code == "COMMERCIAL").Weightage);
+
+        // GP_Operator write blocked with 403; cross-tenant UsageWeightage ID blocked with 404
+        HttpResponseMessage opForbidden = await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Put,
+            $"/api/v1/formula/water-taxes/{specialWater.Id}",
+            operatorA,
+            ApplicationRole.GP_Operator,
+            tenantA,
+            new SaveWaterTaxMasterRequest(specialWater.Id, "SPECIAL", "X", 100m, true, "R1", null, "Blocked")));
+        Assert.Equal(HttpStatusCode.Forbidden, opForbidden.StatusCode);
+
+        HttpResponseMessage crossTenantNotFound = await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Put,
+            $"/api/v1/formula/usage-weightages/{commercial.Id}",
+            gramsevakB,
+            ApplicationRole.Gramsevak,
+            tenantB,
+            new SaveUsageWeightageRequest(commercial.Id, "COMMERCIAL", "X", 2.0m, true, "R2", null, "Cross tenant")));
+        Assert.Equal(HttpStatusCode.NotFound, crossTenantNotFound.StatusCode);
+
+        // AuditLogs recorded for secondary entities
+        using IServiceScope scope = factory.Services.CreateScope();
+        AppDbContext db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        List<AuditLog> secLogs = await db.AuditLogs
+            .AsNoTracking()
+            .Where(l => l.TenantId == tenantA)
+            .ToListAsync();
+        Assert.Contains(secLogs, l => l.EntityName == nameof(Domain.Entities.Taxation.UsageWeightage) &&
+                                      l.NewValuesJson != null &&
+                                      l.NewValuesJson.Contains("GP-RES/2026/32", StringComparison.Ordinal));
+        Assert.Contains(secLogs, l => l.EntityName == nameof(Domain.Entities.Taxation.WaterTaxMaster) &&
+                                      l.NewValuesJson != null &&
+                                      l.NewValuesJson.Contains("GP-RES/2026/33", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task CalculateFromMastersEndpoint_ResolvesLiveDbRates_MatchesGoldenVectorAndOpenPlotPolicy()
+    {
+        (Guid tenantId, Guid gramsevakId, _) = await SeedTenantWithFormulasAsync();
+        HttpClient client = factory.CreateClient();
+
+        // 1) Chincholi Khurd Golden Vector through live DB masters -> 66 Building + 180 Slab = 246 Total
+        CalculatePropertyTaxFromMastersQuery goldenQuery = new(
+            AssessmentStartYear: 2026,
+            Floors:
+            [
+                new MasterFloorTaxRequest(
+                    ConstructionTypeCode: "HUT_MUD",
+                    UsageCode: "RESIDENTIAL",
+                    ConstructionStartYear: 2021,
+                    LengthFt: 15m,
+                    WidthFt: 15m),
+            ],
+            WaterConnectionCode: "NONE");
+
+        HttpResponseMessage goldenResp = await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Post,
+            "/api/v1/tax/calculate",
+            gramsevakId,
+            ApplicationRole.Gramsevak,
+            tenantId,
+            goldenQuery));
+        Assert.Equal(HttpStatusCode.OK, goldenResp.StatusCode);
+
+        CalculatedPropertyTaxDto? goldenResult = await goldenResp.Content.ReadFromJsonAsync<CalculatedPropertyTaxDto>();
+        Assert.NotNull(goldenResult);
+        Assert.Equal(225m, goldenResult.TotalBuiltUpSqFt);
+        Assert.Equal(20.90m, goldenResult.TotalBuiltUpSqM);
+        Assert.Equal("1-300", goldenResult.AppliedAreaSlabRange);
+        Assert.Equal(66m, goldenResult.Calculation.BuildingTax);
+        Assert.Equal(180m, goldenResult.Calculation.LightingTax + goldenResult.Calculation.HealthTax + goldenResult.Calculation.SanitationTax + goldenResult.Calculation.ToiletTax);
+        Assert.Equal(246m, goldenResult.Calculation.TotalTax);
+
+        // 2) Update SPECIAL water rate in DB (720 -> 960) and confirm POST /api/v1/tax/calculate picks up new live rate
+        FormulaWorkspaceDto? ws = await (await client.SendAsync(
+            CreateTenantRequest(HttpMethod.Get, "/api/v1/formula/workspace", gramsevakId, ApplicationRole.Gramsevak, tenantId)))
+            .Content.ReadFromJsonAsync<FormulaWorkspaceDto>();
+        WaterTaxMasterDto special = Assert.Single(ws!.WaterTaxes!, w => w.Code == "SPECIAL");
+
+        Assert.Equal(HttpStatusCode.OK, (await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Put,
+            $"/api/v1/formula/water-taxes/{special.Id}",
+            gramsevakId,
+            ApplicationRole.Gramsevak,
+            tenantId,
+            new SaveWaterTaxMasterRequest(special.Id, "SPECIAL", "विशेष पाणी कर", 960m, true, "GP-RES/2026/40", null, "Live test")))).StatusCode);
+
+        CalculatePropertyTaxFromMastersQuery updatedWaterQuery = goldenQuery with { WaterConnectionCode = "SPECIAL" };
+        CalculatedPropertyTaxDto? afterWaterEdit = await (await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Post,
+            "/api/v1/tax/calculate",
+            gramsevakId,
+            ApplicationRole.Gramsevak,
+            tenantId,
+            updatedWaterQuery))).Content.ReadFromJsonAsync<CalculatedPropertyTaxDto>();
+        Assert.Equal(960m, afterWaterEdit!.Calculation.WaterTax);
+        Assert.Equal(1206m, afterWaterEdit.Calculation.TotalTax);
+
+        // 3) Open-plot-only property respects ApplyLightingHealthOnOpenPlot = true (Lighting 40 + Health 40, Sanitation 0)
+        CalculatePropertyTaxFromMastersQuery openPlotQuery = new(
+            AssessmentStartYear: 2026,
+            Floors: [],
+            OpenAreaSqFt: 250m,
+            OpenPlotConstructionCode: "OPEN_PLOT",
+            WaterConnectionCode: "NONE");
+        CalculatedPropertyTaxDto? openPlotResult = await (await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Post,
+            "/api/v1/tax/calculate",
+            gramsevakId,
+            ApplicationRole.Gramsevak,
+            tenantId,
+            openPlotQuery))).Content.ReadFromJsonAsync<CalculatedPropertyTaxDto>();
+        Assert.Equal(40m, openPlotResult!.Calculation.LightingTax);
+        Assert.Equal(40m, openPlotResult.Calculation.HealthTax);
+        Assert.Equal(0m, openPlotResult.Calculation.SanitationTax);
     }
 }
 

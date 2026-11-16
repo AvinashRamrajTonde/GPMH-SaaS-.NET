@@ -539,6 +539,17 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                         .HasPrecision(14, 2)
                         .HasColumnType("numeric(14,2)");
 
+                    b.Property<string>("LastChangeReason")
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.Property<DateOnly?>("LastResolutionDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("LastResolutionNo")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
                     b.Property<decimal>("LightingTax")
                         .HasPrecision(14, 2)
                         .HasColumnType("numeric(14,2)");
@@ -655,6 +666,17 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                         .HasPrecision(5, 2)
                         .HasColumnType("numeric(5,2)");
 
+                    b.Property<string>("LastChangeReason")
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.Property<DateOnly?>("LastResolutionDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("LastResolutionNo")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
                     b.Property<decimal>("StoneBrickRccPercent")
                         .HasPrecision(5, 2)
                         .HasColumnType("numeric(5,2)");
@@ -762,6 +784,17 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("LastChangeReason")
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.Property<DateOnly?>("LastResolutionDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("LastResolutionNo")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
 
@@ -805,6 +838,17 @@ namespace GPMH.Infrastructure.Persistence.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("LastChangeReason")
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.Property<DateOnly?>("LastResolutionDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("LastResolutionNo")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
 
                     b.Property<Guid>("TenantId")
                         .HasColumnType("uuid");
