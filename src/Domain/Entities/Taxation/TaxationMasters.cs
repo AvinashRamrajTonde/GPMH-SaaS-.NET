@@ -15,6 +15,9 @@ public sealed class FormulaSetting : BaseEntity, ITenantEntity
     public bool ApplyLightingHealthOnOpenPlot { get; set; } = true;
     public bool RoundArea { get; set; } = true;
     public bool IsActive { get; set; } = true;
+    public string? LastResolutionNo { get; set; }
+    public DateOnly? LastResolutionDate { get; set; }
+    public string? LastChangeReason { get; set; }
 }
 
 public sealed class ConstructionTypeMaster : BaseEntity, ITenantEntity
@@ -28,6 +31,9 @@ public sealed class ConstructionTypeMaster : BaseEntity, ITenantEntity
     public decimal UsageWeightageFactor { get; set; }
     public decimal TaxRate { get; set; }
     public bool IsActive { get; set; } = true;
+    public string? LastResolutionNo { get; set; }
+    public DateOnly? LastResolutionDate { get; set; }
+    public string? LastChangeReason { get; set; }
 }
 
 public sealed class UsageWeightage : BaseEntity, ITenantEntity

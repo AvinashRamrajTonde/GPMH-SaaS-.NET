@@ -8,7 +8,15 @@ import { ApiProblemError } from '../../services/apiClient';
 import { sprint2Api } from '../../services/sprint2Api';
 import { formatDateTime } from '../../utils/formatters';
 
-const ENTITY_TYPES = ['Property', 'GramPanchayat', 'AssessmentYear', 'BankAccount', 'Tenant'];
+const ENTITY_TYPES = [
+  'Property',
+  'FormulaSetting',
+  'ConstructionTypeMaster',
+  'GramPanchayat',
+  'AssessmentYear',
+  'BankAccount',
+  'Tenant',
+];
 
 export function AuditLogPage() {
   const { t, i18n } = useTranslation();

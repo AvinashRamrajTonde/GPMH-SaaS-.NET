@@ -595,6 +595,17 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                         .HasPrecision(10, 4)
                         .HasColumnType("numeric(10,4)");
 
+                    b.Property<string>("LastChangeReason")
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.Property<DateOnly?>("LastResolutionDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("LastResolutionNo")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
                     b.Property<decimal>("TaxRate")
                         .HasPrecision(8, 4)
                         .HasColumnType("numeric(8,4)");
@@ -683,6 +694,17 @@ namespace GPMH.Infrastructure.Persistence.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("LastChangeReason")
+                        .HasMaxLength(400)
+                        .HasColumnType("character varying(400)");
+
+                    b.Property<DateOnly?>("LastResolutionDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("LastResolutionNo")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
 
                     b.Property<decimal>("LatePenaltyPct")
                         .HasPrecision(5, 2)

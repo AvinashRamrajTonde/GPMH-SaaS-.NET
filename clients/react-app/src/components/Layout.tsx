@@ -14,6 +14,7 @@ import {
   PanelLeftOpen,
   ReceiptText,
   ShieldCheck,
+  SlidersHorizontal,
   UserCheck,
   X,
 } from 'lucide-react';
@@ -414,6 +415,20 @@ export function Layout({ children }: PropsWithChildren) {
                       <Building2 className="h-[18px] w-[18px]" />
                     </span>
                     {!sidebarCollapsed && <span className="truncate">{t('nav.properties')}</span>}
+                  </>
+                )}
+              </NavLink>
+
+              <NavLink to="/formula" className={navLinkClass} onClick={() => setMobileOpen(false)}>
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-brand-700" />
+                    )}
+                    <span className={iconBoxClass(isActive)}>
+                      <SlidersHorizontal className="h-[18px] w-[18px]" />
+                    </span>
+                    {!sidebarCollapsed && <span className="truncate">{t('nav.formula')}</span>}
                   </>
                 )}
               </NavLink>

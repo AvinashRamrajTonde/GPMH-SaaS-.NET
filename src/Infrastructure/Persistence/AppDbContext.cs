@@ -323,6 +323,8 @@ public sealed class AppDbContext(
             entity.Property(e => e.TaxDivisor).HasPrecision(10, 2);
             entity.Property(e => e.EarlyRebatePct).HasPrecision(5, 2);
             entity.Property(e => e.LatePenaltyPct).HasPrecision(5, 2);
+            entity.Property(e => e.LastResolutionNo).HasMaxLength(80);
+            entity.Property(e => e.LastChangeReason).HasMaxLength(400);
             entity.HasIndex(e => new { e.TenantId, e.RatePeriodName }).IsUnique();
             entity.HasQueryFilter(e =>
                 tenantContext.CurrentTenantId != null &&
@@ -340,6 +342,8 @@ public sealed class AppDbContext(
             entity.Property(e => e.ConstructionReadyReckonerRate).HasPrecision(12, 4);
             entity.Property(e => e.UsageWeightageFactor).HasPrecision(8, 4);
             entity.Property(e => e.TaxRate).HasPrecision(8, 4);
+            entity.Property(e => e.LastResolutionNo).HasMaxLength(80);
+            entity.Property(e => e.LastChangeReason).HasMaxLength(400);
             entity.HasIndex(e => new { e.TenantId, e.Code }).IsUnique();
             entity.HasQueryFilter(e =>
                 tenantContext.CurrentTenantId != null &&

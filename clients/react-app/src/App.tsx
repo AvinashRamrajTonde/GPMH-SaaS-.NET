@@ -14,6 +14,9 @@ const OnboardingLgdPage = lazy(() =>
 const PropertiesPage = lazy(() =>
   import('./features/properties/PropertiesPage').then((m) => ({ default: m.PropertiesPage })),
 );
+const FormulaMastersPage = lazy(() =>
+  import('./features/formula/FormulaMastersPage').then((m) => ({ default: m.FormulaMastersPage })),
+);
 const AuditLogPage = lazy(() =>
   import('./features/audit/AuditLogPage').then((m) => ({ default: m.AuditLogPage })),
 );
@@ -67,6 +70,8 @@ export function App() {
                 <Route path="/onboarding" element={<OnboardingLgdPage />} />
                 <Route path="/properties" element={<PropertiesPage />} />
                 <Route path="/namuna-8/add" element={<PropertiesPage />} />
+                <Route path="/formula" element={<FormulaMastersPage />} />
+                <Route path="/namuna-8/formula" element={<FormulaMastersPage />} />
                 <Route path="/audit" element={<AuditLogPage />} />
                 <Route path="/audit/:entityName/:entityId" element={<AuditLogPage />} />
                 <Route path="/login" element={<LoginPage />} />
