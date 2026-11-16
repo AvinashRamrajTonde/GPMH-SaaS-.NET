@@ -29,11 +29,10 @@ export function ValidationSummary({
   return (
     <div
       role="alert"
-      className={`rounded-xl border px-4 py-3 text-xs space-y-2 ${
-        dark
+      className={`rounded-xl border px-4 py-3 text-xs space-y-2 ${dark
           ? 'border-rose-500/40 bg-rose-950/60 text-rose-200'
           : 'border-rose-300 bg-rose-50 text-rose-900'
-      }`}
+        }`}
     >
       <div className="flex items-start gap-2 font-bold">
         <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
@@ -65,11 +64,10 @@ export function ValidationSummary({
                       <button
                         type="button"
                         onClick={() => onJumpToStep(targetStep)}
-                        className={`rounded-md border px-2 py-0.5 text-[10.5px] font-bold transition ${
-                          dark
+                        className={`rounded-md border px-2 py-0.5 text-[10.5px] font-bold transition ${dark
                             ? 'border-rose-400/50 bg-rose-900/50 text-white hover:bg-rose-800'
                             : 'border-rose-300 bg-white text-rose-800 hover:bg-rose-100'
-                        }`}
+                          }`}
                       >
                         {t('validation.goToStep', { n: targetStep })} →
                       </button>
@@ -83,11 +81,10 @@ export function ValidationSummary({
 
       {showLoginHint && (
         <div
-          className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2 text-[11px] ${
-            dark
+          className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2 text-[11px] ${dark
               ? 'border-amber-500/30 bg-amber-950/40 text-amber-200'
               : 'border-amber-200 bg-amber-50 text-amber-950'
-          }`}
+            }`}
         >
           <span>{t('validation.alreadyRegisteredHint')}</span>
           <Link
