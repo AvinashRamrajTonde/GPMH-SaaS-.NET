@@ -2,10 +2,69 @@
 
 @theme {
   --font-sans: "Noto Sans Devanagari", "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --color-brand-50: #effaf8;
+  --color-brand-100: #d5f2ed;
+  --color-brand-200: #99f6e4;
+  --color-brand-300: #5eead4;
+  --color-brand-400: #38b8a8;
+  --color-brand-500: #14a090;
+  --color-brand-600: #0d8577;
+  --color-brand-700: #0f6b61;
+  --color-brand-800: #11544d;
+  --color-brand-900: #0c3a36;
+
+  --color-surface: #f8fafc;
+  --color-card: #ffffff;
+  --color-ink: #0f172a;
+  --color-muted: #475569;
+  --color-line: #e2e8f0;
+  --color-thead: #f0fdfa;
 }
 
 @layer base {
+  html {
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+  }
+
   body {
     font-family: var(--font-sans);
+    line-height: 1.6;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    line-height: 1.35;
+  }
+
+  input,
+  select,
+  textarea {
+    line-height: 1.5;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+  }
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
   }
 }

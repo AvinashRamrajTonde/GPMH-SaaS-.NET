@@ -4,6 +4,7 @@ import type {
   BankAccountPayload,
   CompleteOnboardingPayload,
   LgdProvenance,
+  OnboardingStatus,
 } from '../../../services/sprint2Api';
 import {
   type LgdSnapshotMap,
@@ -85,6 +86,7 @@ const INITIAL_STATE: OnboardingWizardState = {
   activateTenant: true,
   adminUsername: '',
   adminPassword: '',
+  adminConfirmPassword: '',
   adminEmail: '',
 };
 
@@ -100,7 +102,12 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
   const updateField = useCallback(
     <K extends keyof OnboardingWizardState>(key: K, value: OnboardingWizardState[K]) => {
       setState((prev) => ({ ...prev, [key]: value }));
-      if (key === 'officeAddress' || key === 'gramsevakMobile' || key === 'sarpanchMobile' || key === 'censusCode') {
+      if (
+        key === 'officeAddress' ||
+        key === 'gramsevakMobile' ||
+        key === 'sarpanchMobile' ||
+        key === 'censusCode'
+      ) {
         setExtraEditedFields((prev) => (prev.includes(key) ? prev : [...prev, key]));
       }
     },
@@ -141,6 +148,59 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
     },
     [],
   );
+
+  const hydrateFromStatus = useCallback((status: OnboardingStatus) => {
+    if (status.provenance?.originalLgdSnapshotJson) {
+      try {
+        const parsed = JSON.parse(status.provenance.originalLgdSnapshotJson) as LgdSnapshotMap;
+        setLgdSnapshot(parsed);
+      } catch {
+        // Ignore malformed snapshot JSON
+      }
+    }
+
+    const mergedBanks: BankAccountPayload[] = DEFAULT_BANKS.map((def) => {
+      const matched = status.bankAccounts.find((b) => b.fundType === def.fundType);
+      return matched ? { ...def, ...matched } : def;
+    });
+
+    const defaultBank = status.bankAccounts[0];
+    setState((prev) => ({
+      ...prev,
+      lgdCode: status.lgdCode || prev.lgdCode,
+      districtCode: status.districtCode || prev.districtCode,
+      districtName: status.districtName || prev.districtName,
+      tehsilCode: status.tehsilCode || prev.tehsilCode,
+      tehsilName: status.tehsilName || prev.tehsilName,
+      panchayatNameEn: status.panchayatNameEn || prev.panchayatNameEn,
+      panchayatNameMr: status.panchayatNameMr || prev.panchayatNameMr,
+      pincode: status.pincode ?? '',
+      censusCode: status.censusCode ?? '',
+      officeAddress: status.officeAddress ?? '',
+      totalWards: status.totalWards || 5,
+      populationCensus: status.populationCensus ? String(status.populationCensus) : '',
+      sarpanchName: status.committee.sarpanchName ?? '',
+      sarpanchMobile: status.committee.sarpanchMobile ?? '',
+      upSarpanchName: status.committee.upSarpanchName ?? '',
+      gramsevakName: status.committee.gramsevakName ?? '',
+      gramsevakMobile: status.committee.gramsevakMobile ?? '',
+      operatorName: status.committee.operatorName ?? '',
+      operatorMobile: status.committee.operatorMobile ?? '',
+      gramsevakSignatureKey: status.committee.gramsevakSignatureKey,
+      sarpanchSignatureKey: status.committee.sarpanchSignatureKey,
+      operatorSignatureKey: status.committee.operatorSignatureKey,
+      officialStampKey: status.committee.officialStampKey,
+      assessmentYearLabel: status.assessmentYear.yearLabel || '2026-27',
+      assessmentStartYear: status.assessmentYear.startYear || 2026,
+      assessmentEndYear: status.assessmentYear.endYear || 2027,
+      lockAssessmentYear: status.assessmentYear.isLocked,
+      initializeArrearsRollover: status.assessmentYear.isArrearsRolloverInitialized,
+      primaryUpiId: defaultBank?.upiId ?? '',
+      upiPayeeName: defaultBank?.upiPayeeName ?? `Gram Panchayat ${status.panchayatNameEn}`,
+      bankAccounts: mergedBanks,
+      seedDefaultFormulas: status.formulaSeeded || prev.seedDefaultFormulas,
+    }));
+  }, []);
 
   const restoreOriginalField = useCallback(
     (field: TrackedGeoField) => {
@@ -235,6 +295,7 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
         updateField,
         updateBankAccount,
         applyLgdAutoFill,
+        hydrateFromStatus,
         restoreOriginalField,
         getFieldProvenance,
         buildCompletePayload,

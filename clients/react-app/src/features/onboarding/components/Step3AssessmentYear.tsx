@@ -14,11 +14,11 @@ export function Step3AssessmentYear() {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-xl border border-emerald-200 bg-emerald-50/70 p-4 flex items-start gap-3">
-        <CalendarCheck2 className="h-5 w-5 text-emerald-700 shrink-0 mt-0.5" />
+      <div className="rounded-xl border border-brand-200 bg-brand-50/70 p-4 flex items-start gap-3">
+        <CalendarCheck2 className="h-5 w-5 text-brand-700 shrink-0 mt-0.5" />
         <div>
-          <p className="text-sm font-bold text-emerald-900">{t('onboarding.ayTitle')}</p>
-          <p className="text-xs text-emerald-800 mt-0.5">{t('onboarding.ayHint')}</p>
+          <p className="text-sm font-bold text-brand-900">{t('onboarding.ayTitle')}</p>
+          <p className="text-xs text-brand-800 mt-0.5">{t('onboarding.ayHint')}</p>
         </div>
       </div>
 
@@ -35,51 +35,51 @@ export function Step3AssessmentYear() {
                 updateField('assessmentEndYear', found.end);
               }
             }}
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-mono text-sm font-semibold"
+            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 mono text-sm font-semibold"
           >
             {YEAR_OPTIONS.map((y) => (
               <option key={y.label} value={y.label}>
-                FY {y.label} (01 Apr {y.start} – 31 Mar {y.end})
+                {t('onboarding.ayRange', { label: y.label, start: y.start, end: y.end })}
               </option>
             ))}
           </select>
         </label>
 
-        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs space-y-1">
+        <div className="rounded-xl border border-line bg-surface p-3.5 text-xs space-y-1">
           <p className="font-bold text-slate-700">{t('onboarding.fyCycle')}</p>
-          <p className="font-mono text-slate-900">
+          <p className="mono text-sm font-bold text-ink">
             01-04-{state.assessmentStartYear} → 31-03-{state.assessmentEndYear}
           </p>
         </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 cursor-pointer">
+        <label className="flex items-start gap-3 rounded-xl border border-line bg-white p-4 cursor-pointer hover:border-brand-300 transition">
           <input
             type="checkbox"
             checked={state.lockAssessmentYear}
             onChange={(e) => updateField('lockAssessmentYear', e.target.checked)}
-            className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-700"
+            className="mt-1 h-4 w-4 rounded border-slate-300 text-brand-700"
           />
           <div>
-            <p className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-800">
-              <Lock className="h-3.5 w-3.5 text-emerald-700" />
+            <p className="inline-flex items-center gap-1.5 text-sm font-bold text-ink">
+              <Lock className="h-3.5 w-3.5 text-brand-700" />
               {t('onboarding.lockAy')}
             </p>
-            <p className="text-xs text-slate-500 mt-0.5">{t('onboarding.lockAyDesc')}</p>
+            <p className="text-xs text-muted mt-0.5">{t('onboarding.lockAyDesc')}</p>
           </div>
         </label>
 
-        <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-4 cursor-pointer">
+        <label className="flex items-start gap-3 rounded-xl border border-line bg-white p-4 cursor-pointer hover:border-brand-300 transition">
           <input
             type="checkbox"
             checked={state.initializeArrearsRollover}
             onChange={(e) => updateField('initializeArrearsRollover', e.target.checked)}
-            className="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-700"
+            className="mt-1 h-4 w-4 rounded border-slate-300 text-brand-700"
           />
           <div>
-            <p className="text-sm font-bold text-slate-800">{t('onboarding.arrearsRollover')}</p>
-            <p className="text-xs text-slate-500 mt-0.5">{t('onboarding.arrearsRolloverDesc')}</p>
+            <p className="text-sm font-bold text-ink">{t('onboarding.arrearsRollover')}</p>
+            <p className="text-xs text-muted mt-0.5">{t('onboarding.arrearsRolloverDesc')}</p>
           </div>
         </label>
       </div>

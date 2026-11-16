@@ -1,5 +1,3 @@
-import { normalizeBaseUrl } from './lgdApi';
-
 export interface ProblemDetails {
   type?: string;
   title: string;
@@ -9,6 +7,11 @@ export interface ProblemDetails {
   correlationId?: string;
   traceId?: string;
   errors?: Record<string, string[]>;
+  kycStatus?: string;
+  agentCode?: string;
+  reason?: string;
+  helplinePhone?: string;
+  helplineEmail?: string;
 }
 
 export class ApiProblemError extends Error {
@@ -21,8 +24,12 @@ export class ApiProblemError extends Error {
   }
 }
 
+export function normalizeBaseUrl(rawUrl: string): string {
+  return rawUrl.replace(/\/+$/, '') + '/';
+}
+
 const API_BASE_URL = normalizeBaseUrl(
-  import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1/',
+  import.meta.env.VITE_API_BASE_URL || '/api/v1/',
 );
 
 let activeTenantId: string | null = null;
@@ -33,15 +40,9 @@ export function setClientSessionContext(tenantId: string | null, jwt: string | n
   accessToken = jwt;
 }
 
-export async function apiRequest<T>(
-  relativePath: string,
-  init: RequestInit = {},
-): Promise<T> {
-  const cleanPath = relativePath.replace(/^\/+/, '');
-  const headers = new Headers(init.headers);
-  headers.set('Accept', 'application/json');
-
-  if (init.body && !(init.body instanceof FormData) && !headers.has('Content-Type')) {
+function buildAuthHeaders(initHeaders?: HeadersInit, body?: BodyInit | null): Headers {
+  const headers = new Headers(initHeaders);
+  if (body && !(body instanceof FormData) && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
   if (activeTenantId) {
@@ -50,6 +51,16 @@ export async function apiRequest<T>(
   if (accessToken) {
     headers.set('Authorization', `Bearer ${accessToken}`);
   }
+  return headers;
+}
+
+export async function apiRequest<T>(
+  relativePath: string,
+  init: RequestInit = {},
+): Promise<T> {
+  const cleanPath = relativePath.replace(/^\/+/, '');
+  const headers = buildAuthHeaders(init.headers, init.body);
+  headers.set('Accept', 'application/json');
 
   const response = await fetch(`${API_BASE_URL}${cleanPath}`, {
     ...init,
@@ -77,3 +88,18 @@ export async function apiRequest<T>(
   return (await response.json()) as T;
 }
 
+export async function apiFetchBlobUrl(relativePath: string): Promise<string> {
+  const cleanPath = relativePath.replace(/^\/+/, '');
+  const headers = buildAuthHeaders();
+  const response = await fetch(`${API_BASE_URL}${cleanPath}`, {
+    headers,
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error(`Asset fetch failed (${response.status})`);
+  }
+
+  const blob = await response.blob();
+  return URL.createObjectURL(blob);
+}

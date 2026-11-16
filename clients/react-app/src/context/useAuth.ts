@@ -4,6 +4,7 @@ import type { AuthenticatedUser, AuthResponse } from '../services/sprint2Api';
 export interface AuthContextValue {
   user: AuthenticatedUser | null;
   accessToken: string | null;
+  isBootstrapping: boolean;
   login: (username: string, password: string, tenantId?: string | null) => Promise<AuthResponse>;
   loginAgent: (identifier: string, password: string) => Promise<AuthResponse>;
   switchTenant: (tenantId: string) => Promise<void>;
@@ -19,4 +20,3 @@ export function useAuth(): AuthContextValue {
   }
   return ctx;
 }
-

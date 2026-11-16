@@ -11,6 +11,67 @@ export type CanonicalRole =
   | 'Support_Admin'
   | 'Field_Agent';
 
+export type CanonicalKycStatus =
+  | 'PendingApproval'
+  | 'Approved'
+  | 'Suspended'
+  | 'Rejected';
+
+const ROLE_BY_NUMBER: Record<number, CanonicalRole> = {
+  1: 'SuperAdmin',
+  2: 'Gramsevak',
+  3: 'GP_Admin',
+  4: 'GP_Operator',
+  5: 'Surveyor',
+  6: 'Citizen',
+  7: 'Auditor',
+  8: 'Support_Admin',
+  9: 'Field_Agent',
+};
+
+const KYC_STATUS_BY_NUMBER: Record<number, CanonicalKycStatus> = {
+  1: 'PendingApproval',
+  2: 'Approved',
+  3: 'Suspended',
+  4: 'Rejected',
+};
+
+export function normalizeRole(raw: unknown): CanonicalRole {
+  if (typeof raw === 'number' && raw in ROLE_BY_NUMBER) {
+    return ROLE_BY_NUMBER[raw];
+  }
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim();
+    const num = Number(trimmed);
+    if (!Number.isNaN(num) && num in ROLE_BY_NUMBER) {
+      return ROLE_BY_NUMBER[num];
+    }
+    const valid = Object.values(ROLE_BY_NUMBER) as string[];
+    if (valid.includes(trimmed)) {
+      return trimmed as CanonicalRole;
+    }
+  }
+  return 'Citizen';
+}
+
+export function normalizeKycStatus(raw: unknown): CanonicalKycStatus {
+  if (typeof raw === 'number' && raw in KYC_STATUS_BY_NUMBER) {
+    return KYC_STATUS_BY_NUMBER[raw];
+  }
+  if (typeof raw === 'string') {
+    const trimmed = raw.trim();
+    const num = Number(trimmed);
+    if (!Number.isNaN(num) && num in KYC_STATUS_BY_NUMBER) {
+      return KYC_STATUS_BY_NUMBER[num];
+    }
+    const valid = Object.values(KYC_STATUS_BY_NUMBER) as string[];
+    if (valid.includes(trimmed)) {
+      return trimmed as CanonicalKycStatus;
+    }
+  }
+  return 'PendingApproval';
+}
+
 export interface TenantMembershipSummary {
   tenantId: string;
   role: CanonicalRole;
@@ -32,6 +93,41 @@ export interface AuthResponse {
   expiresAtUtc: string;
   user: AuthenticatedUser;
   refreshToken?: string | null;
+}
+
+interface RawAuthUser {
+  userId: string;
+  username: string;
+  fullNameEn: string;
+  fullNameMr: string;
+  role: unknown;
+  activeTenantId: string | null;
+  memberships: { tenantId: string; role: unknown; isDefault: boolean }[];
+}
+
+interface RawAuthResponse {
+  accessToken: string;
+  expiresAtUtc: string;
+  user: RawAuthUser;
+  refreshToken?: string | null;
+}
+
+function mapUser(raw: RawAuthUser): AuthenticatedUser {
+  return {
+    ...raw,
+    role: normalizeRole(raw.role),
+    memberships: (raw.memberships ?? []).map((m) => ({
+      ...m,
+      role: normalizeRole(m.role),
+    })),
+  };
+}
+
+function mapAuthResponse(raw: RawAuthResponse): AuthResponse {
+  return {
+    ...raw,
+    user: mapUser(raw.user),
+  };
 }
 
 export interface LgdProvenance {
@@ -248,7 +344,7 @@ export interface AgentRegistrationResult {
   agentCode: string;
   fullName: string;
   mobileNo: string;
-  kycStatus: 'PendingApproval' | 'Approved' | 'Suspended' | 'Rejected' | number;
+  kycStatus: CanonicalKycStatus;
   aadhaarMasked: string;
   panMasked: string;
   requestedCommissionRatePct: number;
@@ -258,7 +354,7 @@ export interface AgentProfile {
   agentId: string;
   userId: string;
   agentCode: string;
-  kycStatus: 'PendingApproval' | 'Approved' | 'Suspended' | 'Rejected' | number;
+  kycStatus: CanonicalKycStatus;
   statusReason: string | null;
   fullName: string;
   mobileNo: string;
@@ -270,24 +366,150 @@ export interface AgentProfile {
   requestedCommissionRatePct: number;
   approvedNewGpRatePct: number;
   approvedRenewalRatePct: number;
+  aadhaarDocumentKey?: string | null;
+  panDocumentKey?: string | null;
+}
+
+interface RawAgentRegistrationResult extends Omit<AgentRegistrationResult, 'kycStatus'> {
+  kycStatus: unknown;
+}
+
+interface RawAgentProfile extends Omit<AgentProfile, 'kycStatus'> {
+  kycStatus: unknown;
+}
+
+function mapAgentProfile(raw: RawAgentProfile): AgentProfile {
+  return {
+    ...raw,
+    kycStatus: normalizeKycStatus(raw.kycStatus),
+  };
+}
+
+export interface PropertyItem {
+  id: string;
+  tenantId: string;
+  parentPropertyId: string | null;
+  wardNo: string;
+  propertyNo: string;
+  builtUpAreaSqFt: number;
+  openPlotAreaSqFt: number;
+  totalAreaSqFt: number;
+  boundaryEast: string | null;
+  boundaryWest: string | null;
+  boundaryNorth: string | null;
+  boundarySouth: string | null;
+  waterConnectionCode: string;
+  isTaxExempt: boolean;
+  isActive: boolean;
+}
+
+export interface CreatePropertyPayload {
+  wardNo: string;
+  propertyNo: string;
+  builtUpAreaSqFt: number;
+  openPlotAreaSqFt: number;
+  boundaryEast?: string | null;
+  boundaryWest?: string | null;
+  boundaryNorth?: string | null;
+  boundarySouth?: string | null;
+  waterConnectionCode: string;
+  isTaxExempt: boolean;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  tenantId: string | null;
+  entityName: string;
+  entityId: string;
+  action: string;
+  actorId: string | null;
+  actorRole: string | null;
+  correlationId: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  oldValuesJson: string | null;
+  newValuesJson: string | null;
+  changedColumnsJson: string | null;
+  timestampUtc: string;
+}
+
+export interface TaxPreviewRequest {
+  assessmentStartYear: number;
+  floors: {
+    lengthFt: number;
+    widthFt: number;
+    areaSqm: number | null;
+    landAnnualValueRate: number;
+    constructionReadyReckonerRate: number;
+    usageWeightage: number;
+    taxRate: number;
+    constructionStartYear: number;
+  }[];
+  depreciationSlabs: {
+    ageFrom: number;
+    ageTo: number;
+    retentionPercentage: number;
+  }[];
+  areaSlabTaxes: {
+    lightingTax: number;
+    healthTax: number;
+    sanitationTax: number;
+    toiletTax: number;
+  };
+  waterTax: number;
+  otherTax: number;
+  openAreaSqm: number;
+  openPlotLandRate: number;
+  openPlotTaxRate: number;
+  taxDivisor: number;
+  roundAreaToTwoDecimals: boolean;
+}
+
+export interface TaxPreviewResponse {
+  floorBreakdowns: {
+    floorIndex: number;
+    areaSqm: number;
+    buildingAge: number;
+    depreciationPercentage: number;
+    landValue: number;
+    depreciatedBuildingValue: number;
+    floorCapitalValue: number;
+    rawBuildingTax: number;
+  }[];
+  buildingTax: number;
+  openLandTax: number;
+  lightingTax: number;
+  healthTax: number;
+  sanitationTax: number;
+  toiletTax: number;
+  waterTax: number;
+  otherTax: number;
+  totalTax: number;
 }
 
 export const sprint2Api = {
-  login: (username: string, password: string, tenantId?: string | null) =>
-    apiRequest<AuthResponse>('auth/login', {
+  login: async (username: string, password: string, tenantId?: string | null): Promise<AuthResponse> => {
+    const raw = await apiRequest<RawAuthResponse>('auth/login', {
       method: 'POST',
       body: JSON.stringify({ username, password, tenantId: tenantId || null }),
-    }),
+    });
+    return mapAuthResponse(raw);
+  },
 
-  refresh: (tenantId?: string | null) =>
-    apiRequest<AuthResponse>('auth/refresh', {
+  refresh: async (tenantId?: string | null): Promise<AuthResponse> => {
+    const raw = await apiRequest<RawAuthResponse>('auth/refresh', {
       method: 'POST',
       body: JSON.stringify({ tenantId: tenantId || null }),
-    }),
+    });
+    return mapAuthResponse(raw);
+  },
 
   logout: () => apiRequest<void>('auth/logout', { method: 'POST', body: JSON.stringify({}) }),
 
-  me: () => apiRequest<AuthenticatedUser>('auth/me'),
+  me: async (): Promise<AuthenticatedUser> => {
+    const raw = await apiRequest<RawAuthUser>('auth/me');
+    return mapUser(raw);
+  },
 
   getOnboardingStatus: () => apiRequest<OnboardingStatus>('onboarding/status'),
 
@@ -323,6 +545,27 @@ export const sprint2Api = {
   searchDashboard: (q: string) =>
     apiRequest<DashboardSearchResult>(`dashboard/search?q=${encodeURIComponent(q)}&limit=10`),
 
+  previewCapitalTax: (payload: TaxPreviewRequest) =>
+    apiRequest<TaxPreviewResponse>('tax/preview', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  listProperties: () => apiRequest<PropertyItem[]>('properties'),
+
+  getPropertyById: (id: string) => apiRequest<PropertyItem>(`properties/${encodeURIComponent(id)}`),
+
+  createProperty: (payload: CreatePropertyPayload) =>
+    apiRequest<PropertyItem>('properties', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
+  getAuditTrail: (entityName: string, entityId: string) =>
+    apiRequest<AuditLogEntry[]>(
+      `audit/${encodeURIComponent(entityName)}/${encodeURIComponent(entityId)}`,
+    ),
+
   listSuperAdminTenants: () => apiRequest<SuperAdminTenantSummary[]>('superadmin/tenants'),
 
   provisionTenantDirect: (payload: ProvisionTenantPayload) =>
@@ -331,32 +574,46 @@ export const sprint2Api = {
       body: JSON.stringify(payload),
     }),
 
-  listSuperAdminAgents: () => apiRequest<AgentProfile[]>('superadmin/agents'),
+  listSuperAdminAgents: async (): Promise<AgentProfile[]> => {
+    const rows = await apiRequest<RawAgentProfile[]>('superadmin/agents');
+    return rows.map(mapAgentProfile);
+  },
 
-  updateAgentStatus: (
+  updateAgentStatus: async (
     agentId: string,
     status: number,
     approvedNewGpRatePct?: number,
     approvedRenewalRatePct?: number,
     reason?: string,
-  ) =>
-    apiRequest<AgentProfile>(`superadmin/agents/${agentId}/status`, {
+  ): Promise<AgentProfile> => {
+    const raw = await apiRequest<RawAgentProfile>(`superadmin/agents/${agentId}/status`, {
       method: 'POST',
       body: JSON.stringify({ status, approvedNewGpRatePct, approvedRenewalRatePct, reason }),
-    }),
+    });
+    return mapAgentProfile(raw);
+  },
 
-  registerAgent: (formData: FormData) =>
-    apiRequest<AgentRegistrationResult>('agents/register', {
+  registerAgent: async (formData: FormData): Promise<AgentRegistrationResult> => {
+    const raw = await apiRequest<RawAgentRegistrationResult>('agents/register', {
       method: 'POST',
       body: formData,
-    }),
+    });
+    return {
+      ...raw,
+      kycStatus: normalizeKycStatus(raw.kycStatus),
+    };
+  },
 
-  loginAgent: (identifier: string, password: string) =>
-    apiRequest<AuthResponse>('agents/login', {
+  loginAgent: async (identifier: string, password: string): Promise<AuthResponse> => {
+    const raw = await apiRequest<RawAuthResponse>('agents/login', {
       method: 'POST',
       body: JSON.stringify({ identifier, password }),
-    }),
+    });
+    return mapAuthResponse(raw);
+  },
 
-  getAgentProfile: () => apiRequest<AgentProfile>('agents/me'),
+  getAgentProfile: async (): Promise<AgentProfile> => {
+    const raw = await apiRequest<RawAgentProfile>('agents/me');
+    return mapAgentProfile(raw);
+  },
 };
-

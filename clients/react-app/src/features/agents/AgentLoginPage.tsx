@@ -1,7 +1,8 @@
-import { AlertTriangle, PhoneCall, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, Eye, EyeOff, Mail, PhoneCall, ShieldAlert, UserCheck } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
+import { KycStatusBadge } from '../../components/StatusBadge';
 import { useAuth } from '../../context/useAuth';
 import { ApiProblemError } from '../../services/apiClient';
 
@@ -20,6 +21,7 @@ export function AgentLoginPage() {
 
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [gateInfo, setGateInfo] = useState<GateInfo | null>(null);
@@ -34,14 +36,13 @@ export function AgentLoginPage() {
       void navigate('/agent/dashboard');
     } catch (err) {
       if (err instanceof ApiProblemError) {
-        const ext = err.problem as unknown as Record<string, string | undefined>;
-        if (err.problem.status === 403 && ext.kycStatus) {
+        if (err.problem.status === 403 && err.problem.kycStatus) {
           setGateInfo({
-            kycStatus: ext.kycStatus,
-            agentCode: ext.agentCode || '',
-            reason: ext.reason,
-            helplinePhone: ext.helplinePhone || '0721-2550101',
-            helplineEmail: ext.helplineEmail || 'support@epanchayat-mh.gov.in',
+            kycStatus: err.problem.kycStatus,
+            agentCode: err.problem.agentCode || '',
+            reason: err.problem.reason,
+            helplinePhone: err.problem.helplinePhone || '0721-2550101',
+            helplineEmail: err.problem.helplineEmail || 'support@epanchayat-mh.gov.in',
           });
         } else {
           setErrorMsg(err.problem.detail || err.message);
@@ -55,76 +56,109 @@ export function AgentLoginPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-      <div className="flex items-center gap-2 text-emerald-700">
-        <ShieldCheck className="h-5 w-5" />
-        <h1 className="text-lg font-bold text-slate-900">{t('agent.loginTitle')}</h1>
+    <div className="mx-auto max-w-md py-6 space-y-5">
+      <div className="text-center space-y-2">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-700 text-white shadow-lg border border-emerald-400/30">
+          <UserCheck className="h-7 w-7" />
+        </div>
+        <h1 className="text-xl font-extrabold text-white">{t('agent.loginTitle')}</h1>
+        <p className="text-xs text-slate-400">{t('agent.loginSubtitle')}</p>
       </div>
 
-      {errorMsg && (
-        <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800">
-          {errorMsg}
-        </div>
-      )}
-
-      {gateInfo && (
-        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-xs text-amber-950 space-y-2">
-          <div className="flex items-center gap-2 font-bold">
-            <AlertTriangle className="h-4 w-4 text-amber-700" />
-            <span>
-              {t('agent.statusGateTitle')} ({gateInfo.kycStatus})
-            </span>
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-7 shadow-2xl space-y-5">
+        {errorMsg && (
+          <div
+            role="alert"
+            className="flex items-start gap-2 rounded-xl border border-rose-500/40 bg-rose-950/60 px-3.5 py-2.5 text-xs text-rose-200"
+          >
+            <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>{errorMsg}</span>
           </div>
-          <p className="font-mono">
-            {t('agent.codeLabel')}: <strong>{gateInfo.agentCode}</strong>
-          </p>
-          {gateInfo.reason && <p>{gateInfo.reason}</p>}
-          <div className="flex items-center gap-2 pt-1 font-semibold text-amber-900">
-            <PhoneCall className="h-3.5 w-3.5" />
-            <span>
-              Helpline: {gateInfo.helplinePhone} · {gateInfo.helplineEmail}
-            </span>
+        )}
+
+        {gateInfo && (
+          <div className="rounded-xl border border-amber-500/40 bg-amber-950/40 p-4 text-xs text-amber-100 space-y-2.5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-1.5 font-extrabold text-amber-300">
+                <AlertTriangle className="h-4 w-4" />
+                {t('agent.statusGateTitle')}
+              </span>
+              <KycStatusBadge status={gateInfo.kycStatus} dark />
+            </div>
+            <p className="mono text-[11px]">
+              {t('agent.codeLabel')}: <strong className="text-white">{gateInfo.agentCode}</strong>
+            </p>
+            {gateInfo.reason && <p className="text-slate-200">{gateInfo.reason}</p>}
+            <div className="space-y-1 border-t border-amber-500/20 pt-2 text-[11px]">
+              <p className="font-bold text-amber-300">{t('agent.helplineLabel')}</p>
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href={`tel:${gateInfo.helplinePhone}`}
+                  className="inline-flex items-center gap-1 text-emerald-300 hover:underline"
+                >
+                  <PhoneCall className="h-3 w-3" />
+                  {gateInfo.helplinePhone}
+                </a>
+                <a
+                  href={`mailto:${gateInfo.helplineEmail}`}
+                  className="inline-flex items-center gap-1 text-emerald-300 hover:underline"
+                >
+                  <Mail className="h-3 w-3" />
+                  {gateInfo.helplineEmail}
+                </a>
+              </div>
+            </div>
           </div>
+        )}
+
+        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4 text-xs">
+          <label className="block space-y-1.5 font-bold text-slate-300">
+            <span>{t('agent.loginIdentifierLabel')}</span>
+            <input
+              type="text"
+              required
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              placeholder="9822112233"
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 mono text-sm font-bold text-amber-300 focus:border-emerald-500"
+            />
+          </label>
+
+          <label className="block space-y-1.5 font-bold text-slate-300">
+            <span>{t('login.password')}</span>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 pr-10 text-sm text-white focus:border-emerald-500"
+              />
+              <button
+                type="button"
+                aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded p-1 text-slate-400 hover:text-white"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+          </label>
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-3 text-sm font-bold text-white shadow-lg hover:from-emerald-500 hover:to-teal-500 disabled:opacity-60 transition"
+          >
+            {submitting ? t('onboarding.loading') : t('agent.loginBtn')}
+          </button>
+        </form>
+
+        <div className="border-t border-slate-800 pt-4 text-center text-xs">
+          <Link to="/agent/register" className="font-bold text-emerald-400 hover:underline">
+            {t('agent.registerCta')}
+          </Link>
         </div>
-      )}
-
-      <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4 text-xs">
-        <label className="block font-semibold text-slate-700">
-          {t('agent.mobile')}
-          <input
-            type="text"
-            required
-            value={identifier}
-            onChange={(e) => setIdentifier(e.target.value)}
-            placeholder="9822112233"
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm"
-          />
-        </label>
-
-        <label className="block font-semibold text-slate-700">
-          {t('login.password')}
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-          />
-        </label>
-
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-emerald-800 disabled:opacity-60"
-        >
-          {submitting ? t('onboarding.loading') : t('agent.loginBtn')}
-        </button>
-      </form>
-
-      <div className="border-t border-slate-100 pt-3 text-center text-xs">
-        <Link to="/agent/register" className="font-bold text-emerald-700 hover:underline">
-          {t('agent.registerCta')}
-        </Link>
       </div>
     </div>
   );

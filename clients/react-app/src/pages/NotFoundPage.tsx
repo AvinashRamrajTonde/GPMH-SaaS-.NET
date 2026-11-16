@@ -5,15 +5,15 @@ export function NotFoundPage() {
   const { t } = useTranslation();
 
   return (
-    <div className="mx-auto max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-      <h1 className="text-xl font-bold text-slate-900">{t('notFound.title')}</h1>
+    <div className="mx-auto max-w-md rounded-2xl border border-line bg-card p-8 text-center shadow-xs space-y-3">
+      <h1 className="text-xl font-extrabold text-ink">{t('notFound.title')}</h1>
+      <p className="text-xs text-muted">{t('notFound.desc')}</p>
       <Link
         to="/"
-        className="mt-4 inline-block rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+        className="inline-block rounded-xl bg-brand-700 px-5 py-2.5 text-xs font-bold text-white hover:bg-brand-800 transition"
       >
         {t('notFound.back')}
       </Link>
     </div>
   );
 }
-

@@ -1,6 +1,10 @@
 import { createContext, useContext } from 'react';
 import type { LgdPanchayatSummary } from '../../../services/lgdApi';
-import type { BankAccountPayload, CompleteOnboardingPayload } from '../../../services/sprint2Api';
+import type {
+  BankAccountPayload,
+  CompleteOnboardingPayload,
+  OnboardingStatus,
+} from '../../../services/sprint2Api';
 
 export type TrackedGeoField =
   | 'lgdCode'
@@ -47,6 +51,7 @@ export interface OnboardingWizardState {
   activateTenant: boolean;
   adminUsername: string;
   adminPassword: string;
+  adminConfirmPassword: string;
   adminEmail: string;
 }
 
@@ -60,6 +65,7 @@ export interface OnboardingContextValue {
   updateField: <K extends keyof OnboardingWizardState>(key: K, value: OnboardingWizardState[K]) => void;
   updateBankAccount: (index: number, patch: Partial<BankAccountPayload>) => void;
   applyLgdAutoFill: (gp: LgdPanchayatSummary & { district_code?: string | null; tehsil_code?: string | null }) => void;
+  hydrateFromStatus: (status: OnboardingStatus) => void;
   restoreOriginalField: (field: TrackedGeoField) => void;
   getFieldProvenance: (field: TrackedGeoField) => 'autofilled' | 'edited' | 'manual';
   buildCompletePayload: () => CompleteOnboardingPayload;
@@ -74,4 +80,3 @@ export function useOnboardingWizard(): OnboardingContextValue {
   }
   return ctx;
 }
-
