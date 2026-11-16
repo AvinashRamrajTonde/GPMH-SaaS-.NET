@@ -94,14 +94,30 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
   const [state, setState] = useState<OnboardingWizardState>(INITIAL_STATE);
   const [lgdSnapshot, setLgdSnapshot] = useState<LgdSnapshotMap | null>(null);
   const [extraEditedFields, setExtraEditedFields] = useState<string[]>([]);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const setStep = useCallback((step: number) => {
     setState((prev) => ({ ...prev, step: Math.min(5, Math.max(1, step)) }));
   }, []);
 
+  const clearKeys = useCallback((keys: string[]) => {
+    setFieldErrors((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const k of keys) {
+        if (k in next) {
+          delete next[k];
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, []);
+
   const updateField = useCallback(
     <K extends keyof OnboardingWizardState>(key: K, value: OnboardingWizardState[K]) => {
       setState((prev) => ({ ...prev, [key]: value }));
+      clearKeys([String(key)]);
       if (
         key === 'officeAddress' ||
         key === 'gramsevakMobile' ||
@@ -111,15 +127,19 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
         setExtraEditedFields((prev) => (prev.includes(key) ? prev : [...prev, key]));
       }
     },
-    [],
+    [clearKeys],
   );
 
-  const updateBankAccount = useCallback((index: number, patch: Partial<BankAccountPayload>) => {
-    setState((prev) => ({
-      ...prev,
-      bankAccounts: prev.bankAccounts.map((acc, i) => (i === index ? { ...acc, ...patch } : acc)),
-    }));
-  }, []);
+  const updateBankAccount = useCallback(
+    (index: number, patch: Partial<BankAccountPayload>) => {
+      setState((prev) => ({
+        ...prev,
+        bankAccounts: prev.bankAccounts.map((acc, i) => (i === index ? { ...acc, ...patch } : acc)),
+      }));
+      clearKeys(Object.keys(patch).map((k) => `bankAccounts.${index}.${k}`));
+    },
+    [clearKeys],
+  );
 
   const applyLgdAutoFill = useCallback(
     (gp: LgdPanchayatSummary & { district_code?: string | null; tehsil_code?: string | null }) => {
@@ -133,6 +153,7 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
       };
       setLgdSnapshot(snapshot);
       setExtraEditedFields([]);
+      clearKeys(['lgdCode', 'panchayatNameEn', 'panchayatNameMr', 'districtName', 'tehsilName', 'pincode']);
       setState((prev) => ({
         ...prev,
         lgdCode: gp.lgd_code,
@@ -146,7 +167,7 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
         upiPayeeName: prev.upiPayeeName || `Gram Panchayat ${gp.gp_name_en}`,
       }));
     },
-    [],
+    [clearKeys],
   );
 
   const hydrateFromStatus = useCallback((status: OnboardingStatus) => {
@@ -206,9 +227,10 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
     (field: TrackedGeoField) => {
       if (!lgdSnapshot || lgdSnapshot[field] === undefined) return;
       const original = lgdSnapshot[field] ?? '';
+      clearKeys([field]);
       setState((prev) => ({ ...prev, [field]: original }));
     },
-    [lgdSnapshot],
+    [lgdSnapshot, clearKeys],
   );
 
   const getFieldProvenance = useCallback(
@@ -238,7 +260,10 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
 
   const buildCompletePayload = useCallback((): CompleteOnboardingPayload => {
     const filledBanks = state.bankAccounts.filter(
-      (b) => b.accountNumber.trim().length > 0 && b.ifscCode.trim().length > 0,
+      (b) =>
+        b.branchName.trim().length > 0 ||
+        b.accountNumber.trim().length > 0 ||
+        b.ifscCode.trim().length > 0,
     );
     const provenance: LgdProvenance = {
       isAutofilledFromLgd: lgdSnapshot !== null,
@@ -291,6 +316,8 @@ export function OnboardingProvider({ children }: PropsWithChildren) {
         state,
         lgdSnapshot,
         editedFields,
+        fieldErrors,
+        setFieldErrors,
         setStep,
         updateField,
         updateBankAccount,

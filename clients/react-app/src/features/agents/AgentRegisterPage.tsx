@@ -1,11 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
-import { CheckCircle2, Eye, EyeOff, Lock, ShieldAlert, UserPlus } from 'lucide-react';
+import { CheckCircle2, Eye, EyeOff, Lock, UserPlus } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { ApiProblemError } from '../../services/apiClient';
+import { ValidationSummary } from '../../components/ValidationSummary';
 import { getDistricts } from '../../services/lgdApi';
 import { type AgentRegistrationResult, sprint2Api } from '../../services/sprint2Api';
+import {
+  evaluatePasswordStrength,
+  extractProblemValidation,
+  type ParsedValidationItem,
+} from '../../utils/validation';
 
 export function AgentRegisterPage() {
   const { t } = useTranslation();
@@ -37,6 +42,7 @@ export function AgentRegisterPage() {
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [errorItems, setErrorItems] = useState<ParsedValidationItem[]>([]);
   const [result, setResult] = useState<AgentRegistrationResult | null>(null);
 
   const districtsQuery = useQuery({
@@ -48,9 +54,42 @@ export function AgentRegisterPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setErrorMsg(null);
+    setErrorItems([]);
 
+    const items: ParsedValidationItem[] = [];
+    if (!/^\d{10}$/.test(mobileNo.trim())) {
+      items.push({ key: 'mobileNo', rawField: 'MobileNo', message: t('validation.mobileDigits') });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      items.push({ key: 'email', rawField: 'Email', message: t('validation.emailFormat') });
+    }
+    if (!evaluatePasswordStrength(password).isValid) {
+      items.push({ key: 'password', rawField: 'Password', message: t('validation.passwordRules') });
+    }
     if (password !== confirmPassword) {
-      setErrorMsg(t('onboarding.passwordMismatch'));
+      items.push({
+        key: 'confirmPassword',
+        rawField: 'ConfirmPassword',
+        message: t('onboarding.passwordMismatch'),
+      });
+    }
+    if (!/^\d{12}$/.test(aadhaarNumber.trim())) {
+      items.push({
+        key: 'aadhaarNumber',
+        rawField: 'AadhaarNumber',
+        message: t('validation.aadhaarDigits'),
+      });
+    }
+    if (!/^[A-Z]{5}\d{4}[A-Z]$/.test(panNumber.trim().toUpperCase())) {
+      items.push({ key: 'panNumber', rawField: 'PanNumber', message: t('validation.panFormat') });
+    }
+    if (ifscCode.trim() && !/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifscCode.trim().toUpperCase())) {
+      items.push({ key: 'ifscCode', rawField: 'IfscCode', message: t('validation.ifscFormat') });
+    }
+
+    if (items.length > 0) {
+      setErrorMsg(t('validation.summaryTitle'));
+      setErrorItems(items);
       return;
     }
 
@@ -80,12 +119,9 @@ export function AgentRegisterPage() {
       const res = await sprint2Api.registerAgent(form);
       setResult(res);
     } catch (err) {
-      if (err instanceof ApiProblemError) {
-        const firstErr = err.problem.errors ? Object.values(err.problem.errors).flat()[0] : null;
-        setErrorMsg(firstErr || err.problem.detail || err.message);
-      } else {
-        setErrorMsg(err instanceof Error ? err.message : t('agent.registerFailed'));
-      }
+      const parsed = extractProblemValidation(err, t('agent.registerFailed'));
+      setErrorMsg(parsed.summary);
+      setErrorItems(parsed.items);
     } finally {
       setSubmitting(false);
     }
@@ -140,15 +176,7 @@ export function AgentRegisterPage() {
         <span>{t('agent.dpdpNotice')}</span>
       </div>
 
-      {errorMsg && (
-        <div
-          role="alert"
-          className="flex items-start gap-2 rounded-xl border border-rose-500/40 bg-rose-950/60 px-4 py-3 text-xs text-rose-200"
-        >
-          <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>{errorMsg}</span>
-        </div>
-      )}
+      <ValidationSummary summary={errorMsg} items={errorItems} dark />
 
       <form onSubmit={(e) => void handleSubmit(e)} className="space-y-6 text-xs">
         {/* Section 1: Personal & Login */}

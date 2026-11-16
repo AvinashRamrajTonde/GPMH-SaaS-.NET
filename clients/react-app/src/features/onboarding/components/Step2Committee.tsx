@@ -15,7 +15,7 @@ type AssetFieldKey =
 export function Step2Committee() {
   const { t } = useTranslation();
   const { accessToken } = useAuth();
-  const { state, updateField } = useOnboardingWizard();
+  const { state, fieldErrors, updateField } = useOnboardingWizard();
   const [uploadingField, setUploadingField] = useState<AssetFieldKey | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [localPreviews, setLocalPreviews] = useState<Partial<Record<AssetFieldKey, string>>>({});
@@ -90,8 +90,15 @@ export function Step2Committee() {
               maxLength={10}
               value={state.gramsevakMobile}
               onChange={(e) => updateField('gramsevakMobile', e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 mono text-sm"
+              className={`w-full rounded-lg border px-3 py-2 mono text-sm ${
+                fieldErrors.gramsevakMobile ? 'border-rose-500 ring-1 ring-rose-300' : 'border-slate-300'
+              }`}
             />
+            {fieldErrors.gramsevakMobile && (
+              <span className="block text-[11px] font-semibold text-rose-700">
+                {fieldErrors.gramsevakMobile}
+              </span>
+            )}
           </label>
           <div>
             <label className="flex cursor-pointer items-center justify-between rounded-lg border border-dashed border-slate-300 bg-surface px-3 py-2.5 text-xs hover:border-brand-600">
@@ -140,8 +147,15 @@ export function Step2Committee() {
                 maxLength={10}
                 value={state.sarpanchMobile}
                 onChange={(e) => updateField('sarpanchMobile', e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 mono text-sm"
+                className={`w-full rounded-lg border px-3 py-2 mono text-sm ${
+                  fieldErrors.sarpanchMobile ? 'border-rose-500 ring-1 ring-rose-300' : 'border-slate-300'
+                }`}
               />
+              {fieldErrors.sarpanchMobile && (
+                <span className="block text-[11px] font-semibold text-rose-700">
+                  {fieldErrors.sarpanchMobile}
+                </span>
+              )}
             </label>
             <label className="block space-y-1 text-xs font-semibold text-slate-700">
               <span>{t('onboarding.upSarpanchName')}</span>
@@ -199,8 +213,15 @@ export function Step2Committee() {
               maxLength={10}
               value={state.operatorMobile}
               onChange={(e) => updateField('operatorMobile', e.target.value)}
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 mono text-sm"
+              className={`w-full rounded-lg border px-3 py-2 mono text-sm ${
+                fieldErrors.operatorMobile ? 'border-rose-500 ring-1 ring-rose-300' : 'border-slate-300'
+              }`}
             />
+            {fieldErrors.operatorMobile && (
+              <span className="block text-[11px] font-semibold text-rose-700">
+                {fieldErrors.operatorMobile}
+              </span>
+            )}
           </label>
           <div>
             <label className="flex cursor-pointer items-center justify-between rounded-lg border border-dashed border-slate-300 bg-surface px-3 py-2.5 text-xs hover:border-brand-600">

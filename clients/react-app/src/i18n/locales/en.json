@@ -441,5 +441,32 @@
     "title": "Page Not Found (404)",
     "desc": "The requested ERP route does not exist or has moved.",
     "back": "Return to Dashboard"
+  },
+  "validation": {
+    "summaryTitle": "Please fix the following validation issues:",
+    "required": "This field is required.",
+    "lgdDigits": "LGD code must be 5 to 8 numeric digits.",
+    "pincodeDigits": "Pincode must be exactly 6 digits.",
+    "mobileDigits": "Mobile number must be exactly 10 digits.",
+    "wardsRange": "Total wards must be between 1 and 50.",
+    "ayFormat": "Assessment year must follow YYYY-YY format (e.g. 2026-27).",
+    "branchRequired": "Branch name is required for configured bank account.",
+    "accountRequired": "Account number is required for configured bank account.",
+    "ifscRequired": "IFSC code is required for configured bank account.",
+    "ifscFormat": "Invalid IFSC format (11 chars, e.g. SBIN0001234).",
+    "upiFormat": "Enter a valid UPI VPA (e.g. sonimohagp@sbi).",
+    "usernameMin": "Username must be 4 to 120 characters.",
+    "emailFormat": "Enter a valid email address.",
+    "passwordRules": "Password needs 8+ characters with uppercase (A-Z), lowercase (a-z), and a digit (0-9).",
+    "passwordRuleLength": "8+ characters",
+    "passwordRuleUpper": "Uppercase (A-Z)",
+    "passwordRuleLower": "Lowercase (a-z)",
+    "passwordRuleDigit": "Number (0-9)",
+    "aadhaarDigits": "Aadhaar number must be exactly 12 digits.",
+    "panFormat": "Invalid PAN format (e.g. ABCDE1234F).",
+    "propertyAreaPositive": "Built-up area + open plot area must be greater than zero.",
+    "alreadyRegisteredHint": "This LGD code or username is already registered in this database. Sign in via Portal Login or use another LGD code.",
+    "goToStep": "Go to Step {{n}}",
+    "bankPartialHint": "If entering a bank account, Branch Name, Account No, and 11-char IFSC are all required."
   }
 }

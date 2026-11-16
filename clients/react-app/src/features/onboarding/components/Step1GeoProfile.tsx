@@ -16,7 +16,7 @@ type DiscoveryMode = 'code' | 'search' | 'cascade';
 
 export function Step1GeoProfile() {
   const { t } = useTranslation();
-  const { state, updateField, applyLgdAutoFill } = useOnboardingWizard();
+  const { state, fieldErrors, updateField, applyLgdAutoFill } = useOnboardingWizard();
 
   const [mode, setMode] = useState<DiscoveryMode>('code');
   const [debouncedCode, setDebouncedCode] = useState('');
@@ -173,7 +173,10 @@ export function Step1GeoProfile() {
               value={state.lgdCode}
               onChange={(e) => updateField('lgdCode', e.target.value)}
               placeholder={t('onboarding.codePlaceholder')}
-              className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 mono text-sm"
+              aria-invalid={Boolean(fieldErrors.lgdCode)}
+              className={`flex-1 rounded-lg border bg-white px-3 py-2 mono text-sm ${
+                fieldErrors.lgdCode ? 'border-rose-500 ring-1 ring-rose-300' : 'border-slate-300'
+              }`}
             />
             <button
               type="button"
@@ -185,6 +188,9 @@ export function Step1GeoProfile() {
               {isLookingUp ? t('onboarding.loading') : t('onboarding.verifyBtn')}
             </button>
           </div>
+          {fieldErrors.lgdCode && (
+            <p className="text-[11px] font-semibold text-rose-700">{fieldErrors.lgdCode}</p>
+          )}
           <p className="text-[11px] text-muted">{t('onboarding.debounceHint')}</p>
         </div>
       )}
@@ -389,10 +395,16 @@ export function Step1GeoProfile() {
             id="onb-gp-mr"
             type="text"
             required
+            aria-invalid={Boolean(fieldErrors.panchayatNameMr)}
             value={state.panchayatNameMr}
             onChange={(e) => updateField('panchayatNameMr', e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium"
+            className={`w-full rounded-lg border bg-white px-3 py-2 text-sm font-medium ${
+              fieldErrors.panchayatNameMr ? 'border-rose-500 ring-1 ring-rose-300' : 'border-slate-300'
+            }`}
           />
+          {fieldErrors.panchayatNameMr && (
+            <p className="text-[11px] font-semibold text-rose-700">{fieldErrors.panchayatNameMr}</p>
+          )}
         </div>
 
         <div className="space-y-1">
@@ -406,10 +418,16 @@ export function Step1GeoProfile() {
             id="onb-gp-en"
             type="text"
             required
+            aria-invalid={Boolean(fieldErrors.panchayatNameEn)}
             value={state.panchayatNameEn}
             onChange={(e) => updateField('panchayatNameEn', e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium"
+            className={`w-full rounded-lg border bg-white px-3 py-2 text-sm font-medium ${
+              fieldErrors.panchayatNameEn ? 'border-rose-500 ring-1 ring-rose-300' : 'border-slate-300'
+            }`}
           />
+          {fieldErrors.panchayatNameEn && (
+            <p className="text-[11px] font-semibold text-rose-700">{fieldErrors.panchayatNameEn}</p>
+          )}
         </div>
 
         <div className="space-y-1">
@@ -423,10 +441,16 @@ export function Step1GeoProfile() {
             id="onb-dist"
             type="text"
             required
+            aria-invalid={Boolean(fieldErrors.districtName)}
             value={state.districtName}
             onChange={(e) => updateField('districtName', e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+            className={`w-full rounded-lg border bg-white px-3 py-2 text-sm ${
+              fieldErrors.districtName ? 'border-rose-500 ring-1 ring-rose-300' : 'border-slate-300'
+            }`}
           />
+          {fieldErrors.districtName && (
+            <p className="text-[11px] font-semibold text-rose-700">{fieldErrors.districtName}</p>
+          )}
         </div>
 
         <div className="space-y-1">
@@ -440,10 +464,16 @@ export function Step1GeoProfile() {
             id="onb-tehsil"
             type="text"
             required
+            aria-invalid={Boolean(fieldErrors.tehsilName)}
             value={state.tehsilName}
             onChange={(e) => updateField('tehsilName', e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+            className={`w-full rounded-lg border bg-white px-3 py-2 text-sm ${
+              fieldErrors.tehsilName ? 'border-rose-500 ring-1 ring-rose-300' : 'border-slate-300'
+            }`}
           />
+          {fieldErrors.tehsilName && (
+            <p className="text-[11px] font-semibold text-rose-700">{fieldErrors.tehsilName}</p>
+          )}
         </div>
 
         <div className="space-y-1">
@@ -457,10 +487,16 @@ export function Step1GeoProfile() {
             id="onb-pin"
             type="text"
             maxLength={10}
+            aria-invalid={Boolean(fieldErrors.pincode)}
             value={state.pincode}
             onChange={(e) => updateField('pincode', e.target.value)}
-            className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 mono text-sm"
+            className={`w-full rounded-lg border bg-white px-3 py-2 mono text-sm ${
+              fieldErrors.pincode ? 'border-rose-500 ring-1 ring-rose-300' : 'border-slate-300'
+            }`}
           />
+          {fieldErrors.pincode && (
+            <p className="text-[11px] font-semibold text-rose-700">{fieldErrors.pincode}</p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3">
@@ -470,10 +506,18 @@ export function Step1GeoProfile() {
               type="number"
               min={1}
               max={50}
+              aria-invalid={Boolean(fieldErrors.totalWards)}
               value={state.totalWards}
               onChange={(e) => updateField('totalWards', Number(e.target.value))}
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 mono text-sm"
+              className={`w-full rounded-lg border bg-white px-3 py-2 mono text-sm ${
+                fieldErrors.totalWards ? 'border-rose-500 ring-1 ring-rose-300' : 'border-slate-300'
+              }`}
             />
+            {fieldErrors.totalWards && (
+              <span className="block text-[11px] font-semibold text-rose-700">
+                {fieldErrors.totalWards}
+              </span>
+            )}
           </label>
           <label className="space-y-1 text-xs font-bold text-slate-700">
             <span>{t('onboarding.censusCode')}</span>

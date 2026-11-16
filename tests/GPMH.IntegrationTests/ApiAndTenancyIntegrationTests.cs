@@ -42,6 +42,7 @@ public sealed class ApiAndTenancyIntegrationTests(GpmhApiFactory factory)
         ValidationProblemDetails? problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         Assert.NotNull(problem);
         Assert.Equal("Validation Failed", problem.Title);
+        Assert.NotEmpty(problem.Errors);
     }
 
     [Fact]

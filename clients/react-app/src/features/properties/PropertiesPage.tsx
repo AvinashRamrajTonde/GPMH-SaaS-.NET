@@ -1,11 +1,13 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Building2, History, Plus, Search, ShieldAlert, X } from 'lucide-react';
+import { Building2, History, Plus, Search, X } from 'lucide-react';
 import { useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { ValidationSummary } from '../../components/ValidationSummary';
 import { useAuth } from '../../context/useAuth';
 import { ApiProblemError } from '../../services/apiClient';
 import { type CreatePropertyPayload, sprint2Api } from '../../services/sprint2Api';
+import { extractProblemValidation, type ParsedValidationItem } from '../../utils/validation';
 
 export function PropertiesPage() {
   const { t } = useTranslation();
@@ -16,6 +18,7 @@ export function PropertiesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [formErrorItems, setFormErrorItems] = useState<ParsedValidationItem[]>([]);
 
   const [form, setForm] = useState<CreatePropertyPayload>({
     wardNo: 'W-01',
@@ -52,6 +55,28 @@ export function PropertiesPage() {
   async function handleCreateSubmit(e: FormEvent) {
     e.preventDefault();
     setFormError(null);
+    setFormErrorItems([]);
+
+    const clientItems: ParsedValidationItem[] = [];
+    if (!form.wardNo.trim()) {
+      clientItems.push({ key: 'wardNo', rawField: 'WardNo', message: t('validation.required') });
+    }
+    if (!form.propertyNo.trim()) {
+      clientItems.push({ key: 'propertyNo', rawField: 'PropertyNo', message: t('validation.required') });
+    }
+    if ((Number(form.builtUpAreaSqFt) || 0) + (Number(form.openPlotAreaSqFt) || 0) <= 0) {
+      clientItems.push({
+        key: 'totalArea',
+        rawField: 'TotalArea',
+        message: t('validation.propertyAreaPositive'),
+      });
+    }
+    if (clientItems.length > 0) {
+      setFormError(t('validation.summaryTitle'));
+      setFormErrorItems(clientItems);
+      return;
+    }
+
     setSubmitting(true);
     try {
       await sprint2Api.createProperty({
@@ -68,12 +93,9 @@ export function PropertiesPage() {
       setModalOpen(false);
       setForm((prev) => ({ ...prev, propertyNo: '' }));
     } catch (err) {
-      if (err instanceof ApiProblemError) {
-        const firstErr = err.problem.errors ? Object.values(err.problem.errors).flat()[0] : null;
-        setFormError(firstErr || err.problem.detail || err.message);
-      } else {
-        setFormError(err instanceof Error ? err.message : t('onboarding.submitFailed'));
-      }
+      const parsed = extractProblemValidation(err, t('onboarding.submitFailed'));
+      setFormError(parsed.summary);
+      setFormErrorItems(parsed.items);
     } finally {
       setSubmitting(false);
     }
@@ -220,12 +242,7 @@ export function PropertiesPage() {
               </button>
             </div>
 
-            {formError && (
-              <div className="flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800">
-                <ShieldAlert className="h-4 w-4 shrink-0" />
-                <span>{formError}</span>
-              </div>
-            )}
+            <ValidationSummary summary={formError} items={formErrorItems} />
 
             <form onSubmit={(e) => void handleCreateSubmit(e)} className="space-y-4 text-xs">
               <div className="grid gap-3 sm:grid-cols-3">

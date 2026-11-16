@@ -100,7 +100,12 @@ public sealed class GlobalExceptionHandler(
         }
 
         httpContext.Response.StatusCode = problem.Status ?? StatusCodes.Status500InternalServerError;
-        await httpContext.Response.WriteAsJsonAsync(problem, cancellationToken).ConfigureAwait(false);
+        await httpContext.Response.WriteAsJsonAsync(
+            problem,
+            problem.GetType(),
+            options: null,
+            contentType: "application/problem+json",
+            cancellationToken: cancellationToken).ConfigureAwait(false);
         return true;
     }
 }

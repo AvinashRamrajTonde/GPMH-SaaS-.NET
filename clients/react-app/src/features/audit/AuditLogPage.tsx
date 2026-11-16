@@ -25,8 +25,8 @@ export function AuditLogPage() {
 
   const canQueryAudit = Boolean(
     accessToken &&
-      user &&
-      ['SuperAdmin', 'Gramsevak', 'GP_Admin', 'Auditor', 'Support_Admin'].includes(user.role),
+    user &&
+    ['SuperAdmin', 'Gramsevak', 'GP_Admin', 'Auditor', 'Support_Admin'].includes(user.role),
   );
 
   const propertiesQuery = useQuery({

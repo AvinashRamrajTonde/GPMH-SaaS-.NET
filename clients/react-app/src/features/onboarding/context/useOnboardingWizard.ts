@@ -61,6 +61,8 @@ export interface OnboardingContextValue {
   state: OnboardingWizardState;
   lgdSnapshot: LgdSnapshotMap | null;
   editedFields: string[];
+  fieldErrors: Record<string, string>;
+  setFieldErrors: (errors: Record<string, string>) => void;
   setStep: (step: number) => void;
   updateField: <K extends keyof OnboardingWizardState>(key: K, value: OnboardingWizardState[K]) => void;
   updateBankAccount: (index: number, patch: Partial<BankAccountPayload>) => void;

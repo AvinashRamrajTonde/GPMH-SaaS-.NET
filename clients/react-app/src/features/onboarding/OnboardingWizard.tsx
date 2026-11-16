@@ -1,11 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, ShieldAlert } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ArrowLeft, ArrowRight, Check, CheckCircle2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ValidationSummary } from '../../components/ValidationSummary';
 import { useAuth } from '../../context/useAuth';
-import { ApiProblemError } from '../../services/apiClient';
 import { sprint2Api } from '../../services/sprint2Api';
+import { extractProblemValidation, type ParsedValidationItem } from '../../utils/validation';
 import { OnboardingProvider } from './context/OnboardingContext';
 import { useOnboardingWizard } from './context/useOnboardingWizard';
 import { Step1GeoProfile } from './components/Step1GeoProfile';
@@ -13,6 +14,11 @@ import { Step2Committee } from './components/Step2Committee';
 import { Step3AssessmentYear } from './components/Step3AssessmentYear';
 import { Step4BankQr } from './components/Step4BankQr';
 import { Step5FormulaActivation } from './components/Step5FormulaActivation';
+import {
+  resolveStepForFieldKey,
+  validateAllOnboardingSteps,
+  validateOnboardingStep,
+} from './validation';
 
 const STEP_KEYS = [
   { num: 1, key: 'onboarding.step1Nav' },
@@ -28,11 +34,20 @@ function OnboardingWizardInner() {
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const { user, accessToken, login } = useAuth();
-  const { state, setStep, hydrateFromStatus, buildCompletePayload } = useOnboardingWizard();
+  const {
+    state,
+    fieldErrors,
+    setFieldErrors,
+    setStep,
+    hydrateFromStatus,
+    buildCompletePayload,
+  } = useOnboardingWizard();
   const [submitting, setSubmitting] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+  const [validationItems, setValidationItems] = useState<ParsedValidationItem[]>([]);
   const [savedNotice, setSavedNotice] = useState(false);
 
+  const isSelfService = !accessToken;
   const canHydrate = Boolean(accessToken && user?.activeTenantId);
   const statusQuery = useQuery({
     queryKey: ['onboarding', 'status', user?.activeTenantId],
@@ -54,22 +69,51 @@ function OnboardingWizardInner() {
     }
   }, [statusQuery.data, hydrateFromStatus]);
 
-  function goToStep(next: number) {
+  function goToStep(next: number, validateBeforeAdvance = false) {
     const clamped = Math.min(5, Math.max(1, next));
+    setSavedNotice(false);
+
+    if (validateBeforeAdvance && clamped > state.step) {
+      const stepErrs = validateOnboardingStep(state.step, state, isSelfService, t);
+      const entries = Object.entries(stepErrs);
+      if (entries.length > 0) {
+        setFieldErrors(stepErrs);
+        setSummaryError(t('validation.summaryTitle'));
+        setValidationItems(
+          entries.map(([k, message]) => ({ key: k, rawField: k, message })),
+        );
+        return;
+      }
+      setFieldErrors({});
+      setSummaryError(null);
+      setValidationItems([]);
+    }
+
     setStep(clamped);
     setSearchParams({ step: String(clamped) }, { replace: true });
   }
 
   async function handleCompleteSubmit(redirectToDashboard: boolean) {
-    setErrorMsg(null);
+    setSummaryError(null);
+    setValidationItems([]);
     setSavedNotice(false);
 
-    if (!accessToken && state.adminPassword !== state.adminConfirmPassword) {
-      setStep(5);
-      setErrorMsg(t('onboarding.passwordMismatch'));
+    const check = validateAllOnboardingSteps(state, isSelfService, t);
+    if (check.firstInvalidStep !== null) {
+      setFieldErrors(check.fieldErrors);
+      setSummaryError(t('validation.summaryTitle'));
+      setValidationItems(
+        Object.entries(check.fieldErrors).map(([k, message]) => ({
+          key: k,
+          rawField: k,
+          message,
+        })),
+      );
+      goToStep(check.firstInvalidStep, false);
       return;
     }
 
+    setFieldErrors({});
     setSubmitting(true);
     try {
       const payload = buildCompletePayload();
@@ -79,7 +123,7 @@ function OnboardingWizardInner() {
         await queryClient.invalidateQueries({ queryKey: ['dashboard', 'summary', user?.activeTenantId] });
       } else {
         const created = await sprint2Api.registerSelfServiceGp(
-          state.adminUsername,
+          state.adminUsername.trim(),
           state.adminPassword,
           state.adminEmail.trim() || null,
           payload,
@@ -92,16 +136,39 @@ function OnboardingWizardInner() {
         setSavedNotice(true);
       }
     } catch (err) {
-      if (err instanceof ApiProblemError) {
-        const firstFieldErr = err.problem.errors ? Object.values(err.problem.errors).flat()[0] : null;
-        setErrorMsg(firstFieldErr || err.problem.detail || err.message);
-      } else {
-        setErrorMsg(err instanceof Error ? err.message : t('onboarding.submitFailed'));
+      const parsed = extractProblemValidation(err, t('onboarding.submitFailed'));
+      setSummaryError(parsed.summary);
+      setValidationItems(parsed.items);
+      if (Object.keys(parsed.fieldErrors).length > 0) {
+        setFieldErrors(parsed.fieldErrors);
+        const targetStep = Math.min(
+          ...Object.keys(parsed.fieldErrors).map((k) => resolveStepForFieldKey(k)),
+        );
+        if (targetStep >= 1 && targetStep <= 5) {
+          goToStep(targetStep, false);
+        }
       }
     } finally {
       setSubmitting(false);
     }
   }
+
+  const stepHasErrors = useMemo(() => {
+    const flags: Record<number, boolean> = {};
+    for (const key of Object.keys(fieldErrors)) {
+      flags[resolveStepForFieldKey(key)] = true;
+    }
+    return flags;
+  }, [fieldErrors]);
+
+  const showDuplicateHint = useMemo(() => {
+    if (!isSelfService) return false;
+    return validationItems.some(
+      (i) =>
+        i.message.toLowerCase().includes('already registered') ||
+        i.message.toLowerCase().includes('already taken'),
+    );
+  }, [isSelfService, validationItems]);
 
   const progressPct = Math.round((state.step / 5) * 100);
 
@@ -115,34 +182,45 @@ function OnboardingWizardInner() {
         <p className="text-xs sm:text-sm text-muted">{t('onboarding.subtitle')}</p>
       </div>
 
-      {/* Stepper Card matching canonical 21_gp_onboarding_wizard */}
+      {/* Stepper Header Card */}
       <section className="rounded-2xl border border-line bg-card p-4 sm:p-5 shadow-xs space-y-4">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-5" role="tablist">
           {STEP_KEYS.map((s) => {
             const active = state.step === s.num;
-            const completed = state.step > s.num;
+            const completed = state.step > s.num && !stepHasErrors[s.num];
+            const hasErr = Boolean(stepHasErrors[s.num]);
             return (
               <button
                 key={s.num}
                 type="button"
                 role="tab"
                 aria-selected={active}
-                onClick={() => goToStep(s.num)}
-                className={`flex flex-col items-center rounded-xl border-2 px-2 py-2.5 text-center transition ${
-                  active
-                    ? 'border-brand-700 bg-brand-50 text-brand-900 shadow-xs'
-                    : completed
-                      ? 'border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50/40'
-                      : 'border-slate-200 bg-surface text-slate-600 hover:bg-white'
+                onClick={() => goToStep(s.num, false)}
+                className={`relative flex flex-col items-center rounded-xl border-2 px-2 py-2.5 text-center transition ${
+                  hasErr
+                    ? 'border-rose-400 bg-rose-50/70 text-rose-900'
+                    : active
+                      ? 'border-brand-700 bg-brand-50 text-brand-900 shadow-xs'
+                      : completed
+                        ? 'border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50/40'
+                        : 'border-slate-200 bg-surface text-slate-600 hover:bg-white'
                 }`}
               >
+                {hasErr && (
+                  <span
+                    className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-rose-600"
+                    aria-hidden="true"
+                  />
+                )}
                 <span
                   className={`mb-1.5 flex h-7 w-7 items-center justify-center rounded-full border-2 mono text-xs font-extrabold ${
-                    active
-                      ? 'border-brand-700 bg-brand-700 text-white'
-                      : completed
-                        ? 'border-emerald-600 bg-emerald-600 text-white'
-                        : 'border-slate-300 bg-white text-slate-600'
+                    hasErr
+                      ? 'border-rose-600 bg-rose-600 text-white'
+                      : active
+                        ? 'border-brand-700 bg-brand-700 text-white'
+                        : completed
+                          ? 'border-emerald-600 bg-emerald-600 text-white'
+                          : 'border-slate-300 bg-white text-slate-600'
                   }`}
                 >
                   {completed ? <Check className="h-3.5 w-3.5" /> : s.num}
@@ -161,7 +239,7 @@ function OnboardingWizardInner() {
         </div>
       </section>
 
-      {/* Main Step Card */}
+      {/* Main Step Form Card */}
       <section className="rounded-2xl border border-line bg-card p-6 sm:p-8 shadow-xs space-y-6">
         {statusQuery.isFetching && (
           <div className="rounded-xl border border-brand-200 bg-brand-50 px-4 py-2.5 text-xs font-semibold text-brand-800 animate-pulse">
@@ -176,15 +254,14 @@ function OnboardingWizardInner() {
           </div>
         )}
 
-        {errorMsg && (
-          <div
-            role="alert"
-            className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-medium text-rose-800"
-          >
-            <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" />
-            <span>{errorMsg}</span>
-          </div>
-        )}
+        <ValidationSummary
+          summary={summaryError}
+          items={validationItems}
+          resolveStep={resolveStepForFieldKey}
+          currentStep={state.step}
+          onJumpToStep={(target) => goToStep(target, false)}
+          showLoginHint={showDuplicateHint}
+        />
 
         <div>
           {state.step === 1 && <Step1GeoProfile />}
@@ -198,7 +275,7 @@ function OnboardingWizardInner() {
           <button
             type="button"
             disabled={state.step <= 1}
-            onClick={() => goToStep(state.step - 1)}
+            onClick={() => goToStep(state.step - 1, false)}
             className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 transition"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -224,7 +301,7 @@ function OnboardingWizardInner() {
             {state.step < 5 ? (
               <button
                 type="button"
-                onClick={() => goToStep(state.step + 1)}
+                onClick={() => goToStep(state.step + 1, true)}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-brand-700 px-5 py-2 text-xs font-bold text-white hover:bg-brand-800 transition"
               >
                 {t('onboarding.nextBtn')}

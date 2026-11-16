@@ -1,13 +1,14 @@
-import { CheckCircle2, Eye, EyeOff, Sparkles } from 'lucide-react';
+import { Check, CheckCircle2, Eye, EyeOff, Sparkles, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../context/useAuth';
+import { evaluatePasswordStrength } from '../../../utils/validation';
 import { useOnboardingWizard } from '../context/useOnboardingWizard';
 
 export function Step5FormulaActivation() {
   const { t } = useTranslation();
   const { accessToken } = useAuth();
-  const { state, editedFields, updateField } = useOnboardingWizard();
+  const { state, fieldErrors, editedFields, updateField } = useOnboardingWizard();
   const [showPass, setShowPass] = useState(false);
 
   const seedStats = [
@@ -18,10 +19,18 @@ export function Step5FormulaActivation() {
     { label: t('onboarding.seedDivisor'), value: '1000' },
   ];
 
+  const pwdStrength = evaluatePasswordStrength(state.adminPassword);
   const passwordMismatch =
     !accessToken &&
     state.adminConfirmPassword.length > 0 &&
     state.adminPassword !== state.adminConfirmPassword;
+
+  const strengthRules = [
+    { ok: pwdStrength.hasMinLen, label: t('validation.passwordRuleLength') },
+    { ok: pwdStrength.hasUpper, label: t('validation.passwordRuleUpper') },
+    { ok: pwdStrength.hasLower, label: t('validation.passwordRuleLower') },
+    { ok: pwdStrength.hasDigit, label: t('validation.passwordRuleDigit') },
+  ];
 
   return (
     <div className="space-y-5">
@@ -56,7 +65,7 @@ export function Step5FormulaActivation() {
       </div>
 
       {!accessToken && (
-        <div className="rounded-xl border border-line bg-white p-4 space-y-3 shadow-xs">
+        <div className="rounded-xl border border-line bg-white p-4 space-y-4 shadow-xs">
           <p className="text-xs font-extrabold text-ink">{t('onboarding.adminAccountSection')}</p>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="space-y-1 text-xs font-semibold text-slate-700">
@@ -66,33 +75,53 @@ export function Step5FormulaActivation() {
               <input
                 type="text"
                 required
+                aria-invalid={Boolean(fieldErrors.adminUsername)}
                 value={state.adminUsername}
                 onChange={(e) => updateField('adminUsername', e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 mono text-sm"
+                className={`w-full rounded-lg border px-3 py-2 mono text-sm ${
+                  fieldErrors.adminUsername ? 'border-rose-500 ring-1 ring-rose-300' : 'border-slate-300'
+                }`}
               />
+              {fieldErrors.adminUsername && (
+                <span className="block text-[11px] font-semibold text-rose-700">
+                  {fieldErrors.adminUsername}
+                </span>
+              )}
             </label>
 
             <label className="space-y-1 text-xs font-semibold text-slate-700">
               <span>{t('onboarding.adminEmail')}</span>
               <input
                 type="email"
+                aria-invalid={Boolean(fieldErrors.adminEmail)}
                 value={state.adminEmail}
                 onChange={(e) => updateField('adminEmail', e.target.value)}
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                className={`w-full rounded-lg border px-3 py-2 text-sm ${
+                  fieldErrors.adminEmail ? 'border-rose-500 ring-1 ring-rose-300' : 'border-slate-300'
+                }`}
               />
+              {fieldErrors.adminEmail && (
+                <span className="block text-[11px] font-semibold text-rose-700">
+                  {fieldErrors.adminEmail}
+                </span>
+              )}
             </label>
 
-            <label className="space-y-1 text-xs font-semibold text-slate-700">
-              <span>
+            <div className="space-y-1.5 text-xs font-semibold text-slate-700">
+              <label htmlFor="onb-admin-pwd" className="block">
                 {t('onboarding.adminPassword')} <span className="text-rose-600">*</span>
-              </span>
+              </label>
               <div className="relative">
                 <input
+                  id="onb-admin-pwd"
                   type={showPass ? 'text' : 'password'}
                   required
+                  aria-invalid={Boolean(fieldErrors.adminPassword)}
                   value={state.adminPassword}
                   onChange={(e) => updateField('adminPassword', e.target.value)}
-                  className="w-full rounded-lg border border-slate-300 px-3 py-2 pr-9 mono text-sm"
+                  className={`w-full rounded-lg border px-3 py-2 pr-9 mono text-sm ${
+                    fieldErrors.adminPassword ? 'border-rose-500 ring-1 ring-rose-300' : 'border-slate-300'
+                  }`}
                 />
                 <button
                   type="button"
@@ -103,7 +132,27 @@ export function Step5FormulaActivation() {
                   {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-            </label>
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {strengthRules.map((rule) => (
+                  <span
+                    key={rule.label}
+                    className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${
+                      rule.ok
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-slate-100 text-slate-600'
+                    }`}
+                  >
+                    {rule.ok ? <Check className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                    {rule.label}
+                  </span>
+                ))}
+              </div>
+              {fieldErrors.adminPassword && (
+                <p className="text-[11px] font-semibold text-rose-700">
+                  {fieldErrors.adminPassword}
+                </p>
+              )}
+            </div>
 
             <label className="space-y-1 text-xs font-semibold text-slate-700">
               <span>
@@ -112,15 +161,18 @@ export function Step5FormulaActivation() {
               <input
                 type={showPass ? 'text' : 'password'}
                 required
+                aria-invalid={passwordMismatch || Boolean(fieldErrors.adminConfirmPassword)}
                 value={state.adminConfirmPassword}
                 onChange={(e) => updateField('adminConfirmPassword', e.target.value)}
                 className={`w-full rounded-lg border px-3 py-2 mono text-sm ${
-                  passwordMismatch ? 'border-rose-500 bg-rose-50/40' : 'border-slate-300'
+                  passwordMismatch || fieldErrors.adminConfirmPassword
+                    ? 'border-rose-500 bg-rose-50/40'
+                    : 'border-slate-300'
                 }`}
               />
-              {passwordMismatch && (
+              {(passwordMismatch || fieldErrors.adminConfirmPassword) && (
                 <p className="text-[11px] font-semibold text-rose-700">
-                  {t('onboarding.passwordMismatch')}
+                  {fieldErrors.adminConfirmPassword || t('onboarding.passwordMismatch')}
                 </p>
               )}
             </label>

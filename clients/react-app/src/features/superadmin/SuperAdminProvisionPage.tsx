@@ -8,7 +8,6 @@ import {
   Plus,
   Printer,
   Search,
-  ShieldAlert,
   ShieldCheck,
   UserCheck,
   X,
@@ -17,6 +16,7 @@ import { useMemo, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { KycStatusBadge, TenantStatusBadge } from '../../components/StatusBadge';
+import { ValidationSummary } from '../../components/ValidationSummary';
 import { useAuth } from '../../context/useAuth';
 import { ApiProblemError } from '../../services/apiClient';
 import { getPanchayatByLgd } from '../../services/lgdApi';
@@ -27,6 +27,11 @@ import {
   sprint2Api,
 } from '../../services/sprint2Api';
 import { formatDateOnly, formatInr } from '../../utils/formatters';
+import {
+  evaluatePasswordStrength,
+  extractProblemValidation,
+  type ParsedValidationItem,
+} from '../../utils/validation';
 
 type HQTab = 'directory' | 'provision' | 'agents';
 
@@ -82,6 +87,7 @@ export function SuperAdminProvisionPage() {
   const [lgdLoading, setLgdLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [errorItems, setErrorItems] = useState<ParsedValidationItem[]>([]);
   const [provisioned, setProvisioned] = useState<ProvisionedTenantResult | null>(null);
   const [copiedSlip, setCopiedSlip] = useState(false);
   const [lastProvisionedPassword, setLastProvisionedPassword] = useState('');
@@ -185,6 +191,32 @@ export function SuperAdminProvisionPage() {
   async function handleSubmitProvision(e: FormEvent) {
     e.preventDefault();
     setErrorMsg(null);
+    setErrorItems([]);
+
+    const items: ParsedValidationItem[] = [];
+    if (!/^\d{5,8}$/.test(form.lgdCode.trim())) {
+      items.push({ key: 'lgdCode', rawField: 'LgdCode', message: t('validation.lgdDigits') });
+    }
+    if (form.adminUsername.trim().length < 4) {
+      items.push({
+        key: 'adminUsername',
+        rawField: 'AdminUsername',
+        message: t('validation.usernameMin'),
+      });
+    }
+    if (!evaluatePasswordStrength(form.adminPassword).isValid) {
+      items.push({
+        key: 'adminPassword',
+        rawField: 'AdminPassword',
+        message: t('validation.passwordRules'),
+      });
+    }
+    if (items.length > 0) {
+      setErrorMsg(t('validation.summaryTitle'));
+      setErrorItems(items);
+      return;
+    }
+
     setSubmitting(true);
     try {
       const passwordSnapshot = form.adminPassword;
@@ -193,12 +225,9 @@ export function SuperAdminProvisionPage() {
       setProvisioned(result);
       await queryClient.invalidateQueries({ queryKey: ['superadmin', 'tenants'] });
     } catch (err) {
-      if (err instanceof ApiProblemError) {
-        const firstFieldErr = err.problem.errors ? Object.values(err.problem.errors).flat()[0] : null;
-        setErrorMsg(firstFieldErr || err.problem.detail || err.message);
-      } else {
-        setErrorMsg(err instanceof Error ? err.message : t('superadmin.provisionFailed'));
-      }
+      const parsed = extractProblemValidation(err, t('superadmin.provisionFailed'));
+      setErrorMsg(parsed.summary);
+      setErrorItems(parsed.items);
     } finally {
       setSubmitting(false);
     }
@@ -485,12 +514,7 @@ export function SuperAdminProvisionPage() {
             <h2 className="text-lg font-extrabold text-white">{t('superadmin.tabProvision')}</h2>
           </div>
 
-          {errorMsg && (
-            <div className="flex items-center gap-2 rounded-xl border border-rose-500/40 bg-rose-950/60 px-4 py-3 text-xs text-rose-200">
-              <ShieldAlert className="h-4 w-4 shrink-0" />
-              <span>{errorMsg}</span>
-            </div>
-          )}
+          <ValidationSummary summary={errorMsg} items={errorItems} dark />
 
           {provisioned && (
             <div className="rounded-2xl border border-emerald-500/40 bg-emerald-950/40 p-5 space-y-3 text-xs">
