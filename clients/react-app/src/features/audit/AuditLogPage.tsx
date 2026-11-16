@@ -15,6 +15,7 @@ const ENTITY_TYPES = [
   'PropertyConstruction',
   'PropertyTaxCalc',
   'PropertyDemand',
+  'PropertyMutation',
   'FormulaSetting',
   'ConstructionTypeMaster',
   'DepreciationSlab',

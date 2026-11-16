@@ -30,6 +30,7 @@ public sealed class AppDbContext(
     public DbSet<PropertyConstruction> PropertyConstructions => Set<PropertyConstruction>();
     public DbSet<PropertyTaxCalc> PropertyTaxCalcs => Set<PropertyTaxCalc>();
     public DbSet<PropertyDemand> PropertyDemands => Set<PropertyDemand>();
+    public DbSet<PropertyMutation> PropertyMutations => Set<PropertyMutation>();
     public DbSet<FormulaSetting> FormulaSettings => Set<FormulaSetting>();
     public DbSet<ConstructionTypeMaster> ConstructionTypeMasters => Set<ConstructionTypeMaster>();
     public DbSet<UsageWeightage> UsageWeightages => Set<UsageWeightage>();
@@ -343,6 +344,32 @@ public sealed class AppDbContext(
                 .WithMany()
                 .HasForeignKey(e => e.AssessmentYearId)
                 .OnDelete(DeleteBehavior.Restrict);
+            entity.HasQueryFilter(e =>
+                tenantContext.CurrentTenantId != null &&
+                (Guid?)e.TenantId == tenantContext.CurrentTenantId);
+        });
+
+        modelBuilder.Entity<PropertyMutation>(entity =>
+        {
+            entity.ToTable("property_mutations");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.ApplicationNo).HasMaxLength(40).IsRequired();
+            entity.Property(e => e.MutationType).HasMaxLength(32).IsRequired();
+            entity.Property(e => e.PreviousOwnersSnapshotJson).IsRequired();
+            entity.Property(e => e.ProposedOwnersJson).IsRequired();
+            entity.Property(e => e.DocumentReferenceNo).HasMaxLength(120);
+            entity.Property(e => e.Remarks).HasMaxLength(600);
+            entity.Property(e => e.ObjectionSummary).HasMaxLength(600);
+            entity.Property(e => e.ResolutionNo).HasMaxLength(80);
+            entity.Property(e => e.Status).HasMaxLength(32).IsRequired();
+            entity.Property(e => e.RejectionReason).HasMaxLength(500);
+            entity.HasIndex(e => new { e.TenantId, e.ApplicationNo }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.PropertyId });
+            entity.HasIndex(e => new { e.TenantId, e.Status });
+            entity.HasOne<Property>()
+                .WithMany()
+                .HasForeignKey(e => e.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
             entity.HasQueryFilter(e =>
                 tenantContext.CurrentTenantId != null &&
                 (Guid?)e.TenantId == tenantContext.CurrentTenantId);

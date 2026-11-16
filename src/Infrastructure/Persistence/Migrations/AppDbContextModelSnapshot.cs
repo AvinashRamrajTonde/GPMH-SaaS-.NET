@@ -498,6 +498,111 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                     b.ToTable("property_demands", (string)null);
                 });
 
+            modelBuilder.Entity("GPMH.Domain.Entities.Assessments.PropertyMutation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ApplicationNo")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<DateTimeOffset?>("ApprovedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ApprovedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateOnly?>("DocumentDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("DocumentReferenceNo")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<bool>("HasObjection")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("MutationType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTimeOffset>("NoticeEndsAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("NoticeIssuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("ObjectionRecordedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ObjectionRecordedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ObjectionSummary")
+                        .HasMaxLength(600)
+                        .HasColumnType("character varying(600)");
+
+                    b.Property<string>("PreviousOwnersSnapshotJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ProposedOwnersJson")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RejectionReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Remarks")
+                        .HasMaxLength(600)
+                        .HasColumnType("character varying(600)");
+
+                    b.Property<DateOnly?>("ResolutionDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("ResolutionNo")
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<string>("SupportingAssetIdsJson")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("TenantId", "ApplicationNo")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "PropertyId");
+
+                    b.HasIndex("TenantId", "Status");
+
+                    b.ToTable("property_mutations", (string)null);
+                });
+
             modelBuilder.Entity("GPMH.Domain.Entities.Assessments.PropertyOwner", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1647,6 +1752,15 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("GPMH.Domain.Entities.Assessments.Property", null)
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("GPMH.Domain.Entities.Assessments.PropertyMutation", b =>
+                {
                     b.HasOne("GPMH.Domain.Entities.Assessments.Property", null)
                         .WithMany()
                         .HasForeignKey("PropertyId")

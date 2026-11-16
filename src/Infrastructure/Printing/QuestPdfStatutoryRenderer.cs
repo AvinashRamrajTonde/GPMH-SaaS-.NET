@@ -1,4 +1,5 @@
 using GPMH.Application.Common.Interfaces;
+using GPMH.Application.DTOs.Mutations;
 using GPMH.Application.DTOs.Printing;
 using QuestPDF.Fluent;
 
@@ -30,6 +31,15 @@ public sealed class QuestPdfStatutoryRenderer(IQrCodeGeneratorService qrCodeGene
 
         DevanagariFontRegistry.EnsureInitialized();
         DigitalNameplatePdfDocument document = new(plates, layoutMode, qrCodeGenerator);
+        return document.GeneratePdf();
+    }
+
+    public byte[] RenderMutationRegisterPdf(MutationRegisterPdfDocumentModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        DevanagariFontRegistry.EnsureInitialized();
+        MutationRegisterPdfDocument document = new(model);
         return document.GeneratePdf();
     }
 }

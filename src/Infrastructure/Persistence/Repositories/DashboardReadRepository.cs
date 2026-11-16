@@ -92,6 +92,11 @@ public sealed class DashboardReadRepository(AppDbContext dbContext) : IDashboard
             currentFyDemand = demands.Sum();
         }
 
+        int pendingMutations = await dbContext.PropertyMutations
+            .AsNoTracking()
+            .CountAsync(m => m.Status == "NoticePublished" || m.Status == "ObjectionRecorded", cancellationToken)
+            .ConfigureAwait(false);
+
         return new DashboardSummaryDto(
             TenantId: tenantId,
             PanchayatNameEn: gp?.PanchayatNameEn ?? tenant.NameEn,
@@ -104,7 +109,7 @@ public sealed class DashboardReadRepository(AppDbContext dbContext) : IDashboard
             TodayCollection: 0m,
             MonthCollection: 0m,
             OutstandingArrears: 0m,
-            PendingMutations: 0,
+            PendingMutations: pendingMutations,
             WaterAndSpecialCollection: 0m,
             TodayReceipts: 0,
             ChecklistSteps: checklist,

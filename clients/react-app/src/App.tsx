@@ -31,6 +31,16 @@ const Namuna8PrintPage = lazy(() =>
 const ExtractVerifyPage = lazy(() =>
   import('./features/print/ExtractVerifyPage').then((m) => ({ default: m.ExtractVerifyPage })),
 );
+const MutationRegisterPage = lazy(() =>
+  import('./features/mutations/MutationRegisterPage').then((m) => ({
+    default: m.MutationRegisterPage,
+  })),
+);
+const MutationFormPage = lazy(() =>
+  import('./features/mutations/MutationFormPage').then((m) => ({
+    default: m.MutationFormPage,
+  })),
+);
 const FormulaMastersPage = lazy(() =>
   import('./features/formula/FormulaMastersPage').then((m) => ({ default: m.FormulaMastersPage })),
 );
@@ -116,10 +126,8 @@ export function App() {
                   path="/namuna-9ka/generate"
                   element={<PlannedModulePage titleKey="dashboard.actionBills" sprintNumber={4} />}
                 />
-                <Route
-                  path="/namuna-8/mutation/new"
-                  element={<PlannedModulePage titleKey="dashboard.actionMutation" sprintNumber={3} />}
-                />
+                <Route path="/namuna-8/mutation" element={<MutationRegisterPage />} />
+                <Route path="/namuna-8/mutation/new" element={<MutationFormPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>

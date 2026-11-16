@@ -67,6 +67,7 @@ public sealed class GlobalExceptionHandler(
                 Detail = notFoundEx.Message,
                 Type = "https://tools.ietf.org/html/rfc9457#section-3.1",
             },
+            DomainConflictException conflictEx => CreateConflictProblem(conflictEx),
             ArgumentException argEx => new ProblemDetails
             {
                 Status = StatusCodes.Status400BadRequest,
@@ -107,6 +108,28 @@ public sealed class GlobalExceptionHandler(
             contentType: "application/problem+json",
             cancellationToken: cancellationToken).ConfigureAwait(false);
         return true;
+    }
+
+    private static ProblemDetails CreateConflictProblem(DomainConflictException ex)
+    {
+        ProblemDetails problem = new()
+        {
+            Status = StatusCodes.Status409Conflict,
+            Title = "Domain State Conflict",
+            Detail = ex.Message,
+            Type = "https://tools.ietf.org/html/rfc9457#section-3.1",
+            Extensions =
+            {
+                ["errorCode"] = ex.ErrorCode,
+            },
+        };
+
+        foreach ((string key, object? value) in ex.Metadata)
+        {
+            problem.Extensions[key] = value;
+        }
+
+        return problem;
     }
 }
 
