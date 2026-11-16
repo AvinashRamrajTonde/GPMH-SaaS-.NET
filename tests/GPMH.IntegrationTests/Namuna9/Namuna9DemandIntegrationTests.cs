@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using GPMH.Application.Common.Interfaces;
 using GPMH.Application.DTOs.Citizens;
 using GPMH.Application.DTOs.Dashboard;
@@ -371,6 +372,121 @@ public sealed class Namuna9DemandIntegrationTests(GpmhApiFactory factory)
         Assert.Contains("Namuna9EarlyRebateApplied", auditActions);
         Assert.Contains("Namuna9FeesAdjusted", auditActions);
         Assert.Contains("FinancialYearRollover", auditActions);
+    }
+
+    [Fact]
+    public async Task Namuna9PrintAndCsv_Supports_Formats_ABC_SpreadModes_Bw_LeftMargin_And_AuditLog()
+    {
+        (Guid tenantId, Guid yearId, Guid gramsevakId, Guid operatorId) = await SeedNamuna9TenantAsync();
+        using HttpClient client = factory.CreateClient();
+
+        CitizenDto owner = (await (await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Post,
+            "/api/v1/citizens",
+            gramsevakId,
+            ApplicationRole.Gramsevak,
+            tenantId,
+            new CreateCitizenCommand("CIT-N9-P1", "1", "बलवान पेंदिनाथ दिनकर", "Balwan Pendinath Dinkar", "Male", "9822000201", "222233334499", DpdpConsentAccepted: true))))
+            .Content.ReadFromJsonAsync<CitizenDto>())!;
+
+        HttpResponseMessage propRes = await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Post,
+            "/api/v1/properties",
+            gramsevakId,
+            ApplicationRole.Gramsevak,
+            tenantId,
+            new CreatePropertyCommand(
+                WardNo: "1",
+                PropertyNo: "2",
+                BuiltUpAreaSqFt: 225m,
+                OpenPlotAreaSqFt: 0m,
+                BoundaryEast: "Road",
+                BoundaryWest: "Lane",
+                BoundaryNorth: "Plot 1",
+                BoundarySouth: "Plot 3",
+                WaterConnectionCode: "GENERAL",
+                IsTaxExempt: false,
+                Owners: [new PropertyOwnerRequestItem(owner.Id, 100m, true)],
+                Floors: [new PropertyFloorRequestItem(0, "तळमजला", "HUT_MUD", "RESIDENTIAL", 15m, 15m, null, 2021)],
+                CalculateTax: true)));
+        propRes.EnsureSuccessStatusCode();
+
+        // Format A, B, C with Both spread & left margin
+        foreach (string format in new[] { "A", "B", "C" })
+        {
+            HttpResponseMessage pdfRes = await client.SendAsync(CreateTenantRequest(
+                HttpMethod.Get,
+                $"/api/v1/namuna-9/register.pdf?yearId={yearId}&format={format}&part=Both&style=color&leftMarginMm=20",
+                operatorId,
+                ApplicationRole.GP_Operator,
+                tenantId));
+
+            Assert.Equal(HttpStatusCode.OK, pdfRes.StatusCode);
+            Assert.Equal("application/pdf", pdfRes.Content.Headers.ContentType?.MediaType);
+
+            byte[] pdfBytes = await pdfRes.Content.ReadAsByteArrayAsync();
+            Assert.True(pdfBytes.Length > 10_000, $"Expected > 10 KB PDF for Format {format}, got {pdfBytes.Length}");
+            Assert.Equal("%PDF-", Encoding.ASCII.GetString(pdfBytes, 0, 5));
+        }
+
+        // Single part Demand + B&W style + 0 margin
+        HttpResponseMessage bwDemandRes = await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Get,
+            $"/api/v1/namuna-9/register.pdf?yearId={yearId}&format=C&part=Demand&style=bw&leftMarginMm=0",
+            operatorId,
+            ApplicationRole.GP_Operator,
+            tenantId));
+        Assert.Equal(HttpStatusCode.OK, bwDemandRes.StatusCode);
+        byte[] bwBytes = await bwDemandRes.Content.ReadAsByteArrayAsync();
+        Assert.Equal("%PDF-", Encoding.ASCII.GetString(bwBytes, 0, 5));
+
+        // Validation guards
+        HttpResponseMessage badFormatRes = await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Get,
+            $"/api/v1/namuna-9/register.pdf?yearId={yearId}&format=Z",
+            operatorId,
+            ApplicationRole.GP_Operator,
+            tenantId));
+        Assert.Equal(HttpStatusCode.BadRequest, badFormatRes.StatusCode);
+
+        HttpResponseMessage badMarginRes = await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Get,
+            $"/api/v1/namuna-9/register.pdf?yearId={yearId}&format=C&leftMarginMm=45",
+            operatorId,
+            ApplicationRole.GP_Operator,
+            tenantId));
+        Assert.Equal(HttpStatusCode.BadRequest, badMarginRes.StatusCode);
+
+        // CSV Export (UTF-8 BOM)
+        HttpResponseMessage csvRes = await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Get,
+            $"/api/v1/namuna-9/export.csv?yearId={yearId}&format=C",
+            operatorId,
+            ApplicationRole.GP_Operator,
+            tenantId));
+        Assert.Equal(HttpStatusCode.OK, csvRes.StatusCode);
+        Assert.Equal("text/csv", csvRes.Content.Headers.ContentType?.MediaType);
+
+        byte[] csvBytes = await csvRes.Content.ReadAsByteArrayAsync();
+        Assert.True(csvBytes.Length > 50);
+        Assert.Equal(0xEF, csvBytes[0]);
+        Assert.Equal(0xBB, csvBytes[1]);
+        Assert.Equal(0xBF, csvBytes[2]);
+        string csvText = Encoding.UTF8.GetString(csvBytes, 3, csvBytes.Length - 3);
+        Assert.Contains("बलवान पेंदिनाथ दिनकर", csvText);
+        Assert.Contains("एकूण बेरीज", csvText);
+
+        // AuditLog records Namuna9RegisterPrinted and Namuna9CsvExported
+        using IServiceScope verifyScope = factory.Services.CreateScope();
+        AppDbContext verifyDb = verifyScope.ServiceProvider.GetRequiredService<AppDbContext>();
+        ITenantContext verifyCtx = verifyScope.ServiceProvider.GetRequiredService<ITenantContext>();
+        verifyCtx.SetTenant(tenantId);
+
+        List<AuditLog> printAudits = await verifyDb.AuditLogs
+            .Where(a => a.TenantId == tenantId && (a.Action == "Namuna9RegisterPrinted" || a.Action == "Namuna9CsvExported"))
+            .ToListAsync();
+        Assert.Contains(printAudits, a => a.Action == "Namuna9RegisterPrinted");
+        Assert.Contains(printAudits, a => a.Action == "Namuna9CsvExported");
     }
 }
 

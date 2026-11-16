@@ -1,3 +1,4 @@
+using GPMH.Application.DTOs.Namuna9;
 using GPMH.Domain.Entities.Assessments;
 using GPMH.Domain.Entities.Auditing;
 using GPMH.Domain.Entities.Taxation;
@@ -52,6 +53,8 @@ public interface INamuna9Repository
     Task AddAuditLogsAsync(IEnumerable<AuditLog> logs, CancellationToken cancellationToken);
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
+
+    Task<Namuna9GramPanchayatHeaderDto> LoadPrintHeaderAsync(Guid tenantId, CancellationToken cancellationToken);
 
     /// <summary>Runs <paramref name="work"/> (including its SaveChanges) inside one ACID transaction.</summary>
     Task ExecuteInTransactionAsync(Func<CancellationToken, Task> work, CancellationToken cancellationToken);

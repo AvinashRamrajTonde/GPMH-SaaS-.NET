@@ -118,3 +118,59 @@ public sealed record Namuna9RolloverResultDto(
     decimal TotalCarriedArrears,
     decimal TotalCurrentDemand);
 
+public sealed record Namuna9GramPanchayatHeaderDto(
+    Guid TenantId,
+    string LgdCode,
+    string PanchayatNameMr,
+    string PanchayatNameEn,
+    string VillageNameMr,
+    string TehsilName,
+    string DistrictName,
+    string? Pincode,
+    string? GramsevakName,
+    string? SarpanchName,
+    byte[]? GramsevakSignatureBytes = null,
+    byte[]? SarpanchSignatureBytes = null);
+
+public sealed record Namuna9RegisterPdfDocumentModel(
+    Namuna9GramPanchayatHeaderDto Header,
+    Namuna9WorkspaceDto Workspace,
+    string Format,
+    string RegisterPart,
+    string Style,
+    int LeftMarginMm,
+    string? WardFilterLabel);
+
+public sealed record Namuna9CsvFileDto(string FileName, byte[] Content);
+
+public static class Namuna9FormatMath
+{
+    public static (decimal Demand, decimal Collected, decimal Rebate, decimal Balance) ComputeFormatTotals(
+        Namuna9DemandRowDto row,
+        string format)
+    {
+        ArgumentNullException.ThrowIfNull(row);
+
+        if (format == "C")
+        {
+            return (row.NetDemand, row.PaidAmount, row.RebateAmount, row.PendingBalance);
+        }
+
+        decimal waterDemand = row.GeneralWaterTax.Total + row.SpecialWaterTax.Total;
+        decimal waterCollected = row.CollectedByHead.GeneralWaterTax + row.CollectedByHead.SpecialWaterTax;
+        decimal waterBalance = row.BalanceByHead.GeneralWaterTax + row.BalanceByHead.SpecialWaterTax;
+
+        if (format == "B")
+        {
+            return (waterDemand, waterCollected, 0m, waterBalance);
+        }
+
+        // Format A = General tax + fees + penalty - rebate
+        return (
+            Math.Max(0m, row.NetDemand - waterDemand),
+            Math.Max(0m, row.PaidAmount - waterCollected),
+            row.RebateAmount,
+            Math.Max(0m, row.PendingBalance - waterBalance));
+    }
+}
+

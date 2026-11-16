@@ -66,6 +66,11 @@ const AgentRegisterPage = lazy(() =>
 const AgentWorkspacePage = lazy(() =>
   import('./features/agents/AgentWorkspacePage').then((m) => ({ default: m.AgentWorkspacePage })),
 );
+const Namuna9DemandRegisterPage = lazy(() =>
+  import('./features/namuna9/Namuna9DemandRegisterPage').then((m) => ({
+    default: m.Namuna9DemandRegisterPage,
+  })),
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -121,6 +126,8 @@ export function App() {
                 <Route path="/agent/register" element={<AgentRegisterPage />} />
                 <Route path="/agent/login" element={<AgentLoginPage />} />
                 <Route path="/agent/dashboard" element={<AgentWorkspacePage />} />
+                <Route path="/namuna-9" element={<Namuna9DemandRegisterPage />} />
+                <Route path="/namuna-9/register" element={<Namuna9DemandRegisterPage />} />
                 <Route
                   path="/namuna-10/collect"
                   element={<PlannedModulePage titleKey="dashboard.actionCollect" sprintNumber={5} />}

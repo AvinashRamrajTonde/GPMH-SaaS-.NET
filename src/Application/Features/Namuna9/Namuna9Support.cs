@@ -152,5 +152,68 @@ internal static class Namuna9Support
                 ? PropertyDemand.StatusPartiallyPaid
                 : PropertyDemand.StatusPublished;
     }
+
+    public static string NormalizeFormat(string? format) =>
+        string.IsNullOrWhiteSpace(format) ? "C" : format.Trim().ToUpperInvariant();
+
+    public static bool IsValidFormat(string? format) =>
+        format is null || NormalizeFormat(format) is "A" or "B" or "C";
+
+    public static async Task<Namuna9WorkspaceDto> BuildWorkspaceAsync(
+        INamuna9Repository repository,
+        Guid? assessmentYearId,
+        string? wardNo,
+        string? search,
+        string? format,
+        bool pendingOnly,
+        CancellationToken cancellationToken)
+    {
+        AssessmentYear year = await ResolveYearAsync(repository, assessmentYearId, cancellationToken)
+            .ConfigureAwait(false);
+
+        IReadOnlyList<AssessmentYear> years = await repository.ListYearsAsync(cancellationToken).ConfigureAwait(false);
+        FormulaSetting? formula = await repository.GetActiveFormulaSettingAsync(cancellationToken).ConfigureAwait(false);
+        IReadOnlyList<Namuna9DemandContext> contexts = await repository
+            .LoadContextsAsync(year.Id, wardNo, search, null, cancellationToken)
+            .ConfigureAwait(false);
+
+        string normalizedFormat = NormalizeFormat(format);
+
+        List<Namuna9DemandRowDto> rows = [.. contexts.Select(ToRow)];
+
+        if (pendingOnly)
+        {
+            rows = [.. rows.Where(r => r.PendingBalance > 0m)];
+        }
+
+        if (normalizedFormat == "B")
+        {
+            rows = [.. rows.Where(r =>
+                r.GeneralWaterTax.Total + r.SpecialWaterTax.Total > 0m ||
+                !string.Equals(r.WaterConnectionCode, "NONE", StringComparison.OrdinalIgnoreCase))];
+        }
+
+        decimal general = rows.Sum(r =>
+            r.HouseTax.Total + r.LightingTax.Total + r.HealthTax.Total + r.SanitationTax.Total +
+            r.ToiletTax.Total + r.OtherTax.Total);
+        decimal water = rows.Sum(r => r.GeneralWaterTax.Total + r.SpecialWaterTax.Total);
+
+        Namuna9KpisDto kpis = new(
+            TotalDemand: rows.Sum(r => r.NetDemand),
+            TotalCollected: rows.Sum(r => r.PaidAmount),
+            TotalRebate: rows.Sum(r => r.RebateAmount),
+            TotalBalanceDues: rows.Sum(r => r.PendingBalance),
+            GeneralTaxDemand: general,
+            WaterTaxDemand: water,
+            PropertyCount: rows.Count);
+
+        return new Namuna9WorkspaceDto(
+            SelectedYear: ToDto(year),
+            AssessmentYears: [.. years.Select(ToDto)],
+            FormulaRates: ToRates(formula, year.StartYear),
+            Format: normalizedFormat,
+            Kpis: kpis,
+            Items: rows);
+    }
 }
 

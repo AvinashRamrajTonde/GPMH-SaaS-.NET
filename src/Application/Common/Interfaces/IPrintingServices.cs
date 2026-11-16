@@ -1,4 +1,5 @@
 using GPMH.Application.DTOs.Mutations;
+using GPMH.Application.DTOs.Namuna9;
 using GPMH.Application.DTOs.Printing;
 
 namespace GPMH.Application.Common.Interfaces;
@@ -24,6 +25,8 @@ public interface IStatutoryPdfRenderer
     byte[] RenderDigitalNameplatesPdf(IReadOnlyList<DigitalNameplateItemData> plates, string layoutMode = "bulk");
 
     byte[] RenderMutationRegisterPdf(MutationRegisterPdfDocumentModel model);
+
+    byte[] RenderNamuna9RegisterPdf(Namuna9RegisterPdfDocumentModel model);
 }
 
 public interface IPrintDataRepository

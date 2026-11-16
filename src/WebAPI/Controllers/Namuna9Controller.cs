@@ -1,4 +1,5 @@
 using GPMH.Application.DTOs.Namuna9;
+using GPMH.Application.DTOs.Printing;
 using GPMH.Application.Features.Namuna9.Commands;
 using GPMH.Application.Features.Namuna9.Queries;
 using GPMH.WebAPI.Authorization;
@@ -113,6 +114,64 @@ public sealed class Namuna9Controller(ISender sender) : ControllerBase
             .ConfigureAwait(false);
 
         return Ok(result);
+    }
+
+    [HttpGet("register.pdf")]
+    [Produces("application/pdf")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DownloadRegisterPdf(
+        [FromQuery] Guid? yearId = null,
+        [FromQuery] string? wardNo = null,
+        [FromQuery] string? search = null,
+        [FromQuery] string format = "C",
+        [FromQuery] string part = "Both",
+        [FromQuery] string style = "color",
+        [FromQuery] int leftMarginMm = 10,
+        [FromQuery] bool pendingOnly = false,
+        CancellationToken cancellationToken = default)
+    {
+        GeneratedPdfFileDto file = await sender
+            .Send(
+                new GetNamuna9RegisterPdfQuery(
+                    yearId,
+                    wardNo,
+                    search,
+                    format,
+                    part,
+                    style,
+                    leftMarginMm,
+                    pendingOnly),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        Response.Headers.ContentDisposition = $"inline; filename=\"{file.FileName}\"";
+        return File(file.Content, "application/pdf");
+    }
+
+    [HttpGet("export.csv")]
+    [Produces("text/csv")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ExportCsv(
+        [FromQuery] Guid? yearId = null,
+        [FromQuery] string? wardNo = null,
+        [FromQuery] string? search = null,
+        [FromQuery] string format = "C",
+        [FromQuery] bool pendingOnly = false,
+        CancellationToken cancellationToken = default)
+    {
+        Namuna9CsvFileDto file = await sender
+            .Send(new GetNamuna9CsvQuery(yearId, wardNo, search, format, pendingOnly), cancellationToken)
+            .ConfigureAwait(false);
+
+        return File(file.Content, "text/csv; charset=utf-8", file.FileName);
     }
 
     [HttpPost("rollover")]

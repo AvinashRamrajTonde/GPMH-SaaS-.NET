@@ -1,6 +1,7 @@
 import {
   Building2,
   ClipboardCheck,
+  ClipboardList,
   Crown,
   FileSpreadsheet,
   GitBranch,
@@ -470,6 +471,20 @@ export function Layout({ children }: PropsWithChildren) {
                   {t('nav.sectionStatutory')}
                 </p>
               )}
+              <NavLink to="/namuna-9" className={navLinkClass} onClick={() => setMobileOpen(false)}>
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-brand-700" />
+                    )}
+                    <span className={iconBoxClass(isActive)}>
+                      <ClipboardList className="h-[18px] w-[18px]" />
+                    </span>
+                    {!sidebarCollapsed && <span className="truncate">{t('nav.namuna9')}</span>}
+                  </>
+                )}
+              </NavLink>
+
               <NavLink to="/namuna-9ka/generate" className={navLinkClass} onClick={() => setMobileOpen(false)}>
                 {({ isActive }) => (
                   <>

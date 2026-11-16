@@ -1,4 +1,6 @@
+using System.Security.Cryptography;
 using GPMH.Application.Common.Interfaces;
+using GPMH.Application.DTOs.Namuna9;
 using GPMH.Domain.Entities.Assessments;
 using GPMH.Domain.Entities.Auditing;
 using GPMH.Domain.Entities.Taxation;
@@ -9,7 +11,9 @@ using Microsoft.EntityFrameworkCore.Storage;
 namespace GPMH.Infrastructure.Persistence.Repositories;
 
 /// <summary>Tenant-scoped EF Core repository for Namuna 9 demand registers, adjustments, and FY rollover.</summary>
-public sealed class Namuna9Repository(AppDbContext dbContext) : INamuna9Repository
+public sealed class Namuna9Repository(
+    AppDbContext dbContext,
+    IPiiProtectionService piiProtectionService) : INamuna9Repository
 {
     public async Task<IReadOnlyList<AssessmentYear>> ListYearsAsync(CancellationToken cancellationToken)
     {
@@ -236,6 +240,71 @@ public sealed class Namuna9Repository(AppDbContext dbContext) : INamuna9Reposito
 
     public Task SaveChangesAsync(CancellationToken cancellationToken) =>
         dbContext.SaveChangesAsync(cancellationToken);
+
+    public async Task<Namuna9GramPanchayatHeaderDto> LoadPrintHeaderAsync(
+        Guid tenantId,
+        CancellationToken cancellationToken)
+    {
+        Tenant tenant = await dbContext.Tenants
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id == tenantId, cancellationToken)
+            .ConfigureAwait(false)
+            ?? throw new InvalidOperationException($"Tenant {tenantId} was not found.");
+
+        GramPanchayat? gp = await dbContext.GramPanchayats
+            .AsNoTracking()
+            .FirstOrDefaultAsync(g => g.TenantId == tenantId, cancellationToken)
+            .ConfigureAwait(false);
+
+        byte[]? gsSig = await TryLoadProtectedImageAsync(tenantId, gp?.GramsevakSignatureKey, cancellationToken)
+            .ConfigureAwait(false);
+        byte[]? sarpanchSig = await TryLoadProtectedImageAsync(tenantId, gp?.SarpanchSignatureKey, cancellationToken)
+            .ConfigureAwait(false);
+
+        return new Namuna9GramPanchayatHeaderDto(
+            TenantId: tenantId,
+            LgdCode: gp?.LgdCode ?? tenant.LgdCode,
+            PanchayatNameMr: gp?.PanchayatNameMr ?? tenant.NameMr,
+            PanchayatNameEn: gp?.PanchayatNameEn ?? tenant.NameEn,
+            VillageNameMr: gp?.PanchayatNameMr ?? tenant.NameMr,
+            TehsilName: gp?.TehsilName ?? "-",
+            DistrictName: gp?.DistrictName ?? "-",
+            Pincode: gp?.Pincode,
+            GramsevakName: gp?.GramsevakName,
+            SarpanchName: gp?.SarpanchName,
+            GramsevakSignatureBytes: gsSig,
+            SarpanchSignatureBytes: sarpanchSig);
+    }
+
+    private async Task<byte[]?> TryLoadProtectedImageAsync(
+        Guid tenantId,
+        string? assetKey,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(assetKey))
+        {
+            return null;
+        }
+
+        ProtectedAsset? asset = await dbContext.ProtectedAssets
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.AssetKey == assetKey.Trim() && a.TenantId == tenantId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (asset is null)
+        {
+            return null;
+        }
+
+        try
+        {
+            return piiProtectionService.DecryptBytes(asset.EncryptedContent);
+        }
+        catch (CryptographicException)
+        {
+            return null;
+        }
+    }
 
     public async Task ExecuteInTransactionAsync(Func<CancellationToken, Task> work, CancellationToken cancellationToken)
     {
