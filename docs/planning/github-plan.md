@@ -54,15 +54,15 @@ flowchart LR
 | **#9** | `01-External-LGD-API` | SQLite Indexing, Search Safety & Hosting Hardening | 2 | DevOps | **Done** (`15/15` automated tests passing in `external-api-proj/`) |
 | **#24** | `00-Foundation` | Immutable Audit Trail & Field-Level JSON Diff Tracking | 5 | Backend | **Done** (Same-tx interceptor + `SoftDeleted` + `AuditController` + `AuditTests` passing) |
 
-### Sprint 2 — Smart Onboarding, Executive Hub & Agent Gate (`22 Points`)
-| Issue | Epic | Title | Pts | Role | Template Reference |
+### Sprint 2 — Smart Onboarding, Executive Hub & Agent Gate (`22 Points` — **22/22 Done**)
+| Issue | Epic | Title | Pts | Role | Status / Scope |
 | :---: | :--- | :--- | :---: | :--- | :--- |
-| **#10** | `02-Tenant-Onboarding` | Dual-Mode LGD Discovery Frontend UI (Code & Cascading Dropdowns) | 3 | Frontend | `21_gp_onboarding_wizard.html` |
-| **#11** | `02-Tenant-Onboarding` | Auto-Fill Mapping & "Allow Edits" Override Badge Engine | 5 | Fullstack | `21_gp_onboarding_wizard.html` |
-| **#12** | `02-Tenant-Onboarding` | Statutory Bank Accounts (Dynamic UPI Config) & Default Formula Seeding | 3 | Fullstack | `16_formula_settings_masters.html` |
-| **#25** | `10-Village-Dashboard` | Village Executive Dashboard & Quick Actions Hub | 5 | Frontend | `02_dashboard.html` |
-| **#26** | `02-Tenant-Onboarding` | SuperAdmin Direct GP Tenant Provisioning Portal | 3 | Fullstack | `superadmin_add_gp.html` |
-| **#30** | `09-Agent-Portal` | Field Agent Self-Registration & Status-Gated Login | 3 | Fullstack | `agent_register.html`, `agent_login.html` |
+| **#10** | `02-Tenant-Onboarding` | Dual-Mode LGD Discovery Frontend UI (Code & Cascading Dropdowns) | 3 | Frontend | **Done** (`Step1GeoProfile.tsx` + 400ms debounce + MH cascade) |
+| **#11** | `02-Tenant-Onboarding` | Auto-Fill Mapping & "Allow Edits" Override Badge Engine | 5 | Fullstack | **Done** (`ProvenanceBadge.tsx` + `CompleteOnboardingCommand` + `OnboardingWizardTests`) |
+| **#12** | `02-Tenant-Onboarding` | Statutory Bank Accounts (Dynamic UPI Config) & Default Formula Seeding | 3 | Fullstack | **Done** (`BankAccount` 3 funds + `DefaultFormulaSeeder` + encrypted asset uploads) |
+| **#25** | `10-Village-Dashboard` | Village Executive Dashboard & Quick Actions Hub | 5 | Frontend | **Done** (`VillageDashboard.tsx` + 6 KPIs + `/` search + `DashboardTests`) |
+| **#26** | `02-Tenant-Onboarding` | SuperAdmin Direct GP Tenant Provisioning Portal | 3 | Fullstack | **Done** (`ProvisionTenantDirectCommand` + `SuperAdminProvisionPage` + tests) |
+| **#30** | `09-Agent-Portal` | Field Agent Self-Registration & Status-Gated Login | 3 | Fullstack | **Done** (`RegisterAgentCommand` AES-GCM KYC + status gate + `AgentOnboardingAndAuthTests`) |
 
 ### Sprint 3 — Formula Masters & Namuna 8 / Sub-Division (`22 Points`)
 | Issue | Epic | Title | Pts | Role | Template / Spec Reference |
@@ -106,10 +106,10 @@ flowchart LR
 | Sprint | Scope | Planned Pts | Completed Pts | Progress | Status |
 | :--- | :--- | :---: | :---: | :---: | :--- |
 | **Sprint 1** | Foundation, RLS, Identity/RBAC, Audit & LGD (`#5–#9, #24`) | 23 | 23 | 100% | **Done** |
-| **Sprint 2** | Smart Onboarding, Dashboard & Agent KYC (`#10–#12, #25, #26, #30`) | 22 | 0 | 0% | Todo |
+| **Sprint 2** | Smart Onboarding, Dashboard & Agent KYC (`#10–#12, #25, #26, #30`) | 22 | 22 | 100% | **Done** |
 | **Sprint 3** | Formula Masters & Namuna 8 / Splits (`#13–#17, #27`) | 22 | 0 | 0% | Todo |
 | **Sprint 4** | Namuna 9 Demand & 9-Ka QR Bills (`#18–#19`) | 10 | 0 | 0% | Todo |
 | **Sprint 5** | Namuna 10 Collection, SuperAdmin & Agent Payouts (`#20–#23, #28, #29`) | 21 | 0 | 0% | Todo |
 | **Sprint 6** | Phase-1 Completeness (`#31–#35`) | 22 | 0 | 0% | Todo |
-| **Total** | Full Reconciled SaaS Backlog | **120** | **23** | **19%** | **In Progress** |
+| **Total** | Full Reconciled SaaS Backlog | **120** | **45** | **38%** | **In Progress** |
 

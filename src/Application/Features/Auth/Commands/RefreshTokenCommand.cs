@@ -15,6 +15,7 @@ public sealed record RefreshTokenCommand(
 
 public sealed class RefreshTokenCommandHandler(
     IAuthIdentityRepository authRepository,
+    IAgentRepository agentRepository,
     IJwtTokenService jwtTokenService,
     IDateTimeProvider dateTimeProvider)
     : IRequestHandler<RefreshTokenCommand, AuthTokenBundleDto>
@@ -85,12 +86,11 @@ public sealed class RefreshTokenCommandHandler(
             .GetActiveMembershipsAsync(user.Id, cancellationToken)
             .ConfigureAwait(false);
 
-        (ApplicationRole role, Guid? activeTenantId) = LoginCommandHandler.ResolveRoleAndTenant(
-            user,
-            memberships,
-            request.RequestedTenantId);
+        (ApplicationRole role, Guid? activeTenantId, Guid? agentId) = await LoginCommandHandler
+            .ResolveActorScopeAsync(user, memberships, request.RequestedTenantId, agentRepository, cancellationToken)
+            .ConfigureAwait(false);
 
-        (string accessToken, DateTimeOffset expiresAtUtc) = jwtTokenService.CreateAccessToken(user, role, activeTenantId);
+        (string accessToken, DateTimeOffset expiresAtUtc) = jwtTokenService.CreateAccessToken(user, role, activeTenantId, agentId);
         (string newRawToken, string newHash) = jwtTokenService.CreateRefreshToken();
 
         RefreshToken replacement = new()

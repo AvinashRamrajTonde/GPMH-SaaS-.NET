@@ -45,6 +45,21 @@ public sealed class GlobalExceptionHandler(
                 Detail = deniedEx.Message,
                 Type = "https://tools.ietf.org/html/rfc9457#section-3.1",
             },
+            AgentStatusGatedException agentGateEx => new ProblemDetails
+            {
+                Status = StatusCodes.Status403Forbidden,
+                Title = "Field Agent Status Gated",
+                Detail = agentGateEx.Message,
+                Type = "https://tools.ietf.org/html/rfc9457#section-3.1",
+                Extensions =
+                {
+                    ["agentCode"] = agentGateEx.AgentCode,
+                    ["kycStatus"] = agentGateEx.KycStatus.ToString(),
+                    ["reason"] = agentGateEx.Reason,
+                    ["helplinePhone"] = agentGateEx.HelplinePhone,
+                    ["helplineEmail"] = agentGateEx.HelplineEmail,
+                },
+            },
             NotFoundException notFoundEx => new ProblemDetails
             {
                 Status = StatusCodes.Status404NotFound,

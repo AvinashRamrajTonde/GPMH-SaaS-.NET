@@ -11,8 +11,8 @@ namespace GPMH.WebAPI.Controllers;
 [Route("api/v1/auth")]
 public sealed class AuthController(ISender sender) : ControllerBase
 {
-    public const string RefreshCookieName = "gpmh_refresh_token";
-    public const string ClientTypeHeaderName = "X-Client-Type";
+    public const string RefreshCookieName = AuthCookieHelper.RefreshCookieName;
+    public const string ClientTypeHeaderName = AuthCookieHelper.ClientTypeHeaderName;
 
     [AllowAnonymous]
     [HttpPost("login")]
@@ -28,7 +28,7 @@ public sealed class AuthController(ISender sender) : ControllerBase
             .Send(new LoginCommand(request.Username, request.Password, request.TenantId), cancellationToken)
             .ConfigureAwait(false);
 
-        return BuildAuthResponse(bundle, IsMobileClient(request.ClientType));
+        return AuthCookieHelper.BuildAuthResponse(this, bundle, AuthCookieHelper.IsMobileClient(Request, request.ClientType));
     }
 
     [AllowAnonymous]
@@ -40,7 +40,7 @@ public sealed class AuthController(ISender sender) : ControllerBase
         [FromBody] RefreshRequest? request,
         CancellationToken cancellationToken)
     {
-        bool isMobile = IsMobileClient(request?.ClientType);
+        bool isMobile = AuthCookieHelper.IsMobileClient(Request, request?.ClientType);
         string? rawRefreshToken = Request.Cookies.TryGetValue(RefreshCookieName, out string? cookieToken) &&
             !string.IsNullOrWhiteSpace(cookieToken)
             ? cookieToken
@@ -50,7 +50,7 @@ public sealed class AuthController(ISender sender) : ControllerBase
             .Send(new RefreshTokenCommand(rawRefreshToken ?? string.Empty, request?.TenantId), cancellationToken)
             .ConfigureAwait(false);
 
-        return BuildAuthResponse(bundle, isMobile);
+        return AuthCookieHelper.BuildAuthResponse(this, bundle, isMobile);
     }
 
     [AllowAnonymous]
@@ -67,7 +67,7 @@ public sealed class AuthController(ISender sender) : ControllerBase
 
         await sender.Send(new LogoutCommand(rawRefreshToken), cancellationToken).ConfigureAwait(false);
 
-        Response.Cookies.Delete(RefreshCookieName, BuildCookieOptions(DateTimeOffset.UtcNow.AddDays(-1)));
+        Response.Cookies.Delete(RefreshCookieName, AuthCookieHelper.BuildCookieOptions(DateTimeOffset.UtcNow.AddDays(-1)));
         return NoContent();
     }
 
@@ -83,36 +83,6 @@ public sealed class AuthController(ISender sender) : ControllerBase
 
         return Ok(current);
     }
-
-    private OkObjectResult BuildAuthResponse(AuthTokenBundleDto bundle, bool isMobile)
-    {
-        if (isMobile)
-        {
-            return Ok(new AuthResponseDto(bundle.AccessToken, bundle.ExpiresAtUtc, bundle.User, bundle.RefreshToken));
-        }
-
-        Response.Cookies.Append(
-            RefreshCookieName,
-            bundle.RefreshToken,
-            BuildCookieOptions(DateTimeOffset.UtcNow.AddDays(7)));
-
-        return Ok(new AuthResponseDto(bundle.AccessToken, bundle.ExpiresAtUtc, bundle.User, RefreshToken: null));
-    }
-
-    private bool IsMobileClient(string? bodyClientType) =>
-        Request.Headers.TryGetValue(ClientTypeHeaderName, out Microsoft.Extensions.Primitives.StringValues headerVal) &&
-        string.Equals(headerVal.ToString().Trim(), "mobile", StringComparison.OrdinalIgnoreCase)
-        || string.Equals(bodyClientType?.Trim(), "mobile", StringComparison.OrdinalIgnoreCase);
-
-    private static CookieOptions BuildCookieOptions(DateTimeOffset expiresAtUtc) =>
-        new()
-        {
-            HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Path = "/api/v1/auth",
-            Expires = expiresAtUtc,
-        };
 }
 
 public sealed record LoginRequest(

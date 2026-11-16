@@ -191,6 +191,8 @@ public sealed class GpmhApiFactory : WebApplicationFactory<Program>, IAsyncLifet
 {
     private SqliteConnection _sqliteConnection = null!;
     private readonly string _testSigningKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(48));
+    private readonly string _testPiiKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+    private readonly string _testBlindKey = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
     public RecordingHttpMessageHandler LgdHandler { get; } = new();
 
     public async Task InitializeAsync()
@@ -220,6 +222,8 @@ public sealed class GpmhApiFactory : WebApplicationFactory<Program>, IAsyncLifet
                 ["Jwt:SigningKey"] = _testSigningKey,
                 ["Jwt:Issuer"] = "gpmh-api",
                 ["Jwt:Audience"] = "gpmh-clients",
+                ["Security:PiiEncryptionKey"] = _testPiiKey,
+                ["Security:BlindIndexKey"] = _testBlindKey,
             });
         });
 

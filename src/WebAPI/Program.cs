@@ -4,6 +4,7 @@ using GPMH.Application;
 using GPMH.Application.Common.Interfaces;
 using GPMH.Infrastructure;
 using GPMH.Infrastructure.Identity;
+using GPMH.Infrastructure.Security;
 using GPMH.WebAPI.Authorization;
 using GPMH.WebAPI.Logging;
 using GPMH.WebAPI.Middleware;
@@ -59,6 +60,26 @@ try
         }
     });
 
+    string? ephemeralPiiKey = (builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Testing"))
+        ? Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
+        : null;
+    string? ephemeralBlindKey = (builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Testing"))
+        ? Convert.ToBase64String(RandomNumberGenerator.GetBytes(32))
+        : null;
+
+    builder.Services.PostConfigure<SecurityOptions>(opts =>
+    {
+        if (string.IsNullOrWhiteSpace(opts.PiiEncryptionKey) && ephemeralPiiKey is not null)
+        {
+            opts.PiiEncryptionKey = ephemeralPiiKey;
+        }
+
+        if (string.IsNullOrWhiteSpace(opts.BlindIndexKey) && ephemeralBlindKey is not null)
+        {
+            opts.BlindIndexKey = ephemeralBlindKey;
+        }
+    });
+
     builder.Services
         .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer();
@@ -109,9 +130,11 @@ try
 
     if (!app.Environment.IsDevelopment()
         && !app.Environment.IsEnvironment("Testing")
-        && string.IsNullOrWhiteSpace(app.Configuration["Jwt:SigningKey"]))
+        && (string.IsNullOrWhiteSpace(app.Configuration["Jwt:SigningKey"]) ||
+            string.IsNullOrWhiteSpace(app.Configuration["Security:PiiEncryptionKey"]) ||
+            string.IsNullOrWhiteSpace(app.Configuration["Security:BlindIndexKey"])))
     {
-        throw new InvalidOperationException("Jwt:SigningKey must be configured outside Development/Testing environments.");
+        throw new InvalidOperationException("Jwt:SigningKey and Security PII keys must be configured outside Development/Testing environments.");
     }
 
     app.UseMiddleware<CorrelationIdMiddleware>();

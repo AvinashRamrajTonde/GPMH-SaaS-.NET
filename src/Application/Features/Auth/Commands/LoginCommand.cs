@@ -2,6 +2,7 @@ using FluentValidation;
 using GPMH.Application.Common.Exceptions;
 using GPMH.Application.Common.Interfaces;
 using GPMH.Application.DTOs.Auth;
+using GPMH.Domain.Entities.Agents;
 using GPMH.Domain.Entities.Identity;
 using GPMH.Domain.Entities.Tenancy;
 using GPMH.Domain.Enums;
@@ -25,6 +26,7 @@ public sealed class LoginCommandValidator : AbstractValidator<LoginCommand>
 
 public sealed class LoginCommandHandler(
     IAuthIdentityRepository authRepository,
+    IAgentRepository agentRepository,
     IPasswordHasherService passwordHasher,
     IJwtTokenService jwtTokenService,
     IDateTimeProvider dateTimeProvider)
@@ -46,10 +48,15 @@ public sealed class LoginCommandHandler(
             .GetActiveMembershipsAsync(user.Id, cancellationToken)
             .ConfigureAwait(false);
 
-        (ApplicationRole role, Guid? activeTenantId) = ResolveRoleAndTenant(user, memberships, request.TenantId);
+        (ApplicationRole role, Guid? activeTenantId, Guid? agentId) = await ResolveActorScopeAsync(
+            user,
+            memberships,
+            request.TenantId,
+            agentRepository,
+            cancellationToken).ConfigureAwait(false);
 
         DateTimeOffset now = dateTimeProvider.UtcNow;
-        (string accessToken, DateTimeOffset expiresAtUtc) = jwtTokenService.CreateAccessToken(user, role, activeTenantId);
+        (string accessToken, DateTimeOffset expiresAtUtc) = jwtTokenService.CreateAccessToken(user, role, activeTenantId, agentId);
         (string rawRefreshToken, string refreshTokenHash) = jwtTokenService.CreateRefreshToken();
 
         RefreshToken refreshEntity = new()
@@ -79,19 +86,39 @@ public sealed class LoginCommandHandler(
         return new AuthTokenBundleDto(accessToken, rawRefreshToken, expiresAtUtc, userDto);
     }
 
-    internal static (ApplicationRole Role, Guid? TenantId) ResolveRoleAndTenant(
+    internal static async Task<(ApplicationRole Role, Guid? TenantId, Guid? AgentId)> ResolveActorScopeAsync(
         User user,
         IReadOnlyList<TenantMembership> memberships,
-        Guid? requestedTenantId)
+        Guid? requestedTenantId,
+        IAgentRepository agentRepository,
+        CancellationToken cancellationToken)
     {
         if (user.IsSuperAdmin)
         {
-            return (ApplicationRole.SuperAdmin, requestedTenantId);
+            return (ApplicationRole.SuperAdmin, requestedTenantId, null);
         }
 
         if (memberships.Count == 0)
         {
-            throw new AuthenticationFailedException("User has no active Gram Panchayat membership.");
+            FieldAgent? agent = await agentRepository
+                .FindByUserIdAsync(user.Id, cancellationToken)
+                .ConfigureAwait(false);
+
+            if (agent is null)
+            {
+                throw new AuthenticationFailedException("User has no active Gram Panchayat membership.");
+            }
+
+            if (agent.KycStatus != AgentKycStatus.Approved)
+            {
+                throw new AgentStatusGatedException(
+                    agent.AgentCode,
+                    agent.KycStatus,
+                    agent.StatusReason,
+                    $"Agent account '{agent.AgentCode}' is '{agent.KycStatus}' and awaiting approval.");
+            }
+
+            return (ApplicationRole.Field_Agent, null, agent.Id);
         }
 
         TenantMembership? selected;
@@ -106,7 +133,7 @@ public sealed class LoginCommandHandler(
                 ?? memberships[0];
         }
 
-        return (selected.Role, selected.TenantId);
+        return (selected.Role, selected.TenantId, null);
     }
 }
 
