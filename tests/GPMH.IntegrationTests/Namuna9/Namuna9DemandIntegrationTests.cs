@@ -5,6 +5,7 @@ using GPMH.Application.Common.Interfaces;
 using GPMH.Application.DTOs.Citizens;
 using GPMH.Application.DTOs.Dashboard;
 using GPMH.Application.DTOs.Namuna9;
+using GPMH.Application.DTOs.Partitions;
 using GPMH.Application.DTOs.Properties;
 using GPMH.Application.Features.Citizens.Commands;
 using GPMH.Application.Features.Partitions.Commands;
@@ -357,6 +358,17 @@ public sealed class Namuna9DemandIntegrationTests(GpmhApiFactory factory)
         Assert.Equal("2027-28", dash.ActiveAssessmentYear);
         Assert.Equal(301m, dash.OutstandingArrears);
         Assert.Equal(246m, dash.CurrentFyDemand);
+
+        // Post-rollover partition eligibility must NOT double-count locked 2026-27 dues alongside carried 2027-28 arrears
+        PartitionEligibilityDto? postRolloverElig = await (await client.SendAsync(CreateTenantRequest(
+            HttpMethod.Get,
+            $"/api/v1/properties/{prop.Id}/partition-eligibility",
+            gramsevakId,
+            ApplicationRole.Gramsevak,
+            tenantId))).Content.ReadFromJsonAsync<PartitionEligibilityDto>();
+        Assert.NotNull(postRolloverElig);
+        Assert.Equal(547m, postRolloverElig.PendingDues);
+        Assert.False(postRolloverElig.ZeroDuesGatePassed);
 
         // Verify AuditLog trail captured fee adjustments and rollover
         using IServiceScope verifyScope = factory.Services.CreateScope();

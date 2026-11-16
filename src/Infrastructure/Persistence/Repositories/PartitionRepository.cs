@@ -67,9 +67,12 @@ public sealed class PartitionRepository(
             .. floorRows.OrderBy(f => f.FloorNo),
         ];
 
-        List<PropertyDemand> demands = await dbContext.PropertyDemands
-            .AsNoTracking()
-            .Where(d => d.PropertyId == propertyId)
+        // Exclude locked/rolled-over historical years so carried-forward arrears are not double-counted against Zero-Dues Gate.
+        List<PropertyDemand> demands = await (
+            from d in dbContext.PropertyDemands.AsNoTracking()
+            join y in dbContext.AssessmentYears.AsNoTracking() on d.AssessmentYearId equals y.Id
+            where d.PropertyId == propertyId && !y.IsLocked
+            select d)
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
