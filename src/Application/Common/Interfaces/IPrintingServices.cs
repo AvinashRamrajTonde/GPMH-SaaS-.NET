@@ -1,5 +1,6 @@
 using GPMH.Application.DTOs.Mutations;
 using GPMH.Application.DTOs.Namuna9;
+using GPMH.Application.DTOs.Namuna9Ka;
 using GPMH.Application.DTOs.Printing;
 
 namespace GPMH.Application.Common.Interfaces;
@@ -27,6 +28,8 @@ public interface IStatutoryPdfRenderer
     byte[] RenderMutationRegisterPdf(MutationRegisterPdfDocumentModel model);
 
     byte[] RenderNamuna9RegisterPdf(Namuna9RegisterPdfDocumentModel model);
+
+    byte[] RenderNamuna9KaBillsPdf(Namuna9KaPdfDocumentModel model);
 }
 
 public interface IPrintDataRepository

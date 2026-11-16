@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Security.Cryptography;
 using System.Text.Json;
 using GPMH.Application.Common.Interfaces;
 using GPMH.Application.DTOs.Formula;
@@ -9,6 +8,7 @@ using GPMH.Domain.Entities.Auditing;
 using GPMH.Domain.Entities.Taxation;
 using GPMH.Domain.Entities.Tenancy;
 using GPMH.Domain.Services;
+using GPMH.Infrastructure.Printing;
 using Microsoft.EntityFrameworkCore;
 
 namespace GPMH.Infrastructure.Persistence.Repositories;
@@ -71,7 +71,11 @@ public sealed class PrintDataRepository(
             string verifyUrl = $"{baseUrl}/verify/extract/{token}";
             string verifyQrSvg = qrCodeGenerator.GenerateSvg(verifyUrl, pixelsPerModule: 3);
 
-            string? upiPayUri = BuildUpiPayUri(ctx.UpiId, ctx.PayeeName, p.IsTaxExempt ? 0m : metrics.TotalAnnualTax, $"{p.WardNo}/{p.PropertyNo}");
+            string? upiPayUri = StatutoryPrintAssetHelper.BuildUpiPayUri(
+                ctx.UpiId,
+                ctx.PayeeName,
+                p.IsTaxExempt ? 0m : metrics.TotalAnnualTax,
+                $"Prop {p.WardNo}/{p.PropertyNo}");
 
             OwnerJoinRow? primaryOwner = propOwners.FirstOrDefault();
             string ownersMr = propOwners.Count == 0
@@ -249,7 +253,11 @@ public sealed class PrintDataRepository(
 
             string verifyUrl = $"{baseUrl}/verify/extract/{token}";
             string verifyQrSvg = qrCodeGenerator.GenerateSvg(verifyUrl, pixelsPerModule: 3);
-            string? upiPayUri = BuildUpiPayUri(ctx.UpiId, ctx.PayeeName, annualTax, $"{p.WardNo}/{p.PropertyNo}");
+            string? upiPayUri = StatutoryPrintAssetHelper.BuildUpiPayUri(
+                ctx.UpiId,
+                ctx.PayeeName,
+                annualTax,
+                $"Prop {p.WardNo}/{p.PropertyNo}");
             string? upiQrSvg = string.IsNullOrWhiteSpace(upiPayUri) ? null : qrCodeGenerator.GenerateSvg(upiPayUri, pixelsPerModule: 3);
 
             string usageStr = propFloors.Count > 0
@@ -553,9 +561,9 @@ public sealed class PrintDataRepository(
             .ToListAsync(cancellationToken)
             .ConfigureAwait(false);
 
-        BankAccount? preferredBank = banks.FirstOrDefault(b => b.IsDefault) ?? banks.FirstOrDefault();
-        string? upiId = preferredBank?.UpiId ?? gp?.UpiId;
-        string? payeeName = preferredBank?.UpiPayeeName ?? gp?.UpiPayeeName ?? gp?.PanchayatNameEn ?? tenant.NameEn;
+        ResolvedUpiProfile resolvedUpi = StatutoryPrintAssetHelper.ResolvePreferredUpi(banks, gp, tenant.NameEn);
+        string? upiId = resolvedUpi.UpiId;
+        string? payeeName = resolvedUpi.PayeeName;
 
         byte[]? gramsevakSig = null;
         byte[]? sarpanchSig = null;
@@ -564,10 +572,13 @@ public sealed class PrintDataRepository(
 
         if (loadProtectedImages && gp is not null)
         {
-            gramsevakSig = await TryLoadProtectedImageAsync(tenantId, gp.GramsevakSignatureKey, cancellationToken).ConfigureAwait(false);
-            sarpanchSig = await TryLoadProtectedImageAsync(tenantId, gp.SarpanchSignatureKey, cancellationToken).ConfigureAwait(false);
-            operatorSig = await TryLoadProtectedImageAsync(tenantId, gp.OperatorSignatureKey, cancellationToken).ConfigureAwait(false);
-            officialStamp = await TryLoadProtectedImageAsync(tenantId, gp.OfficialStampKey, cancellationToken).ConfigureAwait(false);
+            ProtectedSignatoryAssets sigs = await StatutoryPrintAssetHelper
+                .LoadSignatoryAssetsAsync(dbContext, piiProtectionService, tenantId, gp, cancellationToken)
+                .ConfigureAwait(false);
+            gramsevakSig = sigs.GramsevakSignatureBytes;
+            sarpanchSig = sigs.SarpanchSignatureBytes;
+            operatorSig = sigs.OperatorSignatureBytes;
+            officialStamp = sigs.OfficialStampBytes;
         }
 
         string yearLabel = year?.YearLabel ?? $"{DateTime.UtcNow.Year}-{(DateTime.UtcNow.Year + 1) % 100:00}";
@@ -598,36 +609,6 @@ public sealed class PrintDataRepository(
             SarpanchSigBytes: sarpanchSig,
             OperatorSigBytes: operatorSig,
             OfficialStampBytes: officialStamp);
-    }
-
-    private async Task<byte[]?> TryLoadProtectedImageAsync(
-        Guid tenantId,
-        string? assetKey,
-        CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(assetKey))
-        {
-            return null;
-        }
-
-        ProtectedAsset? asset = await dbContext.ProtectedAssets
-            .AsNoTracking()
-            .FirstOrDefaultAsync(a => a.AssetKey == assetKey.Trim() && a.TenantId == tenantId, cancellationToken)
-            .ConfigureAwait(false);
-
-        if (asset is null)
-        {
-            return null;
-        }
-
-        try
-        {
-            return piiProtectionService.DecryptBytes(asset.EncryptedContent);
-        }
-        catch (CryptographicException)
-        {
-            return null;
-        }
     }
 
     private static SnapshotMetrics ExtractSnapshotMetrics(
@@ -735,20 +716,6 @@ public sealed class PrintDataRepository(
             ToiletTax: taxCalc.ToiletTax,
             OtherTax: taxCalc.OtherTax,
             TotalAnnualTax: taxCalc.TotalTax);
-    }
-
-    private static string? BuildUpiPayUri(string? upiId, string? payeeName, decimal amount, string refNo)
-    {
-        if (string.IsNullOrWhiteSpace(upiId))
-        {
-            return null;
-        }
-
-        string safePa = Uri.EscapeDataString(upiId.Trim());
-        string safePn = Uri.EscapeDataString(string.IsNullOrWhiteSpace(payeeName) ? "Gram Panchayat" : payeeName.Trim());
-        string safeTn = Uri.EscapeDataString($"Prop {refNo}");
-        string amPart = amount > 0m ? $"&am={Math.Round(amount, 0, MidpointRounding.AwayFromZero):0}" : string.Empty;
-        return $"upi://pay?pa={safePa}&pn={safePn}{amPart}&tn={safeTn}&cu=INR";
     }
 
     private static string FormatWaterLabelMr(string code) => code.ToUpperInvariant() switch

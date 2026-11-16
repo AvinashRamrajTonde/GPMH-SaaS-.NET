@@ -186,6 +186,26 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                     b.ToTable("field_agents", (string)null);
                 });
 
+            modelBuilder.Entity("GPMH.Domain.Entities.Assessments.BillCounter", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FinancialYear")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<long>("LastSequence")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("TenantId", "FinancialYear");
+
+                    b.ToTable("bill_counters", (string)null);
+                });
+
             modelBuilder.Entity("GPMH.Domain.Entities.Assessments.Citizen", b =>
                 {
                     b.Property<Guid>("Id")
@@ -546,6 +566,110 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("property_demands", (string)null);
+                });
+
+            modelBuilder.Entity("GPMH.Domain.Entities.Assessments.PropertyDemandBill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("ArrearsAmount")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<Guid>("AssessmentYearId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BillNo")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<long>("BillSequence")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("CurrentAmount")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<DateOnly>("DueDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("HeadBreakdownJson")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("{}");
+
+                    b.Property<DateOnly>("IssueDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset>("IssuedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("IssuedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("NetPayableAmount")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<decimal>("NoticeAndPenaltyAmount")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<Guid>("PropertyDemandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("RebateAmount")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<DateOnly?>("RebateCutoffDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpiIdUsed")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("UpiPayUri")
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentYearId");
+
+                    b.HasIndex("PropertyDemandId");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("TenantId", "BillNo")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "PropertyDemandId");
+
+                    b.HasIndex("TenantId", "PropertyId", "AssessmentYearId", "Status");
+
+                    b.ToTable("property_demand_bills", (string)null);
                 });
 
             modelBuilder.Entity("GPMH.Domain.Entities.Assessments.PropertyMutation", b =>
@@ -1800,6 +1924,27 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("AssessmentYearId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GPMH.Domain.Entities.Assessments.Property", null)
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("GPMH.Domain.Entities.Assessments.PropertyDemandBill", b =>
+                {
+                    b.HasOne("GPMH.Domain.Entities.Tenancy.AssessmentYear", null)
+                        .WithMany()
+                        .HasForeignKey("AssessmentYearId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GPMH.Domain.Entities.Assessments.PropertyDemand", null)
+                        .WithMany()
+                        .HasForeignKey("PropertyDemandId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("GPMH.Domain.Entities.Assessments.Property", null)

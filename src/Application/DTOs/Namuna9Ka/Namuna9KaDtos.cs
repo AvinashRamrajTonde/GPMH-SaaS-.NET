@@ -1,0 +1,136 @@
+namespace GPMH.Application.DTOs.Namuna9Ka;
+
+public sealed record Namuna9KaHeadRowDto(
+    decimal BuildingArrears,
+    decimal BuildingCurrent,
+    decimal LightingArrears,
+    decimal LightingCurrent,
+    decimal HealthArrears,
+    decimal HealthCurrent,
+    decimal SanitationArrears,
+    decimal SanitationCurrent,
+    decimal ToiletArrears,
+    decimal ToiletCurrent,
+    decimal GeneralWaterArrears,
+    decimal GeneralWaterCurrent,
+    decimal SpecialWaterArrears,
+    decimal SpecialWaterCurrent,
+    decimal OtherArrears,
+    decimal OtherCurrent,
+    decimal CarriedFeesAndPenalty,
+    decimal NoticeFee,
+    decimal WarrantFee,
+    decimal PenaltyAmount,
+    decimal RebateAmount,
+    decimal PaidAmount,
+    decimal TotalArrears,
+    decimal TotalCurrent,
+    decimal TotalPayable);
+
+public sealed record Namuna9KaBillItemDto(
+    Guid DemandId,
+    Guid? BillId,
+    Guid PropertyId,
+    string WardNo,
+    string PropertyNo,
+    string? PrimaryOwnerNameMr,
+    string? PrimaryOwnerNameEn,
+    string? PrimaryOwnerAadhaarMasked,
+    string? PrimaryOwnerMobileMasked,
+    string OccupierName,
+    string WaterConnectionCode,
+    bool IsTaxExempt,
+    string? BillNo,
+    long? BillSequence,
+    DateOnly? IssueDate,
+    DateOnly? DueDate,
+    DateOnly? RebateCutoffDate,
+    string BillStatus,
+    string DemandStatus,
+    decimal ArrearsAmount,
+    decimal CurrentAmount,
+    decimal GeneralDemandTotal,
+    decimal WaterDemandTotal,
+    decimal NoticeAndPenaltyAmount,
+    decimal RebateAmount,
+    decimal PaidAmount,
+    decimal NetPayableAmount,
+    string AmountInWordsMr,
+    string? UpiIdUsed,
+    string? UpiPayUri,
+    bool IsStaleBill,
+    Namuna9KaHeadRowDto Heads);
+
+public sealed record Namuna9KaYearSummaryDto(
+    Guid Id,
+    string YearLabel,
+    int StartYear,
+    int EndYear,
+    bool IsActive,
+    bool IsLocked);
+
+public sealed record Namuna9KaWorkspaceDto(
+    Namuna9KaYearSummaryDto SelectedYear,
+    IReadOnlyList<Namuna9KaYearSummaryDto> AssessmentYears,
+    int NoticeGraceDays,
+    decimal EarlyRebatePct,
+    DateOnly DefaultRebateCutoffDate,
+    bool HasUpiConfigured,
+    string? ConfiguredUpiId,
+    string? ConfiguredPayeeName,
+    int TotalProperties,
+    int BillsIssuedCount,
+    int PendingGenerationCount,
+    decimal TotalNetPayable,
+    IReadOnlyList<Namuna9KaBillItemDto> Items);
+
+public sealed record Namuna9KaGeneratedBillRefDto(
+    Guid BillId,
+    Guid PropertyId,
+    string WardNo,
+    string PropertyNo,
+    string BillNo,
+    long BillSequence,
+    decimal NetPayableAmount,
+    DateOnly IssueDate,
+    DateOnly DueDate,
+    string? UpiPayUri,
+    bool NewlyIssued,
+    bool ReplacedSuperseded);
+
+public sealed record Namuna9KaGenerateResultDto(
+    string YearLabel,
+    int GeneratedCount,
+    int ReusedCount,
+    int SupersededCount,
+    bool HasUpiConfigured,
+    string? ConfiguredUpiId,
+    string? WarningMessage,
+    IReadOnlyList<Namuna9KaGeneratedBillRefDto> Bills);
+
+public sealed record Namuna9KaPdfHeaderModel(
+    Guid TenantId,
+    string LgdCode,
+    string PanchayatNameMr,
+    string PanchayatNameEn,
+    string VillageNameMr,
+    string TehsilName,
+    string DistrictName,
+    string? Pincode,
+    string AssessmentYearLabel,
+    string? GramsevakName,
+    string? SarpanchName,
+    string? OperatorName,
+    byte[]? GramsevakSignatureBytes = null,
+    byte[]? SarpanchSignatureBytes = null,
+    byte[]? OfficialStampBytes = null);
+
+public sealed record Namuna9KaPdfDocumentModel(
+    Namuna9KaPdfHeaderModel Header,
+    IReadOnlyList<Namuna9KaBillItemDto> Bills,
+    string LayoutMode,
+    string SplitMode,
+    int NoticeGraceDays,
+    decimal EarlyRebatePct,
+    string? UpiPayeeName);
+

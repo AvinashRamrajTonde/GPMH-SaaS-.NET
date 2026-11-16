@@ -1,6 +1,7 @@
 using GPMH.Application.Common.Interfaces;
 using GPMH.Application.DTOs.Mutations;
 using GPMH.Application.DTOs.Namuna9;
+using GPMH.Application.DTOs.Namuna9Ka;
 using GPMH.Application.DTOs.Printing;
 using QuestPDF.Fluent;
 
@@ -50,6 +51,15 @@ public sealed class QuestPdfStatutoryRenderer(IQrCodeGeneratorService qrCodeGene
 
         DevanagariFontRegistry.EnsureInitialized();
         Namuna9RegisterPdfDocument document = new(model);
+        return document.GeneratePdf();
+    }
+
+    public byte[] RenderNamuna9KaBillsPdf(Namuna9KaPdfDocumentModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        DevanagariFontRegistry.EnsureInitialized();
+        Namuna9KaBillPdfDocument document = new(model, qrCodeGenerator);
         return document.GeneratePdf();
     }
 }

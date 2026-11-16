@@ -53,7 +53,7 @@ public sealed class PropertyPrintController(ISender sender, IConfiguration confi
                 PropertyId: null,
                 WardNo: wardNo,
                 AssessmentYearId: assessmentYearId,
-                PropertyIds: ParseGuidList(propertyIds),
+                PropertyIds: QueryParamHelper.ParseGuidList(propertyIds),
                 FrontendBaseUrl: ResolveFrontendBaseUrl()),
             cancellationToken).ConfigureAwait(false);
 
@@ -78,7 +78,7 @@ public sealed class PropertyPrintController(ISender sender, IConfiguration confi
                 PropertyId: propertyId,
                 WardNo: wardNo,
                 AssessmentYearId: assessmentYearId,
-                PropertyIds: ParseGuidList(propertyIds),
+                PropertyIds: QueryParamHelper.ParseGuidList(propertyIds),
                 FrontendBaseUrl: ResolveFrontendBaseUrl()),
             cancellationToken).ConfigureAwait(false);
 
@@ -102,7 +102,7 @@ public sealed class PropertyPrintController(ISender sender, IConfiguration confi
             new GetDigitalNameplatesPdfQuery(
                 PropertyId: propertyId,
                 WardNo: wardNo,
-                PropertyIds: ParseGuidList(propertyIds),
+                PropertyIds: QueryParamHelper.ParseGuidList(propertyIds),
                 LayoutMode: layout,
                 FrontendBaseUrl: ResolveFrontendBaseUrl()),
             cancellationToken).ConfigureAwait(false);
@@ -125,7 +125,7 @@ public sealed class PropertyPrintController(ISender sender, IConfiguration confi
             new GetDigitalNameplatesPreviewQuery(
                 PropertyId: propertyId,
                 WardNo: wardNo,
-                PropertyIds: ParseGuidList(propertyIds),
+                PropertyIds: QueryParamHelper.ParseGuidList(propertyIds),
                 FrontendBaseUrl: ResolveFrontendBaseUrl()),
             cancellationToken).ConfigureAwait(false);
 
@@ -147,33 +147,6 @@ public sealed class PropertyPrintController(ISender sender, IConfiguration confi
         }
 
         return $"{Request.Scheme}://{Request.Host}";
-    }
-
-    private static IReadOnlyCollection<Guid>? ParseGuidList(string[]? rawValues)
-    {
-        if (rawValues is null || rawValues.Length == 0)
-        {
-            return null;
-        }
-
-        List<Guid> parsed = [];
-        foreach (string value in rawValues)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                continue;
-            }
-
-            foreach (string token in value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-            {
-                if (Guid.TryParse(token, out Guid guid) && guid != Guid.Empty)
-                {
-                    parsed.Add(guid);
-                }
-            }
-        }
-
-        return parsed.Count > 0 ? parsed : null;
     }
 }
 

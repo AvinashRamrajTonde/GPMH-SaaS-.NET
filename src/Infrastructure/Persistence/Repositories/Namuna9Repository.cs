@@ -1,10 +1,10 @@
-using System.Security.Cryptography;
 using GPMH.Application.Common.Interfaces;
 using GPMH.Application.DTOs.Namuna9;
 using GPMH.Domain.Entities.Assessments;
 using GPMH.Domain.Entities.Auditing;
 using GPMH.Domain.Entities.Taxation;
 using GPMH.Domain.Entities.Tenancy;
+using GPMH.Infrastructure.Printing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
@@ -256,9 +256,8 @@ public sealed class Namuna9Repository(
             .FirstOrDefaultAsync(g => g.TenantId == tenantId, cancellationToken)
             .ConfigureAwait(false);
 
-        byte[]? gsSig = await TryLoadProtectedImageAsync(tenantId, gp?.GramsevakSignatureKey, cancellationToken)
-            .ConfigureAwait(false);
-        byte[]? sarpanchSig = await TryLoadProtectedImageAsync(tenantId, gp?.SarpanchSignatureKey, cancellationToken)
+        ProtectedSignatoryAssets sigs = await StatutoryPrintAssetHelper
+            .LoadSignatoryAssetsAsync(dbContext, piiProtectionService, tenantId, gp, cancellationToken)
             .ConfigureAwait(false);
 
         return new Namuna9GramPanchayatHeaderDto(
@@ -272,38 +271,8 @@ public sealed class Namuna9Repository(
             Pincode: gp?.Pincode,
             GramsevakName: gp?.GramsevakName,
             SarpanchName: gp?.SarpanchName,
-            GramsevakSignatureBytes: gsSig,
-            SarpanchSignatureBytes: sarpanchSig);
-    }
-
-    private async Task<byte[]?> TryLoadProtectedImageAsync(
-        Guid tenantId,
-        string? assetKey,
-        CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(assetKey))
-        {
-            return null;
-        }
-
-        ProtectedAsset? asset = await dbContext.ProtectedAssets
-            .AsNoTracking()
-            .FirstOrDefaultAsync(a => a.AssetKey == assetKey.Trim() && a.TenantId == tenantId, cancellationToken)
-            .ConfigureAwait(false);
-
-        if (asset is null)
-        {
-            return null;
-        }
-
-        try
-        {
-            return piiProtectionService.DecryptBytes(asset.EncryptedContent);
-        }
-        catch (CryptographicException)
-        {
-            return null;
-        }
+            GramsevakSignatureBytes: sigs.GramsevakSignatureBytes,
+            SarpanchSignatureBytes: sigs.SarpanchSignatureBytes);
     }
 
     public async Task ExecuteInTransactionAsync(Func<CancellationToken, Task> work, CancellationToken cancellationToken)
