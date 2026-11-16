@@ -396,13 +396,10 @@ public sealed class PropertyRepository(AppDbContext dbContext) : IPropertyReposi
                 if (existingDemand is not null)
                 {
                     existingDemand.CurrentDemand = draftDemand.CurrentDemand;
-                    existingDemand.PendingBalance = Math.Max(
-                        0m,
-                        existingDemand.ArrearsBalance
-                        + draftDemand.CurrentDemand
-                        + existingDemand.PenaltyAmount
-                        - existingDemand.RebateAmount
-                        - existingDemand.PaidAmount);
+                    existingDemand.CurrentByHeadJson = draftDemand.CurrentByHeadJson;
+                    existingDemand.EarlyRebateEligible = draftDemand.CurrentDemand > 0m;
+                    existingDemand.RebateCutoffDate ??= draftDemand.RebateCutoffDate;
+                    existingDemand.RecalculatePendingBalance();
                 }
                 else
                 {

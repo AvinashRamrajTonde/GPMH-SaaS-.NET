@@ -332,9 +332,17 @@ public sealed class AppDbContext(
             entity.Property(e => e.CurrentDemand).HasPrecision(14, 2);
             entity.Property(e => e.RebateAmount).HasPrecision(14, 2);
             entity.Property(e => e.PenaltyAmount).HasPrecision(14, 2);
+            entity.Property(e => e.NoticeFee).HasPrecision(14, 2).HasDefaultValue(0m);
+            entity.Property(e => e.WarrantFee).HasPrecision(14, 2).HasDefaultValue(0m);
             entity.Property(e => e.PaidAmount).HasPrecision(14, 2);
             entity.Property(e => e.PendingBalance).HasPrecision(14, 2);
             entity.Property(e => e.Status).HasMaxLength(32).IsRequired();
+            entity.Property(e => e.EarlyRebateEligible).HasDefaultValue(false);
+            entity.Property(e => e.EarlyRebateApplied).HasDefaultValue(false);
+            entity.Property(e => e.DemandRemarks).HasMaxLength(600);
+            entity.Property(e => e.ArrearsByHeadJson).HasDefaultValue("{}").IsRequired();
+            entity.Property(e => e.CurrentByHeadJson).HasDefaultValue("{}").IsRequired();
+            entity.Property(e => e.CollectedByHeadJson).HasDefaultValue("{}").IsRequired();
             entity.HasIndex(e => new { e.TenantId, e.PropertyId, e.AssessmentYearId }).IsUnique();
             entity.HasOne<Property>()
                 .WithMany()

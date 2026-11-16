@@ -446,15 +446,53 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                         .HasPrecision(14, 2)
                         .HasColumnType("numeric(14,2)");
 
+                    b.Property<string>("ArrearsByHeadJson")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("{}");
+
                     b.Property<Guid>("AssessmentYearId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("CollectedByHeadJson")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("{}");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("CurrentByHeadJson")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("{}");
+
                     b.Property<decimal>("CurrentDemand")
                         .HasPrecision(14, 2)
                         .HasColumnType("numeric(14,2)");
+
+                    b.Property<string>("DemandRemarks")
+                        .HasMaxLength(600)
+                        .HasColumnType("character varying(600)");
+
+                    b.Property<bool>("EarlyRebateApplied")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("EarlyRebateEligible")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<decimal>("NoticeFee")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)")
+                        .HasDefaultValue(0m);
 
                     b.Property<decimal>("PaidAmount")
                         .HasPrecision(14, 2)
@@ -471,9 +509,15 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("PropertyId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTimeOffset?>("PublishedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<decimal>("RebateAmount")
                         .HasPrecision(14, 2)
                         .HasColumnType("numeric(14,2)");
+
+                    b.Property<DateOnly?>("RebateCutoffDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -485,6 +529,12 @@ namespace GPMH.Infrastructure.Persistence.Migrations
 
                     b.Property<DateTimeOffset?>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("WarrantFee")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)")
+                        .HasDefaultValue(0m);
 
                     b.HasKey("Id");
 
