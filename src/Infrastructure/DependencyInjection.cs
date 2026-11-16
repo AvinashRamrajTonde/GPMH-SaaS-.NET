@@ -5,6 +5,7 @@ using GPMH.Infrastructure.Identity;
 using GPMH.Infrastructure.Notifications;
 using GPMH.Infrastructure.Persistence;
 using GPMH.Infrastructure.Persistence.Repositories;
+using GPMH.Infrastructure.Printing;
 using GPMH.Infrastructure.Security;
 using GPMH.Infrastructure.Services.LgdDirectory;
 using GPMH.Infrastructure.Taxation;
@@ -33,6 +34,10 @@ public static class DependencyInjection
         services.AddScoped<IAuditLogReader, AuditLogReader>();
         services.AddScoped<ITenantMembershipValidator, TenantMembershipValidator>();
         services.AddScoped<IPropertyRepository, PropertyRepository>();
+        services.AddScoped<ICitizenRepository, CitizenRepository>();
+        services.AddScoped<IMutationRepository, MutationRepository>();
+        services.AddScoped<IPartitionRepository, PartitionRepository>();
+        services.AddScoped<IFormulaMasterRepository, FormulaMasterRepository>();
         services.AddScoped<IDefaultFormulaSeeder, DefaultFormulaSeeder>();
         services.AddScoped<IOnboardingRepository, OnboardingRepository>();
         services.AddScoped<IDashboardReadRepository, DashboardReadRepository>();
@@ -45,6 +50,11 @@ public static class DependencyInjection
         services.AddSingleton<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IAuthIdentityRepository, AuthIdentityRepository>();
         services.AddSingleton<ICacheService, DistributedCacheService>();
+        DevanagariFontRegistry.EnsureInitialized();
+        services.AddSingleton<IExtractVerificationTokenService, ExtractVerificationTokenService>();
+        services.AddSingleton<IQrCodeGeneratorService, QrCodeGeneratorService>();
+        services.AddSingleton<IStatutoryPdfRenderer, QuestPdfStatutoryRenderer>();
+        services.AddScoped<IPrintDataRepository, PrintDataRepository>();
         services.AddSingleton<IEmailService, LoggingEmailService>();
         services.AddSingleton<ISmsService, LoggingSmsService>();
 

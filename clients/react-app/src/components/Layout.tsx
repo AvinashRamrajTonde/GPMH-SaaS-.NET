@@ -12,9 +12,13 @@ import {
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
+  Printer,
   ReceiptText,
+  Scissors,
   ShieldCheck,
+  SlidersHorizontal,
   UserCheck,
+  Users,
   X,
 } from 'lucide-react';
 import { useEffect, useState, type PropsWithChildren } from 'react';
@@ -417,6 +421,46 @@ export function Layout({ children }: PropsWithChildren) {
                   </>
                 )}
               </NavLink>
+
+              <NavLink to="/formula" className={navLinkClass} onClick={() => setMobileOpen(false)}>
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-brand-700" />
+                    )}
+                    <span className={iconBoxClass(isActive)}>
+                      <SlidersHorizontal className="h-[18px] w-[18px]" />
+                    </span>
+                    {!sidebarCollapsed && <span className="truncate">{t('nav.formula')}</span>}
+                  </>
+                )}
+              </NavLink>
+              <NavLink to="/citizens" className={navLinkClass} onClick={() => setMobileOpen(false)}>
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-brand-700" />
+                    )}
+                    <span className={iconBoxClass(isActive)}>
+                      <Users className="h-[18px] w-[18px]" />
+                    </span>
+                    {!sidebarCollapsed && <span className="truncate">{t('nav.citizens')}</span>}
+                  </>
+                )}
+              </NavLink>
+              <NavLink to="/namuna-8/print" className={navLinkClass} onClick={() => setMobileOpen(false)}>
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-brand-700" />
+                    )}
+                    <span className={iconBoxClass(isActive)}>
+                      <Printer className="h-[18px] w-[18px]" />
+                    </span>
+                    {!sidebarCollapsed && <span className="truncate">{t('nav.namuna8Print')}</span>}
+                  </>
+                )}
+              </NavLink>
             </div>
 
             {/* Statutory Modules (Sprint 3-5) */}
@@ -462,20 +506,30 @@ export function Layout({ children }: PropsWithChildren) {
                 )}
               </NavLink>
 
-              <NavLink to="/namuna-8/mutation/new" className={navLinkClass} onClick={() => setMobileOpen(false)}>
+              <NavLink to="/namuna-8/mutation" className={navLinkClass} onClick={() => setMobileOpen(false)}>
                 {({ isActive }) => (
                   <>
+                    {isActive && (
+                      <span className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-brand-700" />
+                    )}
                     <span className={iconBoxClass(isActive)}>
                       <GitBranch className="h-[18px] w-[18px]" />
                     </span>
-                    {!sidebarCollapsed && (
-                      <span className="flex flex-1 items-center justify-between gap-2 min-w-0">
-                        <span className="truncate">{t('nav.mutations')}</span>
-                        <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[9.5px] font-semibold text-slate-500">
-                          S3
-                        </span>
-                      </span>
+                    {!sidebarCollapsed && <span className="truncate">{t('nav.mutations')}</span>}
+                  </>
+                )}
+              </NavLink>
+
+              <NavLink to="/namuna-8/partition" className={navLinkClass} onClick={() => setMobileOpen(false)}>
+                {({ isActive }) => (
+                  <>
+                    {isActive && (
+                      <span className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-brand-700" />
                     )}
+                    <span className={iconBoxClass(isActive)}>
+                      <Scissors className="h-[18px] w-[18px]" />
+                    </span>
+                    {!sidebarCollapsed && <span className="truncate">{t('nav.partition')}</span>}
                   </>
                 )}
               </NavLink>

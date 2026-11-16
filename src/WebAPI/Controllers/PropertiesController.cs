@@ -26,14 +26,27 @@ public sealed class PropertiesController(ISender sender) : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("hub-summary")]
+    [ProducesResponseType(typeof(PropertyHubKpisDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<PropertyHubKpisDto>> GetHubSummary(CancellationToken cancellationToken)
+    {
+        PropertyHubKpisDto result = await sender
+            .Send(new GetPropertyHubKpisQuery(), cancellationToken)
+            .ConfigureAwait(false);
+
+        return Ok(result);
+    }
+
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(typeof(PropertyDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PropertyDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<PropertyDto>> GetById(Guid id, CancellationToken cancellationToken)
+    public async Task<ActionResult<PropertyDetailDto>> GetById(Guid id, CancellationToken cancellationToken)
     {
-        PropertyDto result = await sender
+        PropertyDetailDto result = await sender
             .Send(new GetPropertyByIdQuery(id), cancellationToken)
             .ConfigureAwait(false);
 
@@ -67,15 +80,24 @@ public sealed class PropertiesController(ISender sender) : ControllerBase
         CancellationToken cancellationToken)
     {
         UpdatePropertyCommand command = new(
-            id,
-            request.BuiltUpAreaSqFt,
-            request.OpenPlotAreaSqFt,
-            request.BoundaryEast,
-            request.BoundaryWest,
-            request.BoundaryNorth,
-            request.BoundarySouth,
-            request.WaterConnectionCode,
-            request.IsTaxExempt);
+            Id: id,
+            BuiltUpAreaSqFt: request.BuiltUpAreaSqFt,
+            OpenPlotAreaSqFt: request.OpenPlotAreaSqFt,
+            BoundaryEast: request.BoundaryEast,
+            BoundaryWest: request.BoundaryWest,
+            BoundaryNorth: request.BoundaryNorth,
+            BoundarySouth: request.BoundarySouth,
+            WaterConnectionCode: request.WaterConnectionCode,
+            IsTaxExempt: request.IsTaxExempt,
+            StreetOrLaneName: request.StreetOrLaneName,
+            CitySurveyOrGutNo: request.CitySurveyOrGutNo,
+            OccupierName: request.OccupierName,
+            PropertyDescription: request.PropertyDescription,
+            OtherTax: request.OtherTax,
+            OpenPlotConstructionCode: request.OpenPlotConstructionCode,
+            Owners: request.Owners,
+            Floors: request.Floors,
+            CalculateTax: request.CalculateTax);
 
         PropertyDto updated = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return Ok(updated);
@@ -102,5 +124,13 @@ public sealed record UpdatePropertyRequest(
     string? BoundaryNorth,
     string? BoundarySouth,
     string WaterConnectionCode,
-    bool IsTaxExempt);
-
+    bool IsTaxExempt,
+    string? StreetOrLaneName = null,
+    string? CitySurveyOrGutNo = null,
+    string? OccupierName = null,
+    string? PropertyDescription = null,
+    decimal OtherTax = 0m,
+    string? OpenPlotConstructionCode = null,
+    IReadOnlyList<PropertyOwnerRequestItem>? Owners = null,
+    IReadOnlyList<PropertyFloorRequestItem>? Floors = null,
+    bool CalculateTax = false);

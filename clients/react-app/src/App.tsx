@@ -14,6 +14,41 @@ const OnboardingLgdPage = lazy(() =>
 const PropertiesPage = lazy(() =>
   import('./features/properties/PropertiesPage').then((m) => ({ default: m.PropertiesPage })),
 );
+const PropertyFormPage = lazy(() =>
+  import('./features/properties/PropertyFormPage').then((m) => ({ default: m.PropertyFormPage })),
+);
+const PropertyDetailPage = lazy(() =>
+  import('./features/properties/PropertyDetailPage').then((m) => ({
+    default: m.PropertyDetailPage,
+  })),
+);
+const CitizensPage = lazy(() =>
+  import('./features/citizens/CitizensPage').then((m) => ({ default: m.CitizensPage })),
+);
+const Namuna8PrintPage = lazy(() =>
+  import('./features/print/Namuna8PrintPage').then((m) => ({ default: m.Namuna8PrintPage })),
+);
+const ExtractVerifyPage = lazy(() =>
+  import('./features/print/ExtractVerifyPage').then((m) => ({ default: m.ExtractVerifyPage })),
+);
+const MutationRegisterPage = lazy(() =>
+  import('./features/mutations/MutationRegisterPage').then((m) => ({
+    default: m.MutationRegisterPage,
+  })),
+);
+const PropertyPartitionWizardPage = lazy(() =>
+  import('./features/partitions/PropertyPartitionWizardPage').then((m) => ({
+    default: m.PropertyPartitionWizardPage,
+  })),
+);
+const MutationFormPage = lazy(() =>
+  import('./features/mutations/MutationFormPage').then((m) => ({
+    default: m.MutationFormPage,
+  })),
+);
+const FormulaMastersPage = lazy(() =>
+  import('./features/formula/FormulaMastersPage').then((m) => ({ default: m.FormulaMastersPage })),
+);
 const AuditLogPage = lazy(() =>
   import('./features/audit/AuditLogPage').then((m) => ({ default: m.AuditLogPage })),
 );
@@ -66,7 +101,18 @@ export function App() {
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/onboarding" element={<OnboardingLgdPage />} />
                 <Route path="/properties" element={<PropertiesPage />} />
-                <Route path="/namuna-8/add" element={<PropertiesPage />} />
+                <Route path="/namuna-8" element={<PropertiesPage />} />
+                <Route path="/namuna-8/add" element={<PropertyFormPage />} />
+                <Route path="/namuna-8/edit/:id" element={<PropertyFormPage />} />
+                <Route path="/namuna-8/view/:id" element={<PropertyDetailPage />} />
+                <Route path="/namuna-8/print" element={<Namuna8PrintPage />} />
+                <Route path="/namuna-8/print/:id" element={<Namuna8PrintPage />} />
+                <Route path="/verify/extract/:token" element={<ExtractVerifyPage />} />
+                <Route path="/namuna-8/partition" element={<PropertyPartitionWizardPage />} />
+                <Route path="/namuna-8/partition/:id" element={<PropertyPartitionWizardPage />} />
+                <Route path="/citizens" element={<CitizensPage />} />
+                <Route path="/formula" element={<FormulaMastersPage />} />
+                <Route path="/namuna-8/formula" element={<FormulaMastersPage />} />
                 <Route path="/audit" element={<AuditLogPage />} />
                 <Route path="/audit/:entityName/:entityId" element={<AuditLogPage />} />
                 <Route path="/login" element={<LoginPage />} />
@@ -83,10 +129,8 @@ export function App() {
                   path="/namuna-9ka/generate"
                   element={<PlannedModulePage titleKey="dashboard.actionBills" sprintNumber={4} />}
                 />
-                <Route
-                  path="/namuna-8/mutation/new"
-                  element={<PlannedModulePage titleKey="dashboard.actionMutation" sprintNumber={3} />}
-                />
+                <Route path="/namuna-8/mutation" element={<MutationRegisterPage />} />
+                <Route path="/namuna-8/mutation/new" element={<MutationFormPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </Suspense>

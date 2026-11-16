@@ -150,27 +150,57 @@ public static class DevDatabaseInitializer
                 IsActive = true,
             }, cancellationToken).ConfigureAwait(false);
 
-            await db.Properties.AddAsync(new Property
+            Property sampleProp = new()
             {
                 TenantId = demoTenant.Id,
                 WardNo = "W-01",
                 PropertyNo = "101",
+                StreetOrLaneName = "Chawadi Chowk Road",
+                CitySurveyOrGutNo = "CS-12/1",
                 BuiltUpAreaSqFt = 450.00m,
                 OpenPlotAreaSqFt = 120.00m,
                 TotalAreaSqFt = 570.00m,
-                WaterConnectionCode = "HALF_INCH",
-            }, cancellationToken).ConfigureAwait(false);
+                WaterConnectionCode = "GENERAL",
+            };
+            await db.Properties.AddAsync(sampleProp, cancellationToken).ConfigureAwait(false);
 
-            await db.Citizens.AddAsync(new Citizen
+            Citizen sampleCitizen = new()
             {
                 TenantId = demoTenant.Id,
-                CitizenCode = "CIT-101",
+                CitizenCode = "CIT-0001",
                 WardNo = "W-01",
                 FullNameEn = "Rameshwar Patil",
                 FullNameMr = "रामेश्वर पाटील",
                 MobileNo = "9822001122",
                 Gender = "Male",
                 AadhaarLast4 = "4567",
+            };
+            await db.Citizens.AddAsync(sampleCitizen, cancellationToken).ConfigureAwait(false);
+
+            await db.PropertyOwners.AddAsync(new PropertyOwner
+            {
+                TenantId = demoTenant.Id,
+                PropertyId = sampleProp.Id,
+                CitizenId = sampleCitizen.Id,
+                OwnershipSharePct = 100.00m,
+                IsPrimaryOwner = true,
+                IsActive = true,
+            }, cancellationToken).ConfigureAwait(false);
+
+            await db.PropertyConstructions.AddAsync(new PropertyConstruction
+            {
+                TenantId = demoTenant.Id,
+                PropertyId = sampleProp.Id,
+                FloorNo = 0,
+                FloorLabel = "तळमजला",
+                ConstructionTypeCode = "RCC_PUCCA",
+                UsageCode = "RESIDENTIAL",
+                LengthFt = 30m,
+                WidthFt = 15m,
+                AreaSqFt = 450m,
+                AreaSqM = 41.81m,
+                ConstructionStartYear = 2021,
+                IsActive = true,
             }, cancellationToken).ConfigureAwait(false);
 
             await formulaSeeder.SeedDefaultsForTenantAsync(demoTenant.Id, cancellationToken).ConfigureAwait(false);

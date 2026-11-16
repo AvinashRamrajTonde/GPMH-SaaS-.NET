@@ -26,6 +26,11 @@ public sealed class AppDbContext(
     public DbSet<AssessmentYear> AssessmentYears => Set<AssessmentYear>();
     public DbSet<Citizen> Citizens => Set<Citizen>();
     public DbSet<Property> Properties => Set<Property>();
+    public DbSet<PropertyOwner> PropertyOwners => Set<PropertyOwner>();
+    public DbSet<PropertyConstruction> PropertyConstructions => Set<PropertyConstruction>();
+    public DbSet<PropertyTaxCalc> PropertyTaxCalcs => Set<PropertyTaxCalc>();
+    public DbSet<PropertyDemand> PropertyDemands => Set<PropertyDemand>();
+    public DbSet<PropertyMutation> PropertyMutations => Set<PropertyMutation>();
     public DbSet<FormulaSetting> FormulaSettings => Set<FormulaSetting>();
     public DbSet<ConstructionTypeMaster> ConstructionTypeMasters => Set<ConstructionTypeMaster>();
     public DbSet<UsageWeightage> UsageWeightages => Set<UsageWeightage>();
@@ -52,6 +57,7 @@ public sealed class AppDbContext(
         ConfigureAssessmentYear(modelBuilder);
         ConfigureCitizen(modelBuilder);
         ConfigureProperty(modelBuilder);
+        ConfigureNamuna8Assessments(modelBuilder);
         ConfigureTaxationMasters(modelBuilder);
         ConfigureFieldAgent(modelBuilder);
         ConfigureAuditLog(modelBuilder);
@@ -221,6 +227,10 @@ public sealed class AppDbContext(
             entity.HasKey(e => e.Id);
             entity.Property(e => e.WardNo).HasMaxLength(40).IsRequired();
             entity.Property(e => e.PropertyNo).HasMaxLength(40).IsRequired();
+            entity.Property(e => e.StreetOrLaneName).HasMaxLength(160);
+            entity.Property(e => e.CitySurveyOrGutNo).HasMaxLength(60);
+            entity.Property(e => e.OccupierName).HasMaxLength(200);
+            entity.Property(e => e.PropertyDescription).HasMaxLength(300);
             entity.Property(e => e.BuiltUpAreaSqFt).HasPrecision(12, 4);
             entity.Property(e => e.OpenPlotAreaSqFt).HasPrecision(12, 4);
             entity.Property(e => e.TotalAreaSqFt).HasPrecision(12, 4);
@@ -229,6 +239,8 @@ public sealed class AppDbContext(
             entity.Property(e => e.BoundaryNorth).HasMaxLength(300);
             entity.Property(e => e.BoundarySouth).HasMaxLength(300);
             entity.Property(e => e.WaterConnectionCode).HasMaxLength(24).IsRequired();
+            entity.Property(e => e.OtherTax).HasPrecision(14, 2);
+            entity.Property(e => e.Status).HasMaxLength(24).IsRequired();
             entity.HasIndex(e => new { e.TenantId, e.WardNo, e.PropertyNo }).IsUnique();
             entity.HasOne<Property>()
                 .WithMany()
@@ -237,6 +249,128 @@ public sealed class AppDbContext(
 
             entity.HasQueryFilter(e =>
                 !e.IsDeleted &&
+                tenantContext.CurrentTenantId != null &&
+                (Guid?)e.TenantId == tenantContext.CurrentTenantId);
+        });
+    }
+
+    private void ConfigureNamuna8Assessments(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<PropertyOwner>(entity =>
+        {
+            entity.ToTable("property_owners");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.OwnershipSharePct).HasPrecision(5, 2);
+            entity.HasIndex(e => new { e.TenantId, e.PropertyId, e.CitizenId });
+            entity.HasOne<Property>()
+                .WithMany()
+                .HasForeignKey(e => e.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<Citizen>()
+                .WithMany()
+                .HasForeignKey(e => e.CitizenId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasQueryFilter(e =>
+                tenantContext.CurrentTenantId != null &&
+                (Guid?)e.TenantId == tenantContext.CurrentTenantId);
+        });
+
+        modelBuilder.Entity<PropertyConstruction>(entity =>
+        {
+            entity.ToTable("property_constructions");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.FloorLabel).HasMaxLength(80).IsRequired();
+            entity.Property(e => e.ConstructionTypeCode).HasMaxLength(40).IsRequired();
+            entity.Property(e => e.UsageCode).HasMaxLength(32).IsRequired();
+            entity.Property(e => e.LengthFt).HasPrecision(10, 4);
+            entity.Property(e => e.WidthFt).HasPrecision(10, 4);
+            entity.Property(e => e.AreaSqFt).HasPrecision(12, 4);
+            entity.Property(e => e.AreaSqM).HasPrecision(12, 4);
+            entity.HasIndex(e => new { e.TenantId, e.PropertyId, e.FloorNo });
+            entity.HasOne<Property>()
+                .WithMany()
+                .HasForeignKey(e => e.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasQueryFilter(e =>
+                tenantContext.CurrentTenantId != null &&
+                (Guid?)e.TenantId == tenantContext.CurrentTenantId);
+        });
+
+        modelBuilder.Entity<PropertyTaxCalc>(entity =>
+        {
+            entity.ToTable("property_tax_calcs");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.BuildingTax).HasPrecision(14, 2);
+            entity.Property(e => e.OpenLandTax).HasPrecision(14, 2);
+            entity.Property(e => e.LightingTax).HasPrecision(14, 2);
+            entity.Property(e => e.HealthTax).HasPrecision(14, 2);
+            entity.Property(e => e.SanitationTax).HasPrecision(14, 2);
+            entity.Property(e => e.ToiletTax).HasPrecision(14, 2);
+            entity.Property(e => e.WaterTax).HasPrecision(14, 2);
+            entity.Property(e => e.OtherTax).HasPrecision(14, 2);
+            entity.Property(e => e.TotalTax).HasPrecision(14, 2);
+            entity.Property(e => e.CalculationSnapshotJson).IsRequired();
+            entity.HasIndex(e => new { e.TenantId, e.PropertyId, e.AssessmentYearId }).IsUnique();
+            entity.HasOne<Property>()
+                .WithMany()
+                .HasForeignKey(e => e.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<AssessmentYear>()
+                .WithMany()
+                .HasForeignKey(e => e.AssessmentYearId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasQueryFilter(e =>
+                tenantContext.CurrentTenantId != null &&
+                (Guid?)e.TenantId == tenantContext.CurrentTenantId);
+        });
+
+        modelBuilder.Entity<PropertyDemand>(entity =>
+        {
+            entity.ToTable("property_demands");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.ArrearsBalance).HasPrecision(14, 2);
+            entity.Property(e => e.CurrentDemand).HasPrecision(14, 2);
+            entity.Property(e => e.RebateAmount).HasPrecision(14, 2);
+            entity.Property(e => e.PenaltyAmount).HasPrecision(14, 2);
+            entity.Property(e => e.PaidAmount).HasPrecision(14, 2);
+            entity.Property(e => e.PendingBalance).HasPrecision(14, 2);
+            entity.Property(e => e.Status).HasMaxLength(32).IsRequired();
+            entity.HasIndex(e => new { e.TenantId, e.PropertyId, e.AssessmentYearId }).IsUnique();
+            entity.HasOne<Property>()
+                .WithMany()
+                .HasForeignKey(e => e.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<AssessmentYear>()
+                .WithMany()
+                .HasForeignKey(e => e.AssessmentYearId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasQueryFilter(e =>
+                tenantContext.CurrentTenantId != null &&
+                (Guid?)e.TenantId == tenantContext.CurrentTenantId);
+        });
+
+        modelBuilder.Entity<PropertyMutation>(entity =>
+        {
+            entity.ToTable("property_mutations");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.ApplicationNo).HasMaxLength(40).IsRequired();
+            entity.Property(e => e.MutationType).HasMaxLength(32).IsRequired();
+            entity.Property(e => e.PreviousOwnersSnapshotJson).IsRequired();
+            entity.Property(e => e.ProposedOwnersJson).IsRequired();
+            entity.Property(e => e.DocumentReferenceNo).HasMaxLength(120);
+            entity.Property(e => e.Remarks).HasMaxLength(600);
+            entity.Property(e => e.ObjectionSummary).HasMaxLength(600);
+            entity.Property(e => e.ResolutionNo).HasMaxLength(80);
+            entity.Property(e => e.Status).HasMaxLength(32).IsRequired();
+            entity.Property(e => e.RejectionReason).HasMaxLength(500);
+            entity.HasIndex(e => new { e.TenantId, e.ApplicationNo }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.PropertyId });
+            entity.HasIndex(e => new { e.TenantId, e.Status });
+            entity.HasOne<Property>()
+                .WithMany()
+                .HasForeignKey(e => e.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasQueryFilter(e =>
                 tenantContext.CurrentTenantId != null &&
                 (Guid?)e.TenantId == tenantContext.CurrentTenantId);
         });
@@ -323,6 +457,8 @@ public sealed class AppDbContext(
             entity.Property(e => e.TaxDivisor).HasPrecision(10, 2);
             entity.Property(e => e.EarlyRebatePct).HasPrecision(5, 2);
             entity.Property(e => e.LatePenaltyPct).HasPrecision(5, 2);
+            entity.Property(e => e.LastResolutionNo).HasMaxLength(80);
+            entity.Property(e => e.LastChangeReason).HasMaxLength(400);
             entity.HasIndex(e => new { e.TenantId, e.RatePeriodName }).IsUnique();
             entity.HasQueryFilter(e =>
                 tenantContext.CurrentTenantId != null &&
@@ -340,6 +476,8 @@ public sealed class AppDbContext(
             entity.Property(e => e.ConstructionReadyReckonerRate).HasPrecision(12, 4);
             entity.Property(e => e.UsageWeightageFactor).HasPrecision(8, 4);
             entity.Property(e => e.TaxRate).HasPrecision(8, 4);
+            entity.Property(e => e.LastResolutionNo).HasMaxLength(80);
+            entity.Property(e => e.LastChangeReason).HasMaxLength(400);
             entity.HasIndex(e => new { e.TenantId, e.Code }).IsUnique();
             entity.HasQueryFilter(e =>
                 tenantContext.CurrentTenantId != null &&
@@ -353,6 +491,8 @@ public sealed class AppDbContext(
             entity.Property(e => e.Code).HasMaxLength(32).IsRequired();
             entity.Property(e => e.UsageName).HasMaxLength(80).IsRequired();
             entity.Property(e => e.Weightage).HasPrecision(8, 4);
+            entity.Property(e => e.LastResolutionNo).HasMaxLength(80);
+            entity.Property(e => e.LastChangeReason).HasMaxLength(400);
             entity.HasIndex(e => new { e.TenantId, e.Code }).IsUnique();
             entity.HasQueryFilter(e =>
                 tenantContext.CurrentTenantId != null &&
@@ -365,6 +505,8 @@ public sealed class AppDbContext(
             entity.HasKey(e => e.Id);
             entity.Property(e => e.HutMudPercent).HasPrecision(5, 2);
             entity.Property(e => e.StoneBrickRccPercent).HasPrecision(5, 2);
+            entity.Property(e => e.LastResolutionNo).HasMaxLength(80);
+            entity.Property(e => e.LastChangeReason).HasMaxLength(400);
             entity.HasIndex(e => new { e.TenantId, e.AgeFrom, e.AgeTo }).IsUnique();
             entity.HasQueryFilter(e =>
                 tenantContext.CurrentTenantId != null &&
@@ -379,6 +521,8 @@ public sealed class AppDbContext(
             entity.Property(e => e.HealthTax).HasPrecision(14, 2);
             entity.Property(e => e.SanitationTax).HasPrecision(14, 2);
             entity.Property(e => e.ToiletTax).HasPrecision(14, 2);
+            entity.Property(e => e.LastResolutionNo).HasMaxLength(80);
+            entity.Property(e => e.LastChangeReason).HasMaxLength(400);
             entity.HasIndex(e => new { e.TenantId, e.AreaFrom, e.AreaTo }).IsUnique();
             entity.HasQueryFilter(e =>
                 tenantContext.CurrentTenantId != null &&
@@ -392,6 +536,8 @@ public sealed class AppDbContext(
             entity.Property(e => e.Code).HasMaxLength(32).IsRequired();
             entity.Property(e => e.WaterTypeName).HasMaxLength(80).IsRequired();
             entity.Property(e => e.Amount).HasPrecision(14, 2);
+            entity.Property(e => e.LastResolutionNo).HasMaxLength(80);
+            entity.Property(e => e.LastChangeReason).HasMaxLength(400);
             entity.HasIndex(e => new { e.TenantId, e.Code }).IsUnique();
             entity.HasQueryFilter(e =>
                 tenantContext.CurrentTenantId != null &&

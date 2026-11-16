@@ -11,6 +11,10 @@ public sealed class Property : BaseEntity, ITenantEntity
     public Guid? ParentPropertyId { get; set; }
     public required string WardNo { get; set; }
     public required string PropertyNo { get; set; }
+    public string? StreetOrLaneName { get; set; }
+    public string? CitySurveyOrGutNo { get; set; }
+    public string? OccupierName { get; set; }
+    public string? PropertyDescription { get; set; }
     public decimal BuiltUpAreaSqFt { get; set; }
     public decimal OpenPlotAreaSqFt { get; set; }
     public decimal TotalAreaSqFt { get; set; }
@@ -19,7 +23,9 @@ public sealed class Property : BaseEntity, ITenantEntity
     public string? BoundaryNorth { get; set; }
     public string? BoundarySouth { get; set; }
     public string WaterConnectionCode { get; set; } = "NONE";
+    public decimal OtherTax { get; set; }
     public bool IsTaxExempt { get; set; }
+    public string Status { get; set; } = "Active";
     public bool IsActive { get; set; } = true;
     public bool IsDeleted { get; set; }
 }

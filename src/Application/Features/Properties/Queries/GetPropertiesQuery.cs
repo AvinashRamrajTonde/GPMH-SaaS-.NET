@@ -1,7 +1,6 @@
 using GPMH.Application.Common.Exceptions;
 using GPMH.Application.Common.Interfaces;
 using GPMH.Application.DTOs.Properties;
-using GPMH.Application.Features.Properties.Commands;
 using GPMH.Domain.Entities.Assessments;
 using MediatR;
 
@@ -9,12 +8,16 @@ namespace GPMH.Application.Features.Properties.Queries;
 
 public sealed record GetPropertiesQuery : IRequest<IReadOnlyList<PropertyDto>>;
 
-public sealed record GetPropertyByIdQuery(Guid Id) : IRequest<PropertyDto>;
+public sealed record GetPropertyByIdQuery(Guid Id) : IRequest<PropertyDetailDto>;
+
+public sealed record GetPropertyHubKpisQuery : IRequest<PropertyHubKpisDto>;
 
 public sealed class GetPropertiesQueryHandler(
     IPropertyRepository propertyRepository,
     ITenantContext tenantContext)
-    : IRequestHandler<GetPropertiesQuery, IReadOnlyList<PropertyDto>>
+    : IRequestHandler<GetPropertiesQuery, IReadOnlyList<PropertyDto>>,
+      IRequestHandler<GetPropertyByIdQuery, PropertyDetailDto>,
+      IRequestHandler<GetPropertyHubKpisQuery, PropertyHubKpisDto>
 {
     public async Task<IReadOnlyList<PropertyDto>> Handle(
         GetPropertiesQuery request,
@@ -25,32 +28,33 @@ public sealed class GetPropertiesQueryHandler(
             throw new TenantAccessDeniedException("Authenticated tenant context is required.");
         }
 
-        IReadOnlyList<Property> properties = await propertyRepository
-            .ListAsync(cancellationToken)
+        return await propertyRepository
+            .ListEnrichedAsync(cancellationToken)
             .ConfigureAwait(false);
-
-        return properties.Select(p => p.ToDto()).ToList();
     }
-}
 
-public sealed class GetPropertyByIdQueryHandler(
-    IPropertyRepository propertyRepository,
-    ITenantContext tenantContext)
-    : IRequestHandler<GetPropertyByIdQuery, PropertyDto>
-{
-    public async Task<PropertyDto> Handle(GetPropertyByIdQuery request, CancellationToken cancellationToken)
+    public async Task<PropertyDetailDto> Handle(GetPropertyByIdQuery request, CancellationToken cancellationToken)
     {
         if (!tenantContext.CurrentTenantId.HasValue)
         {
             throw new TenantAccessDeniedException("Authenticated tenant context is required.");
         }
 
-        Property property = await propertyRepository
-            .GetByIdAsync(request.Id, cancellationToken)
+        return await propertyRepository
+            .GetDetailByIdAsync(request.Id, cancellationToken)
             .ConfigureAwait(false)
             ?? throw new NotFoundException(nameof(Property), request.Id);
+    }
 
-        return property.ToDto();
+    public async Task<PropertyHubKpisDto> Handle(GetPropertyHubKpisQuery request, CancellationToken cancellationToken)
+    {
+        if (!tenantContext.CurrentTenantId.HasValue)
+        {
+            throw new TenantAccessDeniedException("Authenticated tenant context is required.");
+        }
+
+        return await propertyRepository
+            .GetHubKpisAsync(cancellationToken)
+            .ConfigureAwait(false);
     }
 }
-
