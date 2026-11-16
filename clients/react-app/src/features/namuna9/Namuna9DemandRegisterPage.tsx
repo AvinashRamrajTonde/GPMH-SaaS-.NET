@@ -3,6 +3,7 @@ import {
   AlertCircle,
   CheckCircle2,
   ExternalLink,
+  FileSpreadsheet,
   FileText,
   Filter,
   Lock,
@@ -496,6 +497,18 @@ export function Namuna9DemandRegisterPage() {
               <Printer className="h-3.5 w-3.5" />
               {t('namuna9.printAndExportBtn')}
             </button>
+
+            <Link
+              to={
+                workspace
+                  ? `/namuna-9ka/generate?yearId=${encodeURIComponent(workspace.selectedYear.id)}`
+                  : '/namuna-9ka/generate'
+              }
+              className="inline-flex items-center gap-1.5 rounded-xl border border-brand-200 bg-brand-50 px-3.5 py-2 text-xs font-bold text-brand-800 hover:bg-brand-100"
+            >
+              <FileSpreadsheet className="h-3.5 w-3.5" />
+              {t('namuna9Ka.openBillsWorkspaceBtn')}
+            </Link>
           </div>
         </div>
 

@@ -71,6 +71,11 @@ const Namuna9DemandRegisterPage = lazy(() =>
     default: m.Namuna9DemandRegisterPage,
   })),
 );
+const Namuna9KaBillsPage = lazy(() =>
+  import('./features/namuna9/Namuna9KaBillsPage').then((m) => ({
+    default: m.Namuna9KaBillsPage,
+  })),
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -132,10 +137,8 @@ export function App() {
                   path="/namuna-10/collect"
                   element={<PlannedModulePage titleKey="dashboard.actionCollect" sprintNumber={5} />}
                 />
-                <Route
-                  path="/namuna-9ka/generate"
-                  element={<PlannedModulePage titleKey="dashboard.actionBills" sprintNumber={4} />}
-                />
+                <Route path="/namuna-9ka/generate" element={<Namuna9KaBillsPage />} />
+                <Route path="/namuna-9ka/bills" element={<Namuna9KaBillsPage />} />
                 <Route path="/namuna-8/mutation" element={<MutationRegisterPage />} />
                 <Route path="/namuna-8/mutation/new" element={<MutationFormPage />} />
                 <Route path="*" element={<NotFoundPage />} />

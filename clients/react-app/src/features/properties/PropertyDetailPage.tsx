@@ -4,6 +4,7 @@ import {
   Building2,
   Compass,
   Edit3,
+  FileSpreadsheet,
   GitBranch,
   History,
   IndianRupee,
@@ -129,6 +130,15 @@ export function PropertyDetailPage() {
               <Printer className="h-3.5 w-3.5" />
               {t('properties.printExtractBtn')}
             </Link>
+            {prop.demand && (
+              <Link
+                to={`/namuna-9ka/generate?propertyId=${encodeURIComponent(prop.id)}`}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 font-bold text-emerald-800 hover:bg-emerald-100"
+              >
+                <FileSpreadsheet className="h-3.5 w-3.5" />
+                {t('namuna9Ka.viewDemandBillBtn')}
+              </Link>
+            )}
             <Link
               to={`/namuna-8/partition/${prop.id}`}
               className="inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-2 font-bold text-slate-700 hover:bg-brand-50"
