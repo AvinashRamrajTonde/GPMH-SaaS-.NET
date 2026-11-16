@@ -892,6 +892,157 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                     b.ToTable("property_tax_calcs", (string)null);
                 });
 
+            modelBuilder.Entity("GPMH.Domain.Entities.Assessments.ReceiptCounter", b =>
+                {
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("FinancialYear")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<long>("LastSequence")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("TenantId", "FinancialYear");
+
+                    b.ToTable("receipt_counters", (string)null);
+                });
+
+            modelBuilder.Entity("GPMH.Domain.Entities.Assessments.TaxReceipt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AssessmentYearId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("BankName")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
+
+                    b.Property<string>("BookNo")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(24)
+                        .HasColumnType("character varying(24)")
+                        .HasDefaultValue("BOOK-1");
+
+                    b.Property<string>("CancelReason")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTimeOffset?>("CancelledAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("CancelledByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly?>("ChequeDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTimeOffset>("CollectedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CollectedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DemandBillId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("DiscountGiven")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<decimal>("ExcessCredit")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<string>("HeadAllocationJson")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("{}");
+
+                    b.Property<bool>("IsCancelled")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("OperationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PayerName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("PaymentMode")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("PropertyDemandId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PropertyId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateOnly>("ReceiptDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("ReceiptNo")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<long>("ReceiptSequence")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ReferenceNo")
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.Property<string>("Remarks")
+                        .HasMaxLength(600)
+                        .HasColumnType("character varying(600)");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("TotalPaid")
+                        .HasPrecision(14, 2)
+                        .HasColumnType("numeric(14,2)");
+
+                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentYearId");
+
+                    b.HasIndex("DemandBillId");
+
+                    b.HasIndex("PropertyDemandId");
+
+                    b.HasIndex("PropertyId");
+
+                    b.HasIndex("TenantId", "OperationId")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "PropertyId");
+
+                    b.HasIndex("TenantId", "ReceiptNo")
+                        .IsUnique();
+
+                    b.HasIndex("TenantId", "AssessmentYearId", "ReceiptDate");
+
+                    b.ToTable("tax_receipts", (string)null);
+                });
+
             modelBuilder.Entity("GPMH.Domain.Entities.Auditing.AuditLog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1984,6 +2135,32 @@ namespace GPMH.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("AssessmentYearId")
                         .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GPMH.Domain.Entities.Assessments.Property", null)
+                        .WithMany()
+                        .HasForeignKey("PropertyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("GPMH.Domain.Entities.Assessments.TaxReceipt", b =>
+                {
+                    b.HasOne("GPMH.Domain.Entities.Tenancy.AssessmentYear", null)
+                        .WithMany()
+                        .HasForeignKey("AssessmentYearId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GPMH.Domain.Entities.Assessments.PropertyDemandBill", null)
+                        .WithMany()
+                        .HasForeignKey("DemandBillId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("GPMH.Domain.Entities.Assessments.PropertyDemand", null)
+                        .WithMany()
+                        .HasForeignKey("PropertyDemandId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("GPMH.Domain.Entities.Assessments.Property", null)

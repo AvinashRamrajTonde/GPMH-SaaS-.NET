@@ -32,6 +32,8 @@ public sealed class AppDbContext(
     public DbSet<PropertyDemand> PropertyDemands => Set<PropertyDemand>();
     public DbSet<PropertyDemandBill> PropertyDemandBills => Set<PropertyDemandBill>();
     public DbSet<BillCounter> BillCounters => Set<BillCounter>();
+    public DbSet<TaxReceipt> TaxReceipts => Set<TaxReceipt>();
+    public DbSet<ReceiptCounter> ReceiptCounters => Set<ReceiptCounter>();
     public DbSet<PropertyMutation> PropertyMutations => Set<PropertyMutation>();
     public DbSet<FormulaSetting> FormulaSettings => Set<FormulaSetting>();
     public DbSet<ConstructionTypeMaster> ConstructionTypeMasters => Set<ConstructionTypeMaster>();
@@ -396,6 +398,56 @@ public sealed class AppDbContext(
         modelBuilder.Entity<BillCounter>(entity =>
         {
             entity.ToTable("bill_counters");
+            entity.HasKey(e => new { e.TenantId, e.FinancialYear });
+            entity.Property(e => e.FinancialYear).HasMaxLength(16).IsRequired();
+            entity.HasQueryFilter(e =>
+                tenantContext.CurrentTenantId != null &&
+                (Guid?)e.TenantId == tenantContext.CurrentTenantId);
+        });
+
+        modelBuilder.Entity<TaxReceipt>(entity =>
+        {
+            entity.ToTable("tax_receipts");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.BookNo).HasMaxLength(24).HasDefaultValue("BOOK-1").IsRequired();
+            entity.Property(e => e.ReceiptNo).HasMaxLength(40).IsRequired();
+            entity.Property(e => e.PayerName).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.ReferenceNo).HasMaxLength(120);
+            entity.Property(e => e.BankName).HasMaxLength(150);
+            entity.Property(e => e.Remarks).HasMaxLength(600);
+            entity.Property(e => e.CancelReason).HasMaxLength(500);
+            entity.Property(e => e.TotalPaid).HasPrecision(14, 2);
+            entity.Property(e => e.DiscountGiven).HasPrecision(14, 2);
+            entity.Property(e => e.ExcessCredit).HasPrecision(14, 2);
+            entity.Property(e => e.HeadAllocationJson).HasDefaultValue("{}").IsRequired();
+            entity.HasIndex(e => new { e.TenantId, e.OperationId }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.ReceiptNo }).IsUnique();
+            entity.HasIndex(e => new { e.TenantId, e.AssessmentYearId, e.ReceiptDate });
+            entity.HasIndex(e => new { e.TenantId, e.PropertyId });
+            entity.HasOne<Property>()
+                .WithMany()
+                .HasForeignKey(e => e.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<PropertyDemand>()
+                .WithMany()
+                .HasForeignKey(e => e.PropertyDemandId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne<AssessmentYear>()
+                .WithMany()
+                .HasForeignKey(e => e.AssessmentYearId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<PropertyDemandBill>()
+                .WithMany()
+                .HasForeignKey(e => e.DemandBillId)
+                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasQueryFilter(e =>
+                tenantContext.CurrentTenantId != null &&
+                (Guid?)e.TenantId == tenantContext.CurrentTenantId);
+        });
+
+        modelBuilder.Entity<ReceiptCounter>(entity =>
+        {
+            entity.ToTable("receipt_counters");
             entity.HasKey(e => new { e.TenantId, e.FinancialYear });
             entity.Property(e => e.FinancialYear).HasMaxLength(16).IsRequired();
             entity.HasQueryFilter(e =>
