@@ -1324,6 +1324,14 @@ export function Namuna9DemandRegisterPage() {
                             >
                               {t('namuna9.link9Ka')}
                             </Link>
+                            {live.balance > 0 && (
+                              <Link
+                                to={`/namuna-10/collect?propertyId=${row.propertyId}&yearId=${workspace!.selectedYear.id}`}
+                                className="text-[11px] font-bold text-emerald-700 hover:underline"
+                              >
+                                {t('namuna10.linkCollectShort')}
+                              </Link>
+                            )}
                           </div>
                         </div>
                       </td>

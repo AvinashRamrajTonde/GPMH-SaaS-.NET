@@ -6,7 +6,6 @@ import { AuthProvider } from './context/AuthContext';
 import { DashboardPage } from './pages/DashboardPage';
 import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
-import { PlannedModulePage } from './pages/PlannedModulePage';
 
 const OnboardingLgdPage = lazy(() =>
   import('./pages/OnboardingLgdPage').then((m) => ({ default: m.OnboardingLgdPage })),
@@ -76,6 +75,11 @@ const Namuna9KaBillsPage = lazy(() =>
     default: m.Namuna9KaBillsPage,
   })),
 );
+const Namuna10RegisterPage = lazy(() =>
+  import('./features/namuna10/Namuna10RegisterPage').then((m) => ({
+    default: m.Namuna10RegisterPage,
+  })),
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -133,10 +137,8 @@ export function App() {
                 <Route path="/agent/dashboard" element={<AgentWorkspacePage />} />
                 <Route path="/namuna-9" element={<Namuna9DemandRegisterPage />} />
                 <Route path="/namuna-9/register" element={<Namuna9DemandRegisterPage />} />
-                <Route
-                  path="/namuna-10/collect"
-                  element={<PlannedModulePage titleKey="dashboard.actionCollect" sprintNumber={5} />}
-                />
+                <Route path="/namuna-10" element={<Namuna10RegisterPage />} />
+                <Route path="/namuna-10/collect" element={<Namuna10RegisterPage />} />
                 <Route path="/namuna-9ka/generate" element={<Namuna9KaBillsPage />} />
                 <Route path="/namuna-9ka/bills" element={<Namuna9KaBillsPage />} />
                 <Route path="/namuna-8/mutation" element={<MutationRegisterPage />} />

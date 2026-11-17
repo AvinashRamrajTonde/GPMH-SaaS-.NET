@@ -251,7 +251,7 @@ export function VillageDashboard() {
     { label: t('dashboard.actionOnboarding'), to: '/onboarding', icon: Landmark, badge: null },
     { label: t('dashboard.actionAudit'), to: '/audit', icon: History, badge: null },
     { label: t('dashboard.actionBills'), to: '/namuna-9ka/generate', icon: FileSpreadsheet, badge: null },
-    { label: t('dashboard.actionCollect'), to: '/namuna-10/collect', icon: ReceiptText, badge: t('dashboard.sprintBadge', { n: 5 }) },
+    { label: t('dashboard.actionCollect'), to: '/namuna-10/collect', icon: ReceiptText, badge: null },
     { label: t('dashboard.actionMutation'), to: '/namuna-8/mutation/new', icon: GitBranch, badge: null },
   ];
 

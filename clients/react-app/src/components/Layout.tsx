@@ -502,17 +502,13 @@ export function Layout({ children }: PropsWithChildren) {
               <NavLink to="/namuna-10/collect" className={navLinkClass} onClick={() => setMobileOpen(false)}>
                 {({ isActive }) => (
                   <>
+                    {isActive && (
+                      <span className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-brand-700" />
+                    )}
                     <span className={iconBoxClass(isActive)}>
                       <ReceiptText className="h-[18px] w-[18px]" />
                     </span>
-                    {!sidebarCollapsed && (
-                      <span className="flex flex-1 items-center justify-between gap-2 min-w-0">
-                        <span className="truncate">{t('nav.receipts')}</span>
-                        <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[9.5px] font-semibold text-slate-500">
-                          S5
-                        </span>
-                      </span>
-                    )}
+                    {!sidebarCollapsed && <span className="truncate">{t('nav.receipts')}</span>}
                   </>
                 )}
               </NavLink>
