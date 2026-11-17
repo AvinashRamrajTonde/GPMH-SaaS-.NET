@@ -1,10 +1,11 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, ArrowRight, Check, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, UserCheck, X } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ValidationSummary } from '../../components/ValidationSummary';
 import { useAuth } from '../../context/useAuth';
+import { agentPortalApi } from '../../services/agentPortalApi';
 import { sprint2Api } from '../../services/sprint2Api';
 import { extractProblemValidation, type ParsedValidationItem } from '../../utils/validation';
 import { OnboardingProvider } from './context/OnboardingContext';
@@ -48,6 +49,24 @@ function OnboardingWizardInner() {
   const [savedNotice, setSavedNotice] = useState(false);
 
   const isSelfService = !accessToken;
+  const urlRefCode = (searchParams.get('ref') || '').trim();
+  const [manualRefCode, setManualRefCode] = useState<string | null>(null);
+  const referralInputValue = manualRefCode ?? urlRefCode;
+  const [activeVerifyCode, setActiveVerifyCode] = useState<string>(urlRefCode);
+
+  const referralQuery = useQuery({
+    queryKey: ['agent', 'validate-referral', activeVerifyCode.trim().toUpperCase()],
+    queryFn: () => agentPortalApi.validateReferralCode(activeVerifyCode),
+    enabled: Boolean(isSelfService && activeVerifyCode.trim().length >= 3),
+    staleTime: 60_000,
+    retry: false,
+  });
+
+  const verifiedReferralCode =
+    referralQuery.data?.valid && referralQuery.data.agentCode
+      ? referralQuery.data.agentCode
+      : null;
+
   const canHydrate = Boolean(accessToken && user?.activeTenantId);
   const statusQuery = useQuery({
     queryKey: ['onboarding', 'status', user?.activeTenantId],
@@ -90,7 +109,9 @@ function OnboardingWizardInner() {
     }
 
     setStep(clamped);
-    setSearchParams({ step: String(clamped) }, { replace: true });
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('step', String(clamped));
+    setSearchParams(nextParams, { replace: true });
   }
 
   async function handleCompleteSubmit(redirectToDashboard: boolean) {
@@ -127,6 +148,7 @@ function OnboardingWizardInner() {
           state.adminPassword,
           state.adminEmail.trim() || null,
           payload,
+          verifiedReferralCode,
         );
         await login(state.adminUsername.trim(), state.adminPassword, created.tenantId);
       }
@@ -181,6 +203,82 @@ function OnboardingWizardInner() {
         <h1 className="text-2xl font-extrabold text-ink">{t('onboarding.title')}</h1>
         <p className="text-xs sm:text-sm text-muted">{t('onboarding.subtitle')}</p>
       </div>
+
+      {isSelfService && (
+        <section className="rounded-2xl border border-line bg-card p-4 shadow-xs space-y-2.5 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="inline-flex items-center gap-1.5 font-extrabold text-ink">
+              <UserCheck className="h-4 w-4 text-emerald-700" />
+              {t('onboarding.referralBannerTitle')}
+            </span>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="text"
+                aria-label={t('onboarding.referralCodeInputLabel')}
+                value={referralInputValue}
+                onChange={(e) => setManualRefCode(e.target.value.toUpperCase())}
+                placeholder={t('onboarding.referralCodePlaceholder')}
+                className="w-40 rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 mono text-xs font-bold uppercase text-ink focus:border-brand-600 focus:outline-none"
+              />
+              <button
+                type="button"
+                disabled={referralQuery.isFetching || referralInputValue.trim().length < 3}
+                onClick={() => {
+                  const code = referralInputValue.trim();
+                  setActiveVerifyCode(code);
+                  const nextParams = new URLSearchParams(searchParams);
+                  if (code) nextParams.set('ref', code);
+                  setSearchParams(nextParams, { replace: true });
+                }}
+                className="rounded-lg bg-brand-700 px-3 py-1.5 font-bold text-white hover:bg-brand-800 disabled:opacity-50"
+              >
+                {referralQuery.isFetching
+                  ? t('onboarding.referralVerifying')
+                  : t('onboarding.referralVerifyBtn')}
+              </button>
+              {(referralInputValue || activeVerifyCode) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setManualRefCode('');
+                    setActiveVerifyCode('');
+                    const nextParams = new URLSearchParams(searchParams);
+                    nextParams.delete('ref');
+                    setSearchParams(nextParams, { replace: true });
+                  }}
+                  className="inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-surface px-2.5 py-1.5 font-semibold text-slate-700 hover:bg-slate-100"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  {t('onboarding.referralClearBtn')}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {verifiedReferralCode && referralQuery.data && (
+            <div className="rounded-xl border border-emerald-300 bg-emerald-50 px-3.5 py-2 text-emerald-900 font-bold flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-emerald-700 shrink-0" />
+              <span>
+                {t('onboarding.referralAttributedTo', {
+                  fullName: referralQuery.data.fullName ?? verifiedReferralCode,
+                  code: referralQuery.data.agentCode,
+                  district: referralQuery.data.district ?? 'Maharashtra',
+                })}
+              </span>
+            </div>
+          )}
+
+          {activeVerifyCode &&
+            !referralQuery.isFetching &&
+            referralQuery.data &&
+            !referralQuery.data.valid && (
+              <div className="rounded-xl border border-rose-300 bg-rose-50 px-3.5 py-2 font-semibold text-rose-800">
+                {t('onboarding.referralInvalidCode')}
+              </div>
+            )}
+        </section>
+      )}
 
       {/* Stepper Header Card */}
       <section className="rounded-2xl border border-line bg-card p-4 sm:p-5 shadow-xs space-y-4">

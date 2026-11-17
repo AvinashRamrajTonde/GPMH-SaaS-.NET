@@ -370,6 +370,22 @@ export function Layout({ children }: PropsWithChildren) {
                     + KYC Registration
                   </Link>
                 )}
+                {isDarkSuperAdmin && (
+                  <Link
+                    to="/superadmin"
+                    className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 font-semibold text-slate-200 hover:bg-slate-700 transition"
+                  >
+                    {t('nav.superadmin')}
+                  </Link>
+                )}
+                {isDarkSuperAdmin && (
+                  <Link
+                    to="/superadmin/agents"
+                    className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 font-semibold text-amber-300 hover:bg-amber-500/20 transition"
+                  >
+                    {t('nav.superadminAgents')}
+                  </Link>
+                )}
                 {isDarkSuperAdmin && user?.role === 'SuperAdmin' && (
                   <Link
                     to="/onboarding"
@@ -696,16 +712,34 @@ export function Layout({ children }: PropsWithChildren) {
                 </p>
               )}
               {(!user || isHqRole) && (
-                <NavLink to="/superadmin" className={navLinkClass} onClick={() => setMobileOpen(false)}>
-                  {({ isActive }) => (
-                    <>
-                      <span className={iconBoxClass(isActive)}>
-                        <Crown className="h-[18px] w-[18px]" />
-                      </span>
-                      {!sidebarCollapsed && <span className="truncate">{t('nav.superadmin')}</span>}
-                    </>
-                  )}
-                </NavLink>
+                <>
+                  <NavLink to="/superadmin" end className={navLinkClass} onClick={() => setMobileOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <span className={iconBoxClass(isActive)}>
+                          <Crown className="h-[18px] w-[18px]" />
+                        </span>
+                        {!sidebarCollapsed && <span className="truncate">{t('nav.superadmin')}</span>}
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink
+                    to="/superadmin/agents"
+                    className={navLinkClass}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <span className={iconBoxClass(isActive)}>
+                          <UserCheck className="h-[18px] w-[18px]" />
+                        </span>
+                        {!sidebarCollapsed && (
+                          <span className="truncate">{t('nav.superadminAgents')}</span>
+                        )}
+                      </>
+                    )}
+                  </NavLink>
+                </>
               )}
 
               {(!user || isAgentRole) && (

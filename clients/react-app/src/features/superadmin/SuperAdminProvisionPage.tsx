@@ -354,44 +354,54 @@ export function SuperAdminProvisionPage() {
       </section>
 
       {/* HQ Navigation Tabs */}
-      <nav className="flex flex-wrap gap-2 border-b border-slate-800 pb-3 no-print" role="tablist">
-        {tabs
-          .filter((tab) => !(tab.hideWhenReadOnly && !canMutate))
-          .map((tab) => {
-            const Icon = tab.icon;
-            const active = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => setActiveTab(tab.id)}
-                className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-bold transition ${
-                  active
-                    ? 'border-amber-500/50 bg-amber-500/15 text-amber-300'
-                    : 'border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 hover:text-slate-200'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{tab.label}</span>
-                {typeof tab.badgeCount === 'number' && tab.badgeCount > 0 && (
-                  <span
-                    className={`rounded-full px-1.5 py-0.5 mono text-[10px] font-extrabold ${
-                      tab.badgeTone === 'rose'
-                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
-                        : tab.badgeTone === 'amber'
-                          ? 'bg-amber-500 text-slate-950'
-                          : 'bg-slate-800 text-slate-300'
-                    }`}
-                  >
-                    {tab.badgeCount}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-      </nav>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3 no-print">
+        <nav className="flex flex-wrap gap-2" role="tablist">
+          {tabs
+            .filter((tab) => !(tab.hideWhenReadOnly && !canMutate))
+            .map((tab) => {
+              const Icon = tab.icon;
+              const active = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`inline-flex items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-bold transition ${
+                    active
+                      ? 'border-amber-500/50 bg-amber-500/15 text-amber-300'
+                      : 'border-slate-800 bg-slate-900 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{tab.label}</span>
+                  {typeof tab.badgeCount === 'number' && tab.badgeCount > 0 && (
+                    <span
+                      className={`rounded-full px-1.5 py-0.5 mono text-[10px] font-extrabold ${
+                        tab.badgeTone === 'rose'
+                          ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                          : tab.badgeTone === 'amber'
+                            ? 'bg-amber-500 text-slate-950'
+                            : 'bg-slate-800 text-slate-300'
+                      }`}
+                    >
+                      {tab.badgeCount}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+        </nav>
+
+        <Link
+          to="/superadmin/agents"
+          className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-3.5 py-2 text-xs font-extrabold text-emerald-300 hover:bg-emerald-500/25 transition"
+        >
+          <UserCheck className="h-4 w-4" />
+          <span>{t('nav.superadminAgents')} →</span>
+        </Link>
+      </div>
 
       {/* TAB 1: Villages Directory */}
       {activeTab === 'directory' && (

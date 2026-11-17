@@ -59,6 +59,11 @@ const SuperAdminProvisionPage = lazy(() =>
     default: m.SuperAdminProvisionPage,
   })),
 );
+const SuperAdminAgentsPage = lazy(() =>
+  import('./features/superadmin/SuperAdminAgentsPage').then((m) => ({
+    default: m.SuperAdminAgentsPage,
+  })),
+);
 const AgentLoginPage = lazy(() =>
   import('./features/agents/AgentLoginPage').then((m) => ({ default: m.AgentLoginPage })),
 );
@@ -117,6 +122,7 @@ export function App() {
                 <Route path="/" element={<DashboardPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/onboarding" element={<OnboardingLgdPage />} />
+                <Route path="/register" element={<OnboardingLgdPage />} />
                 <Route path="/properties" element={<PropertiesPage />} />
                 <Route path="/namuna-8" element={<PropertiesPage />} />
                 <Route path="/namuna-8/add" element={<PropertyFormPage />} />
@@ -135,6 +141,7 @@ export function App() {
                 <Route path="/audit/:entityName/:entityId" element={<AuditLogPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/superadmin" element={<SuperAdminProvisionPage />} />
+                <Route path="/superadmin/agents" element={<SuperAdminAgentsPage />} />
                 <Route path="/superadmin/provision-gp" element={<SuperAdminProvisionPage />} />
                 <Route path="/agent/register" element={<AgentRegisterPage />} />
                 <Route path="/agent/login" element={<AgentLoginPage />} />
