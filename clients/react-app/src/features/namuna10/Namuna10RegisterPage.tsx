@@ -1,10 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
+  Ban,
   CheckCircle2,
   ExternalLink,
   FileSpreadsheet,
   Filter,
+  History,
   Info,
   Lock,
   Printer,
@@ -31,6 +33,7 @@ import {
 } from '../../services/namuna10Api';
 import { formatDateOnly, formatInr } from '../../utils/formatters';
 import { extractProblemValidation, type ParsedValidationItem } from '../../utils/validation';
+import { CancelReceiptModal } from './CancelReceiptModal';
 import { TaxCollectionModal } from './TaxCollectionModal';
 
 type WorkspaceTab = 'register' | 'receipts';
@@ -56,6 +59,9 @@ export function Namuna10RegisterPage() {
   const canCollect = Boolean(
     user && ['SuperAdmin', 'Gramsevak', 'GP_Admin', 'GP_Operator'].includes(user.role),
   );
+  const canCancelReceipts = Boolean(
+    user && ['SuperAdmin', 'Gramsevak'].includes(user.role),
+  );
 
   const [activeTab, setActiveTab] = useState<WorkspaceTab>('register');
   const [selectedYearId, setSelectedYearId] = useState<string | undefined>(initialYearParam);
@@ -73,11 +79,13 @@ export function Namuna10RegisterPage() {
   const [recSearchInput, setRecSearchInput] = useState<string>('');
   const [appliedRecSearch, setAppliedRecSearch] = useState<string>('');
   const [includeCancelled, setIncludeCancelled] = useState<boolean>(true);
+  const [cancelledAuditOnly, setCancelledAuditOnly] = useState<boolean>(false);
 
   // Modal & feedback state
   const [modalPropertyId, setModalPropertyId] = useState<string | null>(null);
   const [deepLinkDismissed, setDeepLinkDismissed] = useState<boolean>(false);
   const [downloadingReceiptId, setDownloadingReceiptId] = useState<string | null>(null);
+  const [receiptToCancel, setReceiptToCancel] = useState<TaxReceiptDto | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [infoMsg, setInfoMsg] = useState<string | null>(null);
   const [errSummary, setErrSummary] = useState<string | null>(null);
@@ -121,6 +129,7 @@ export function Namuna10RegisterPage() {
       recModeFilter,
       appliedRecSearch,
       includeCancelled,
+      cancelledAuditOnly,
     ],
     queryFn: () =>
       namuna10Api.listReceipts({
@@ -130,7 +139,7 @@ export function Namuna10RegisterPage() {
         toDate: recToDate || undefined,
         mode: recModeFilter ? (Number(recModeFilter) as PaymentModeCode) : undefined,
         search: appliedRecSearch || undefined,
-        includeCancelled,
+        includeCancelled: cancelledAuditOnly ? true : includeCancelled,
       }),
     enabled: canRead && activeTab === 'receipts',
   });
@@ -211,6 +220,18 @@ export function Namuna10RegisterPage() {
     closeModal();
   };
 
+  const handleReceiptCancelled = async (cancelled: TaxReceiptDto) => {
+    setSuccessMsg(
+      t('namuna10.cancelSuccessMsg', {
+        receiptNo: cancelled.receiptNo,
+        amount: formatInr(cancelled.totalPaid),
+      }),
+    );
+    setErrSummary(null);
+    setErrItems([]);
+    await invalidateAllLedgers();
+  };
+
   const handleDownloadReceiptPdf = async (receiptId: string, receiptNo: string) => {
     setDownloadingReceiptId(receiptId);
     setErrSummary(null);
@@ -283,7 +304,10 @@ export function Namuna10RegisterPage() {
     );
   }
 
-  const receiptItems = receiptsQuery.data?.items ?? [];
+  const rawReceiptItems = receiptsQuery.data?.items ?? [];
+  const receiptItems = cancelledAuditOnly
+    ? rawReceiptItems.filter((rec) => rec.isCancelled)
+    : rawReceiptItems;
 
   return (
     <div className="space-y-4">
@@ -765,14 +789,29 @@ export function Namuna10RegisterPage() {
                 <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-line bg-white px-3 py-1.5 text-xs font-semibold text-slate-700">
                   <input
                     type="checkbox"
-                    checked={includeCancelled}
+                    checked={cancelledAuditOnly ? true : includeCancelled}
+                    disabled={cancelledAuditOnly}
                     onChange={(e) => setIncludeCancelled(e.target.checked)}
                     className="h-3.5 w-3.5 rounded accent-indigo-700"
                   />
                   {t('namuna10.showCancelledLabel')}
                 </label>
 
-                {(recFromDate || recToDate || recModeFilter || appliedRecSearch) && (
+                <button
+                  type="button"
+                  onClick={() => setCancelledAuditOnly((prev) => !prev)}
+                  className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-bold transition-colors ${
+                    cancelledAuditOnly
+                      ? 'border-rose-600 bg-rose-700 text-white'
+                      : 'border-rose-200 bg-rose-50 text-rose-800 hover:bg-rose-100'
+                  }`}
+                >
+                  <History className="h-3.5 w-3.5" />
+                  {t('namuna10.cancelledAuditFilterBtn')}
+                  {receiptsQuery.data ? ` (${receiptsQuery.data.cancelledCount})` : ''}
+                </button>
+
+                {(recFromDate || recToDate || recModeFilter || appliedRecSearch || cancelledAuditOnly) && (
                   <button
                     type="button"
                     onClick={() => {
@@ -781,6 +820,7 @@ export function Namuna10RegisterPage() {
                       setRecModeFilter('');
                       setRecSearchInput('');
                       setAppliedRecSearch('');
+                      setCancelledAuditOnly(false);
                     }}
                     className="inline-flex items-center gap-1 rounded-xl border border-line bg-slate-50 px-2.5 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-100"
                   >
@@ -906,9 +946,24 @@ export function Namuna10RegisterPage() {
                           </td>
                           <td className="px-3 py-3 text-center align-top">
                             {rec.isCancelled ? (
-                              <span className="rounded-full bg-rose-700 px-2.5 py-0.5 text-[10px] font-bold text-white">
-                                {t('namuna10.cancelledBadge')}
-                              </span>
+                              <div className="space-y-1 text-center">
+                                <span className="inline-block rounded-full bg-rose-700 px-2.5 py-0.5 text-[10px] font-bold text-white">
+                                  {t('namuna10.cancelledBadge')}
+                                </span>
+                                {rec.cancelledAtUtc && (
+                                  <p className="text-[10px] text-rose-700">
+                                    {new Date(rec.cancelledAtUtc).toLocaleDateString(i18n.language)}
+                                  </p>
+                                )}
+                                {rec.cancelReason && (
+                                  <p
+                                    className="mx-auto max-w-[170px] truncate text-[10px] font-medium text-rose-900"
+                                    title={rec.cancelReason}
+                                  >
+                                    {rec.cancelReason}
+                                  </p>
+                                )}
+                              </div>
                             ) : (
                               <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-bold text-emerald-800">
                                 {t('namuna10.activeBadge')}
@@ -916,15 +971,27 @@ export function Namuna10RegisterPage() {
                             )}
                           </td>
                           <td className="px-3 py-3 text-right align-top">
-                            <button
-                              type="button"
-                              disabled={downloadingReceiptId === rec.receiptId}
-                              onClick={() => handleDownloadReceiptPdf(rec.receiptId, rec.receiptNo)}
-                              className="inline-flex items-center gap-1 rounded-xl border border-line bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-                            >
-                              <Printer className="h-3.5 w-3.5" />
-                              {t('namuna10.printCopyBtn')}
-                            </button>
+                            <div className="inline-flex flex-wrap items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                disabled={downloadingReceiptId === rec.receiptId}
+                                onClick={() => handleDownloadReceiptPdf(rec.receiptId, rec.receiptNo)}
+                                className="inline-flex items-center gap-1 rounded-xl border border-line bg-white px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                              >
+                                <Printer className="h-3.5 w-3.5" />
+                                {t('namuna10.printCopyBtn')}
+                              </button>
+                              {canCancelReceipts && !rec.isCancelled && !isLocked && (
+                                <button
+                                  type="button"
+                                  onClick={() => setReceiptToCancel(rec)}
+                                  className="inline-flex items-center gap-1 rounded-xl border border-rose-200 bg-rose-50 px-2.5 py-1.5 text-[11px] font-bold text-rose-700 hover:bg-rose-100"
+                                >
+                                  <Ban className="h-3.5 w-3.5" />
+                                  {t('namuna10.cancelBtn')}
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );
@@ -944,8 +1011,19 @@ export function Namuna10RegisterPage() {
           workspace={workspace}
           row={modalRow}
           canCollect={canCollect}
+          canCancelReceipts={canCancelReceipts}
           onClose={closeModal}
           onCollected={handleCollectionCompleted}
+          onReceiptCancelled={handleReceiptCancelled}
+        />
+      )}
+
+      {/* Gramsevak Password-Reauthenticated Cancellation Modal */}
+      {receiptToCancel && (
+        <CancelReceiptModal
+          receipt={receiptToCancel}
+          onClose={() => setReceiptToCancel(null)}
+          onCancelled={handleReceiptCancelled}
         />
       )}
     </div>

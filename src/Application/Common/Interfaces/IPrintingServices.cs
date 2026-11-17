@@ -1,6 +1,7 @@
 using GPMH.Application.DTOs.Mutations;
 using GPMH.Application.DTOs.Namuna9;
 using GPMH.Application.DTOs.Namuna9Ka;
+using GPMH.Application.DTOs.Namuna10;
 using GPMH.Application.DTOs.Printing;
 
 namespace GPMH.Application.Common.Interfaces;
@@ -10,6 +11,10 @@ public interface IExtractVerificationTokenService
     string GenerateToken(ExtractVerifyPayloadDto payload);
 
     bool TryValidateToken(string token, out ExtractVerifyPayloadDto? payload);
+
+    string GenerateReceiptToken(ReceiptVerifyPayloadDto payload);
+
+    bool TryValidateReceiptToken(string token, out ReceiptVerifyPayloadDto? payload);
 }
 
 public interface IQrCodeGeneratorService
@@ -30,6 +35,8 @@ public interface IStatutoryPdfRenderer
     byte[] RenderNamuna9RegisterPdf(Namuna9RegisterPdfDocumentModel model);
 
     byte[] RenderNamuna9KaBillsPdf(Namuna9KaPdfDocumentModel model);
+
+    byte[] RenderNamuna10DualReceiptPdf(Namuna10DualReceiptPdfModel model);
 }
 
 public interface IPrintDataRepository

@@ -220,6 +220,42 @@ public static class Namuna10FifoBridge
             ExcessCredit: fifo.ExcessCredit);
     }
 
+    /// <summary>
+    /// Exact statutory inverse of <see cref="AllocatePayment"/> used when a Gramsevak cancels a receipt:
+    /// subtracts each allocated head, fee, penalty, and receipt-specific rebate, clamped at zero.
+    /// </summary>
+    public static DemandCollectedBreakdown ReverseAllocation(
+        DemandCollectedBreakdown existingCollected,
+        TaxReceiptHeadAllocation allocationToReverse,
+        decimal discountGiven = 0m)
+    {
+        ArgumentNullException.ThrowIfNull(existingCollected);
+        ArgumentNullException.ThrowIfNull(allocationToReverse);
+
+        DemandHeadBreakdown arr = allocationToReverse.ArrearsAllocated ?? DemandHeadBreakdown.Empty;
+        DemandHeadBreakdown cur = allocationToReverse.CurrentAllocated ?? DemandHeadBreakdown.Empty;
+
+        decimal penaltyFromReceipt = allocationToReverse.PenaltyPaid + arr.FeesAndPenalty;
+        decimal rebateToReverse = Math.Max(discountGiven, allocationToReverse.RebateApplied);
+
+        return new DemandCollectedBreakdown(
+            HouseTax: ClampSub(existingCollected.HouseTax, arr.HouseTax + cur.HouseTax),
+            LightingTax: ClampSub(existingCollected.LightingTax, arr.LightingTax + cur.LightingTax),
+            HealthTax: ClampSub(existingCollected.HealthTax, arr.HealthTax + cur.HealthTax),
+            SanitationTax: ClampSub(existingCollected.SanitationTax, arr.SanitationTax + cur.SanitationTax),
+            ToiletTax: ClampSub(existingCollected.ToiletTax, arr.ToiletTax + cur.ToiletTax),
+            GeneralWaterTax: ClampSub(existingCollected.GeneralWaterTax, arr.GeneralWaterTax + cur.GeneralWaterTax),
+            SpecialWaterTax: ClampSub(existingCollected.SpecialWaterTax, arr.SpecialWaterTax + cur.SpecialWaterTax),
+            OtherTax: ClampSub(existingCollected.OtherTax, arr.OtherTax + cur.OtherTax),
+            NoticeFeePaid: ClampSub(existingCollected.NoticeFeePaid, allocationToReverse.NoticeFeePaid),
+            WarrantFeePaid: ClampSub(existingCollected.WarrantFeePaid, allocationToReverse.WarrantFeePaid),
+            PenaltyPaid: ClampSub(existingCollected.PenaltyPaid, penaltyFromReceipt),
+            RebateGranted: ClampSub(existingCollected.RebateGranted, rebateToReverse));
+    }
+
+    private static decimal ClampSub(decimal current, decimal delta) =>
+        Math.Max(0m, Math.Round(current - Math.Max(0m, delta), 2, MidpointRounding.AwayFromZero));
+
     private static TaxHeadBalances ToTaxHeadBalances(DemandHeadBreakdown b) =>
         new(
             BuildingAndOpenLand: b.HouseTax,

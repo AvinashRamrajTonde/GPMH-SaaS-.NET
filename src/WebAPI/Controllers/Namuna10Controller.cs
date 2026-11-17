@@ -1,4 +1,5 @@
 using GPMH.Application.DTOs.Namuna10;
+using GPMH.Application.DTOs.Printing;
 using GPMH.Application.Features.Namuna10.Commands;
 using GPMH.Application.Features.Namuna10.Queries;
 using GPMH.Domain.Enums;
@@ -24,10 +25,14 @@ public sealed record CollectTaxRequest(
     string? Remarks = null,
     bool ApplyEligibleEarlyRebate = false);
 
+public sealed record CancelTaxReceiptRequest(
+    string ConfirmPassword,
+    string CancelReason);
+
 [ApiController]
 [Authorize(Policy = AuthPolicies.RequirePropertyRead)]
 [Route("api/v1/namuna-10")]
-public sealed class Namuna10Controller(ISender sender) : ControllerBase
+public sealed class Namuna10Controller(ISender sender, IConfiguration configuration) : ControllerBase
 {
     [HttpGet("register")]
     [ProducesResponseType(typeof(Namuna10RegisterWorkspaceDto), StatusCodes.Status200OK)]
@@ -133,6 +138,48 @@ public sealed class Namuna10Controller(ISender sender) : ControllerBase
         }
 
         return CreatedAtAction(nameof(GetReceiptById), new { id = result.ReceiptId }, result);
+    }
+
+    [HttpGet("receipts/{id:guid}/dual.pdf")]
+    [Produces("application/pdf")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DownloadDualReceiptPdf(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        GeneratedPdfFileDto file = await sender
+            .Send(
+                new GetNamuna10DualReceiptPdfQuery(
+                    ReceiptId: id,
+                    FrontendBaseUrl: QueryParamHelper.ResolveFrontendBaseUrl(Request, configuration)),
+                cancellationToken)
+            .ConfigureAwait(false);
+
+        Response.Headers.ContentDisposition = $"inline; filename=\"{file.FileName}\"";
+        return File(file.Content, "application/pdf");
+    }
+
+    [HttpPost("receipts/{id:guid}/cancel")]
+    [Authorize(Policy = AuthPolicies.RequireGramsevak)]
+    [ProducesResponseType(typeof(TaxReceiptDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<TaxReceiptDto>> CancelReceipt(
+        Guid id,
+        [FromBody] CancelTaxReceiptRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        TaxReceiptDto result = await sender
+            .Send(new CancelTaxReceiptCommand(id, request.ConfirmPassword, request.CancelReason), cancellationToken)
+            .ConfigureAwait(false);
+
+        return Ok(result);
     }
 }
 

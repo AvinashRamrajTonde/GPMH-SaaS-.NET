@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import {
+  Ban,
   Banknote,
   Building,
   CheckCircle2,
@@ -26,14 +27,17 @@ import {
 } from '../../services/namuna10Api';
 import { formatDateOnly, formatInr } from '../../utils/formatters';
 import { extractProblemValidation, type ParsedValidationItem } from '../../utils/validation';
+import { CancelReceiptModal } from './CancelReceiptModal';
 import { computeLiveFifoPreview, type FifoPreviewHeadRow } from './fifoPreview';
 
 interface TaxCollectionModalProps {
   workspace: Namuna10RegisterWorkspaceDto;
   row: Namuna10RegisterRowDto;
   canCollect: boolean;
+  canCancelReceipts?: boolean;
   onClose: () => void;
   onCollected: (receipt: TaxReceiptDto, pdfNotice?: string | null) => Promise<void>;
+  onReceiptCancelled?: (receipt: TaxReceiptDto) => Promise<void>;
 }
 
 function getTodayIso(): string {
@@ -58,8 +62,10 @@ export function TaxCollectionModal({
   workspace,
   row,
   canCollect,
+  canCancelReceipts = false,
   onClose,
   onCollected,
+  onReceiptCancelled,
 }: TaxCollectionModalProps) {
   const { t, i18n } = useTranslation();
   const isLocked = workspace.selectedYear.isLocked;
@@ -83,6 +89,7 @@ export function TaxCollectionModal({
 
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [receiptToCancel, setReceiptToCancel] = useState<TaxReceiptDto | null>(null);
   const [errSummary, setErrSummary] = useState<string | null>(null);
   const [errItems, setErrItems] = useState<ParsedValidationItem[]>([]);
   const [localNotice, setLocalNotice] = useState<string | null>(null);
@@ -754,15 +761,27 @@ export function TaxCollectionModal({
                           >
                             {formatInr(rec.totalPaid)}
                           </p>
-                          <button
-                            type="button"
-                            disabled={downloadingId === rec.receiptId}
-                            onClick={() => handleDownloadPdf(rec.receiptId, rec.receiptNo)}
-                            className="mt-1 inline-flex items-center gap-1 rounded-lg border border-line bg-slate-50 px-2 py-1 text-[10.5px] font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-50"
-                          >
-                            <Printer className="h-3 w-3" />
-                            {t('namuna10.printCopyBtn')}
-                          </button>
+                          <div className="mt-1 flex flex-wrap items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              disabled={downloadingId === rec.receiptId}
+                              onClick={() => handleDownloadPdf(rec.receiptId, rec.receiptNo)}
+                              className="inline-flex items-center gap-1 rounded-lg border border-line bg-slate-50 px-2 py-1 text-[10.5px] font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                            >
+                              <Printer className="h-3 w-3" />
+                              {t('namuna10.printCopyBtn')}
+                            </button>
+                            {canCancelReceipts && !rec.isCancelled && !isLocked && (
+                              <button
+                                type="button"
+                                onClick={() => setReceiptToCancel(rec)}
+                                className="inline-flex items-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2 py-1 text-[10.5px] font-bold text-rose-700 hover:bg-rose-100"
+                              >
+                                <Ban className="h-3 w-3" />
+                                {t('namuna10.cancelBtn')}
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -802,6 +821,18 @@ export function TaxCollectionModal({
           </div>
         </div>
       </div>
+      {receiptToCancel && (
+        <CancelReceiptModal
+          receipt={receiptToCancel}
+          onClose={() => setReceiptToCancel(null)}
+          onCancelled={async (cancelled) => {
+            await receiptsQuery.refetch();
+            if (onReceiptCancelled) {
+              await onReceiptCancelled(cancelled);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

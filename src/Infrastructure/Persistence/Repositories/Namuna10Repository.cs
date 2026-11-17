@@ -1,4 +1,7 @@
 using GPMH.Application.Common.Interfaces;
+using GPMH.Application.DTOs.Namuna10;
+using GPMH.Application.DTOs.Printing;
+using GPMH.Domain.ValueObjects;
 using GPMH.Domain.Entities.Assessments;
 using GPMH.Domain.Entities.Auditing;
 using GPMH.Domain.Entities.Taxation;
@@ -14,7 +17,8 @@ namespace GPMH.Infrastructure.Persistence.Repositories;
 /// <summary>Tenant-scoped EF Core repository for Namuna 10 collection register, FIFO receipts, and atomic sequencing.</summary>
 public sealed class Namuna10Repository(
     AppDbContext dbContext,
-    IDateTimeProvider dateTimeProvider) : INamuna10Repository
+    IDateTimeProvider dateTimeProvider,
+    IPiiProtectionService piiProtectionService) : INamuna10Repository
 {
     public async Task<IReadOnlyList<AssessmentYear>> ListYearsAsync(CancellationToken cancellationToken)
     {
@@ -403,6 +407,253 @@ public sealed class Namuna10Repository(
         return receipt is null
             ? null
             : await HydrateReceiptContextAsync(receipt, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<Namuna10ReceiptCancelContext?> LoadReceiptForCancelAsync(
+        Guid receiptId,
+        CancellationToken cancellationToken)
+    {
+        TaxReceipt? receipt = await dbContext.TaxReceipts
+            .FirstOrDefaultAsync(r => r.Id == receiptId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (receipt is null)
+        {
+            return null;
+        }
+
+        AssessmentYear? year = await dbContext.AssessmentYears
+            .AsNoTracking()
+            .FirstOrDefaultAsync(y => y.Id == receipt.AssessmentYearId, cancellationToken)
+            .ConfigureAwait(false);
+
+        Property? prop = await dbContext.Properties
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == receipt.PropertyId, cancellationToken)
+            .ConfigureAwait(false);
+
+        PropertyDemand? demand = await dbContext.PropertyDemands
+            .FirstOrDefaultAsync(d => d.Id == receipt.PropertyDemandId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (year is null || prop is null || demand is null)
+        {
+            return null;
+        }
+
+        PropertyDemandBill? bill = receipt.DemandBillId.HasValue
+            ? await dbContext.PropertyDemandBills
+                .FirstOrDefaultAsync(b => b.Id == receipt.DemandBillId.Value, cancellationToken)
+                .ConfigureAwait(false)
+            : null;
+
+        Dictionary<Guid, OwnerSummary> owners = await LoadPrimaryOwnersAsync([prop.Id], cancellationToken)
+            .ConfigureAwait(false);
+        owners.TryGetValue(prop.Id, out OwnerSummary? owner);
+
+        return new Namuna10ReceiptCancelContext(
+            Receipt: receipt,
+            Year: year,
+            Demand: demand,
+            Bill: bill,
+            Property: prop,
+            OwnerNameMr: owner?.NameMr,
+            OwnerNameEn: owner?.NameEn,
+            OwnerAadhaarMasked: owner?.AadhaarMasked,
+            OwnerMobileMasked: owner?.MobileMasked);
+    }
+
+    public async Task<Namuna10DualReceiptPdfModel?> LoadReceiptPdfModelAsync(
+        Guid receiptId,
+        Func<Guid, Guid, string> buildVerifyUrl,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(buildVerifyUrl);
+
+        TaxReceipt? receipt = await dbContext.TaxReceipts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r => r.Id == receiptId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (receipt is null)
+        {
+            return null;
+        }
+
+        Namuna10ReceiptContext? ctx = await HydrateReceiptContextAsync(receipt, cancellationToken).ConfigureAwait(false);
+        if (ctx is null)
+        {
+            return null;
+        }
+
+        Tenant? tenant = await dbContext.Tenants
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id == receipt.TenantId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (tenant is null)
+        {
+            return null;
+        }
+
+        GramPanchayat? gp = await dbContext.GramPanchayats
+            .AsNoTracking()
+            .FirstOrDefaultAsync(g => g.TenantId == receipt.TenantId, cancellationToken)
+            .ConfigureAwait(false);
+
+        ProtectedSignatoryAssets sigs = await StatutoryPrintAssetHelper
+            .LoadSignatoryAssetsAsync(dbContext, piiProtectionService, receipt.TenantId, gp, cancellationToken)
+            .ConfigureAwait(false);
+
+        string occupier = !string.IsNullOrWhiteSpace(ctx.Property.OccupierName)
+            ? ctx.Property.OccupierName!
+            : !string.IsNullOrWhiteSpace(ctx.OwnerNameMr)
+                ? ctx.OwnerNameMr!
+                : "स्वतः (Self)";
+
+        string verifyUrl = buildVerifyUrl(receipt.TenantId, receipt.Id);
+        TaxReceiptHeadAllocation alloc = TaxReceiptHeadAllocation.FromJson(receipt.HeadAllocationJson);
+
+        return new Namuna10DualReceiptPdfModel(
+            TenantId: receipt.TenantId,
+            ReceiptId: receipt.Id,
+            LgdCode: gp?.LgdCode ?? tenant.LgdCode,
+            PanchayatNameMr: gp?.PanchayatNameMr ?? tenant.NameMr,
+            PanchayatNameEn: gp?.PanchayatNameEn ?? tenant.NameEn,
+            VillageNameMr: gp?.PanchayatNameMr ?? tenant.NameMr,
+            TehsilName: gp?.TehsilName ?? "-",
+            DistrictName: gp?.DistrictName ?? "-",
+            Pincode: gp?.Pincode,
+            AssessmentYearLabel: ctx.Year.YearLabel,
+            ReceiptNo: receipt.ReceiptNo,
+            BookNo: receipt.BookNo,
+            ReceiptDate: receipt.ReceiptDate,
+            CollectedAtUtc: receipt.CollectedAtUtc,
+            BillNo: ctx.Bill?.BillNo,
+            WardNo: ctx.Property.WardNo,
+            PropertyNo: ctx.Property.PropertyNo,
+            CitySurveyOrGutNo: ctx.Property.CitySurveyOrGutNo,
+            PrimaryOwnerNameMr: ctx.OwnerNameMr ?? receipt.PayerName,
+            PrimaryOwnerNameEn: ctx.OwnerNameEn ?? ctx.OwnerNameMr ?? receipt.PayerName,
+            OccupierName: occupier,
+            PrimaryOwnerAadhaarMasked: ctx.OwnerAadhaarMasked,
+            PrimaryOwnerMobileMasked: ctx.OwnerMobileMasked,
+            PayerName: receipt.PayerName,
+            PaymentMode: receipt.PaymentMode,
+            ReferenceNo: receipt.ReferenceNo,
+            BankName: receipt.BankName,
+            ChequeDate: receipt.ChequeDate,
+            Remarks: receipt.Remarks,
+            TotalPaid: receipt.TotalPaid,
+            DiscountGiven: receipt.DiscountGiven,
+            ExcessCredit: receipt.ExcessCredit,
+            RemainingBalanceAfterPayment: ctx.Demand.PendingBalance,
+            AmountInWordsMr: MarathiNumberToWords.ToRupeesWords(receipt.TotalPaid),
+            HeadAllocation: alloc,
+            IsCancelled: receipt.IsCancelled,
+            CancelReason: receipt.CancelReason,
+            CancelledAtUtc: receipt.CancelledAtUtc,
+            VerifyUrl: verifyUrl,
+            GramsevakName: gp?.GramsevakName,
+            SarpanchName: gp?.SarpanchName,
+            OperatorName: gp?.OperatorName,
+            GramsevakSignatureBytes: sigs.GramsevakSignatureBytes,
+            SarpanchSignatureBytes: sigs.SarpanchSignatureBytes,
+            OperatorSignatureBytes: sigs.OperatorSignatureBytes,
+            OfficialStampBytes: sigs.OfficialStampBytes);
+    }
+
+    public async Task<VerifiedReceiptPublicDto?> LoadVerifiedReceiptPublicAsync(
+        Guid tenantId,
+        Guid receiptId,
+        string token,
+        DateTimeOffset issuedAtUtc,
+        CancellationToken cancellationToken)
+    {
+        // Note: Executes anonymously ONLY AFTER cryptographic HMAC verification of (tenantId, receiptId).
+        TaxReceipt? receipt = await dbContext.TaxReceipts
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r => r.Id == receiptId && r.TenantId == tenantId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (receipt is null)
+        {
+            return null;
+        }
+
+        Tenant? tenant = await dbContext.Tenants
+            .AsNoTracking()
+            .FirstOrDefaultAsync(t => t.Id == tenantId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (tenant is null)
+        {
+            return null;
+        }
+
+        GramPanchayat? gp = await dbContext.GramPanchayats
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(g => g.TenantId == tenantId, cancellationToken)
+            .ConfigureAwait(false);
+
+        AssessmentYear? year = await dbContext.AssessmentYears
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(y => y.TenantId == tenantId && y.Id == receipt.AssessmentYearId, cancellationToken)
+            .ConfigureAwait(false);
+
+        Property? prop = await dbContext.Properties
+            .IgnoreQueryFilters()
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.TenantId == tenantId && p.Id == receipt.PropertyId, cancellationToken)
+            .ConfigureAwait(false);
+
+        if (year is null || prop is null)
+        {
+            return null;
+        }
+
+        // Strict ADR-015 public minimization: NEVER select Aadhaar or Mobile numbers.
+        var ownersRaw = await (
+            from po in dbContext.PropertyOwners.IgnoreQueryFilters().AsNoTracking()
+            join c in dbContext.Citizens.IgnoreQueryFilters().AsNoTracking() on po.CitizenId equals c.Id
+            where po.TenantId == tenantId && po.PropertyId == prop.Id && po.IsActive
+            select new { po.IsPrimaryOwner, po.OwnershipSharePct, c.FullNameMr, c.FullNameEn })
+            .ToListAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        var owner = ownersRaw
+            .OrderByDescending(o => o.IsPrimaryOwner)
+            .ThenByDescending(o => o.OwnershipSharePct)
+            .FirstOrDefault();
+
+        return new VerifiedReceiptPublicDto(
+            IsValid: true,
+            Token: token,
+            TenantId: tenantId,
+            ReceiptId: receiptId,
+            LgdCode: gp?.LgdCode ?? tenant.LgdCode,
+            PanchayatNameEn: gp?.PanchayatNameEn ?? tenant.NameEn,
+            PanchayatNameMr: gp?.PanchayatNameMr ?? tenant.NameMr,
+            TehsilName: gp?.TehsilName ?? "-",
+            DistrictName: gp?.DistrictName ?? "-",
+            AssessmentYearLabel: year.YearLabel,
+            ReceiptNo: receipt.ReceiptNo,
+            BookNo: receipt.BookNo,
+            ReceiptDate: receipt.ReceiptDate,
+            WardNo: prop.WardNo,
+            PropertyNo: prop.PropertyNo,
+            PrimaryOwnerNameMr: owner?.FullNameMr ?? receipt.PayerName,
+            PrimaryOwnerNameEn: owner?.FullNameEn ?? owner?.FullNameMr ?? receipt.PayerName,
+            PaymentMode: receipt.PaymentMode.ToString(),
+            TotalPaid: receipt.TotalPaid,
+            DiscountGiven: receipt.DiscountGiven,
+            IsCancelled: receipt.IsCancelled,
+            CancelReason: receipt.CancelReason,
+            CancelledAtUtc: receipt.CancelledAtUtc,
+            IssuedAtUtc: issuedAtUtc);
     }
 
     public async Task<long> AllocateNextReceiptSequenceAsync(

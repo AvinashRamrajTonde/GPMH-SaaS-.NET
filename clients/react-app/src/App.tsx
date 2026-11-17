@@ -30,6 +30,9 @@ const Namuna8PrintPage = lazy(() =>
 const ExtractVerifyPage = lazy(() =>
   import('./features/print/ExtractVerifyPage').then((m) => ({ default: m.ExtractVerifyPage })),
 );
+const ReceiptVerifyPage = lazy(() =>
+  import('./features/namuna10/ReceiptVerifyPage').then((m) => ({ default: m.ReceiptVerifyPage })),
+);
 const MutationRegisterPage = lazy(() =>
   import('./features/mutations/MutationRegisterPage').then((m) => ({
     default: m.MutationRegisterPage,
@@ -122,6 +125,7 @@ export function App() {
                 <Route path="/namuna-8/print" element={<Namuna8PrintPage />} />
                 <Route path="/namuna-8/print/:id" element={<Namuna8PrintPage />} />
                 <Route path="/verify/extract/:token" element={<ExtractVerifyPage />} />
+                <Route path="/verify/receipt/:token" element={<ReceiptVerifyPage />} />
                 <Route path="/namuna-8/partition" element={<PropertyPartitionWizardPage />} />
                 <Route path="/namuna-8/partition/:id" element={<PropertyPartitionWizardPage />} />
                 <Route path="/citizens" element={<CitizensPage />} />

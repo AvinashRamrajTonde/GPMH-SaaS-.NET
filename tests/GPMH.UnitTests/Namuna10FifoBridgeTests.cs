@@ -104,5 +104,43 @@ public sealed class Namuna10FifoBridgeTests
         Assert.Equal(221.40m, outcome.UpdatedCollected.Total);
         Assert.Equal(rebate, outcome.UpdatedCollected.RebateGranted);
     }
+
+    [Fact]
+    public void Bridge_ReverseAllocation_RecoversExactPriorCollectedHeadsAndFees()
+    {
+        DemandHeadBreakdown arrears = new(HouseTax: 66m, GeneralWaterTax: 300m, SpecialWaterTax: 200m, FeesAndPenalty: 55m);
+        DemandHeadBreakdown current = new(HouseTax: 66m, LightingTax: 40m, HealthTax: 40m, SanitationTax: 100m, GeneralWaterTax: 720m);
+
+        Namuna10DueBreakdown dues1 = Namuna10FifoBridge.ComputeRemainingDues(
+            arrears, current, DemandCollectedBreakdown.Empty,
+            noticeFee: 10m, warrantFee: 5m, penaltyAmount: 20m, rebateAmount: 0m,
+            pendingBalance: arrears.Total + current.Total + 35m);
+
+        // Receipt 1 pays 500 -> Notice=10, Warrant=5, CarriedFees=55, CurrentPenalty=20, HouseArr=66, GenWaterArr=300, SpecWaterArr=44
+        Namuna10AllocationOutcome r1 = Namuna10FifoBridge.AllocatePayment(
+            500m, 2027, "2027-28", dues1, DemandCollectedBreakdown.Empty);
+
+        // Receipt 2 settles everything with 24.60 early rebate on remaining current heads
+        Namuna10DueBreakdown dues2 = Namuna10FifoBridge.ComputeRemainingDues(
+            arrears, current, r1.UpdatedCollected,
+            noticeFee: 10m, warrantFee: 5m, penaltyAmount: 20m, rebateAmount: 24.60m,
+            pendingBalance: dues1.TotalDue - 500m - 24.60m);
+
+        Namuna10AllocationOutcome r2 = Namuna10FifoBridge.AllocatePayment(
+            dues2.TotalDue, 2027, "2027-28", dues2, r1.UpdatedCollected,
+            newlyGrantedRebate: 24.60m, totalDemandRebateAfter: 24.60m);
+
+        // Cancel Receipt 2 -> MUST land back identically on r1.UpdatedCollected!
+        DemandCollectedBreakdown afterCancelR2 = Namuna10FifoBridge.ReverseAllocation(
+            r2.UpdatedCollected, r2.ReceiptAllocation, r2.ReceiptAllocation.RebateApplied);
+
+        Assert.Equal(r1.UpdatedCollected, afterCancelR2);
+
+        // Cancel Receipt 1 -> MUST land back on DemandCollectedBreakdown.Empty (all zeros)!
+        DemandCollectedBreakdown afterCancelR1 = Namuna10FifoBridge.ReverseAllocation(
+            afterCancelR2, r1.ReceiptAllocation, discountGiven: 0m);
+
+        Assert.Equal(DemandCollectedBreakdown.Empty, afterCancelR1);
+    }
 }
 

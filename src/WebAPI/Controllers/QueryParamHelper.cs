@@ -28,5 +28,25 @@ internal static class QueryParamHelper
 
         return parsed.Count > 0 ? parsed : null;
     }
+
+    public static string ResolveFrontendBaseUrl(HttpRequest request, IConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(configuration);
+
+        string? configured = configuration["Frontend:BaseUrl"];
+        if (!string.IsNullOrWhiteSpace(configured))
+        {
+            return configured.TrimEnd('/');
+        }
+
+        string? origin = request.Headers.Origin.FirstOrDefault();
+        if (!string.IsNullOrWhiteSpace(origin))
+        {
+            return origin.TrimEnd('/');
+        }
+
+        return $"{request.Scheme}://{request.Host}".TrimEnd('/');
+    }
 }
 

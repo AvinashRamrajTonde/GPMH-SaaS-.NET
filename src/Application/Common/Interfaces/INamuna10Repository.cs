@@ -1,3 +1,5 @@
+using GPMH.Application.DTOs.Namuna10;
+using GPMH.Application.DTOs.Printing;
 using GPMH.Domain.Entities.Assessments;
 using GPMH.Domain.Entities.Auditing;
 using GPMH.Domain.Entities.Taxation;
@@ -40,6 +42,17 @@ public sealed record Namuna10ReceiptContext(
     string? OwnerAadhaarMasked,
     string? OwnerMobileMasked);
 
+public sealed record Namuna10ReceiptCancelContext(
+    TaxReceipt Receipt,
+    AssessmentYear Year,
+    PropertyDemand Demand,
+    PropertyDemandBill? Bill,
+    Property Property,
+    string? OwnerNameMr,
+    string? OwnerNameEn,
+    string? OwnerAadhaarMasked,
+    string? OwnerMobileMasked);
+
 /// <summary>Tenant-scoped repository for Namuna 10 collection register, receipts, and FIFO ledger updates.</summary>
 public interface INamuna10Repository
 {
@@ -77,6 +90,22 @@ public interface INamuna10Repository
 
     Task<Namuna10ReceiptContext?> GetReceiptByIdAsync(
         Guid receiptId,
+        CancellationToken cancellationToken);
+
+    Task<Namuna10ReceiptCancelContext?> LoadReceiptForCancelAsync(
+        Guid receiptId,
+        CancellationToken cancellationToken);
+
+    Task<Namuna10DualReceiptPdfModel?> LoadReceiptPdfModelAsync(
+        Guid receiptId,
+        Func<Guid, Guid, string> buildVerifyUrl,
+        CancellationToken cancellationToken);
+
+    Task<VerifiedReceiptPublicDto?> LoadVerifiedReceiptPublicAsync(
+        Guid tenantId,
+        Guid receiptId,
+        string token,
+        DateTimeOffset issuedAtUtc,
         CancellationToken cancellationToken);
 
     Task<long> AllocateNextReceiptSequenceAsync(

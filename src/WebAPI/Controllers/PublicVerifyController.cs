@@ -1,4 +1,5 @@
 using GPMH.Application.DTOs.Printing;
+using GPMH.Application.Features.Namuna10.Queries;
 using GPMH.Application.Features.Printing.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -21,6 +22,21 @@ public sealed class PublicVerifyController(ISender sender) : ControllerBase
     {
         VerifiedExtractPublicDto result = await sender
             .Send(new VerifyExtractTokenQuery(token), cancellationToken)
+            .ConfigureAwait(false);
+
+        return Ok(result);
+    }
+
+    [HttpGet("receipt/{token}")]
+    [ProducesResponseType(typeof(VerifiedReceiptPublicDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<VerifiedReceiptPublicDto>> VerifyReceipt(
+        string token,
+        CancellationToken cancellationToken)
+    {
+        VerifiedReceiptPublicDto result = await sender
+            .Send(new VerifyReceiptTokenQuery(token), cancellationToken)
             .ConfigureAwait(false);
 
         return Ok(result);

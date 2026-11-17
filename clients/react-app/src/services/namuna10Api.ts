@@ -178,6 +178,11 @@ export interface CollectTaxPayload {
   applyEligibleEarlyRebate?: boolean;
 }
 
+export interface CancelTaxReceiptPayload {
+  confirmPassword: string;
+  cancelReason: string;
+}
+
 export const namuna10Api = {
   getRegister(params: {
     yearId?: string;
@@ -237,6 +242,13 @@ export const namuna10Api = {
       `namuna10-receipt-${safeName}.pdf`,
     );
     triggerBlobDownload(blob, fileName);
+  },
+
+  cancelReceipt(receiptId: string, payload: CancelTaxReceiptPayload) {
+    return apiRequest<TaxReceiptDto>(`/namuna-10/receipts/${encodeURIComponent(receiptId)}/cancel`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   },
 };
 
