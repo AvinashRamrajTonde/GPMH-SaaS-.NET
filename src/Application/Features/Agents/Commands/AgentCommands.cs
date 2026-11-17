@@ -3,6 +3,7 @@ using GPMH.Application.Common.Exceptions;
 using GPMH.Application.Common.Interfaces;
 using GPMH.Application.DTOs.Agents;
 using GPMH.Application.DTOs.Auth;
+using GPMH.Application.Features.SuperAdmin.Commands;
 using GPMH.Domain.Entities.Agents;
 using GPMH.Domain.Entities.Identity;
 using GPMH.Domain.Entities.Tenancy;
@@ -110,105 +111,41 @@ public sealed class RegisterAgentCommandHandler(
     public async Task<AgentRegistrationResultDto> Handle(RegisterAgentCommand request, CancellationToken cancellationToken)
     {
         string mobile = request.MobileNo.Trim();
-        string aadhaarDigits = RegisterAgentCommandValidator.DigitsOnly(request.AadhaarNumber);
-        string panUpper = request.PanNumber.Trim().ToUpperInvariant();
-
-        string aadhaarBlindIndex = piiProtection.ComputeBlindIndex($"AADHAAR:{aadhaarDigits}");
-        string panBlindIndex = piiProtection.ComputeBlindIndex($"PAN:{panUpper}");
-
-        if (await agentRepository.ExistsDuplicateAsync(mobile, aadhaarBlindIndex, panBlindIndex, cancellationToken).ConfigureAwait(false))
-        {
-            throw new DomainValidationException(new Dictionary<string, string[]>(StringComparer.Ordinal)
-            {
-                [nameof(request.MobileNo)] = ["An agent with the same mobile number, Aadhaar, or PAN is already registered."],
-            });
-        }
-
-        User user = new()
-        {
-            Username = mobile,
-            Email = request.Email.Trim(),
-            Phone = mobile,
-            FullNameEn = request.FullName.Trim(),
-            FullNameMr = request.FullName.Trim(),
-            PasswordHash = passwordHasher.HashPassword(request.Password),
-            IsSuperAdmin = false,
-            IsActive = true,
-        };
-
-        string agentCode = $"AGT-MH-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
-        List<ProtectedAsset> assets = [];
-
-        string? aadhaarDocKey = null;
-        if (request.AadhaarDocument is not null)
-        {
-            aadhaarDocKey = $"kyc-{user.Id:N}-aadhaar-{Guid.NewGuid():N}";
-            assets.Add(new ProtectedAsset
-            {
-                AssetKey = aadhaarDocKey,
-                TenantId = null,
-                OwnerUserId = user.Id,
-                Category = "KYC_DOC",
-                FileName = Path.GetFileName(request.AadhaarDocument.FileName),
-                ContentType = request.AadhaarDocument.ContentType.Trim().ToLowerInvariant(),
-                EncryptedContent = piiProtection.EncryptBytes(request.AadhaarDocument.Content),
-                SizeBytes = request.AadhaarDocument.Content.LongLength,
-            });
-        }
-
-        string? panDocKey = null;
-        if (request.PanDocument is not null)
-        {
-            panDocKey = $"kyc-{user.Id:N}-pan-{Guid.NewGuid():N}";
-            assets.Add(new ProtectedAsset
-            {
-                AssetKey = panDocKey,
-                TenantId = null,
-                OwnerUserId = user.Id,
-                Category = "KYC_DOC",
-                FileName = Path.GetFileName(request.PanDocument.FileName),
-                ContentType = request.PanDocument.ContentType.Trim().ToLowerInvariant(),
-                EncryptedContent = piiProtection.EncryptBytes(request.PanDocument.Content),
-                SizeBytes = request.PanDocument.Content.LongLength,
-            });
-        }
-
-        FieldAgent agent = new()
-        {
-            UserId = user.Id,
-            AgentCode = agentCode,
-            KycStatus = AgentKycStatus.PendingApproval,
-            FullName = request.FullName.Trim(),
-            MobileNo = mobile,
-            Email = request.Email.Trim(),
-            IdProofType = string.IsNullOrWhiteSpace(request.IdProofType) ? "AADHAAR" : request.IdProofType.Trim().ToUpperInvariant(),
-            PanMasked = piiProtection.MaskPan(panUpper),
-            AadhaarMasked = piiProtection.MaskAadhaar(aadhaarDigits),
-            AadhaarBlindIndex = aadhaarBlindIndex,
-            AadhaarEncrypted = piiProtection.EncryptString(aadhaarDigits),
-            PanBlindIndex = panBlindIndex,
-            PanEncrypted = piiProtection.EncryptString(panUpper),
-            Address = request.Address.Trim(),
-            VillageOrCity = request.VillageOrCity.Trim(),
-            District = request.District.Trim(),
-            TalukasCsv = request.TalukasCsv.Trim(),
-            BankName = request.BankName?.Trim(),
-            BankBranch = request.BankBranch?.Trim(),
-            AccountNumber = request.AccountNumber?.Trim(),
-            IfscCode = request.IfscCode?.Trim().ToUpperInvariant(),
-            UpiId = request.UpiId?.Trim(),
-            AadhaarDocumentKey = aadhaarDocKey,
-            PanDocumentKey = panDocKey,
-            RequestedCommissionRatePct = request.RequestedCommissionRatePct,
-            ApprovedNewGpRatePct = request.RequestedCommissionRatePct,
-            ApprovedRenewalRatePct = Math.Max(5m, request.RequestedCommissionRatePct - 5m),
-        };
+        (User user, FieldAgent agent, List<ProtectedAsset> assets) = await AgentRegistrationHelper.BuildAgentEntitiesAsync(
+            fullName: request.FullName,
+            mobileNo: mobile,
+            email: request.Email,
+            password: request.Password,
+            address: request.Address,
+            villageOrCity: request.VillageOrCity,
+            district: request.District,
+            talukasCsv: request.TalukasCsv,
+            idProofType: request.IdProofType,
+            aadhaarNumber: request.AadhaarNumber,
+            panNumber: request.PanNumber,
+            bankName: request.BankName,
+            bankBranch: request.BankBranch,
+            accountNumber: request.AccountNumber,
+            ifscCode: request.IfscCode,
+            upiId: request.UpiId,
+            requestedCommissionRatePct: request.RequestedCommissionRatePct,
+            approvedNewGpRatePct: request.RequestedCommissionRatePct,
+            approvedRenewalRatePct: Math.Max(5m, request.RequestedCommissionRatePct - 5m),
+            autoApprove: false,
+            approvedByUserId: null,
+            approvedAtUtc: null,
+            aadhaarDocument: request.AadhaarDocument,
+            panDocument: request.PanDocument,
+            agentRepository,
+            passwordHasher,
+            piiProtection,
+            cancellationToken).ConfigureAwait(false);
 
         await agentRepository.RegisterAgentAsync(user, agent, assets, cancellationToken).ConfigureAwait(false);
 
         await smsService.SendAsync(
             mobile,
-            $"Application {agentCode} submitted and is Pending Approval.",
+            $"Application {agent.AgentCode} submitted and is Pending Approval.",
             cancellationToken).ConfigureAwait(false);
 
         return new AgentRegistrationResultDto(
@@ -310,6 +247,9 @@ public sealed class UpdateAgentStatusCommandHandler(
         FieldAgent agent = await agentRepository.FindByIdAsync(request.AgentId, cancellationToken).ConfigureAwait(false)
             ?? throw new NotFoundException(nameof(FieldAgent), request.AgentId);
 
+        AgentKycStatus oldStatus = agent.KycStatus;
+        DateTimeOffset now = dateTimeProvider.UtcNow;
+
         agent.KycStatus = request.Status;
         agent.StatusReason = request.Reason?.Trim();
 
@@ -326,8 +266,29 @@ public sealed class UpdateAgentStatusCommandHandler(
         if (request.Status == AgentKycStatus.Approved)
         {
             agent.ApprovedByUserId = actorId;
-            agent.ApprovedAtUtc = dateTimeProvider.UtcNow;
+            agent.ApprovedAtUtc = now;
         }
+
+        await agentRepository.AddAuditLogAsync(
+            SubscriptionGstHelper.BuildPlatformAudit(
+                tenantId: null,
+                actorUserId: actorId,
+                actorRole: currentUserService.Role,
+                entityName: nameof(FieldAgent),
+                entityId: agent.Id.ToString("D"),
+                action: "AgentKycDecisionUpdated",
+                oldValues: new { KycStatus = oldStatus.ToString() },
+                newValues: new
+                {
+                    agent.AgentCode,
+                    KycStatus = agent.KycStatus.ToString(),
+                    agent.ApprovedNewGpRatePct,
+                    agent.ApprovedRenewalRatePct,
+                    agent.StatusReason,
+                },
+                utcNow: now,
+                ipAddress: currentUserService.IpAddress),
+            cancellationToken).ConfigureAwait(false);
 
         await agentRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -343,6 +304,136 @@ public sealed class UpdateAgentStatusCommandHandler(
             cancellationToken).ConfigureAwait(false);
 
         return agent.ToProfileDto();
+    }
+}
+
+internal static class AgentRegistrationHelper
+{
+    public static async Task<(User User, FieldAgent Agent, List<ProtectedAsset> Assets)> BuildAgentEntitiesAsync(
+        string fullName,
+        string mobileNo,
+        string email,
+        string password,
+        string address,
+        string villageOrCity,
+        string district,
+        string talukasCsv,
+        string idProofType,
+        string aadhaarNumber,
+        string panNumber,
+        string? bankName,
+        string? bankBranch,
+        string? accountNumber,
+        string? ifscCode,
+        string? upiId,
+        decimal requestedCommissionRatePct,
+        decimal approvedNewGpRatePct,
+        decimal approvedRenewalRatePct,
+        bool autoApprove,
+        Guid? approvedByUserId,
+        DateTimeOffset? approvedAtUtc,
+        KycFileUploadInput? aadhaarDocument,
+        KycFileUploadInput? panDocument,
+        IAgentRepository agentRepository,
+        IPasswordHasherService passwordHasher,
+        IPiiProtectionService piiProtection,
+        CancellationToken cancellationToken)
+    {
+        string mobile = mobileNo.Trim();
+        string aadhaarDigits = RegisterAgentCommandValidator.DigitsOnly(aadhaarNumber);
+        string panUpper = panNumber.Trim().ToUpperInvariant();
+
+        string aadhaarBlindIndex = piiProtection.ComputeBlindIndex($"AADHAAR:{aadhaarDigits}");
+        string panBlindIndex = piiProtection.ComputeBlindIndex($"PAN:{panUpper}");
+
+        if (await agentRepository.ExistsDuplicateAsync(mobile, aadhaarBlindIndex, panBlindIndex, cancellationToken).ConfigureAwait(false))
+        {
+            throw new DomainValidationException(new Dictionary<string, string[]>(StringComparer.Ordinal)
+            {
+                ["MobileNo"] = ["An agent with the same mobile number, Aadhaar, or PAN is already registered."],
+            });
+        }
+
+        User user = new()
+        {
+            Username = mobile,
+            Email = email.Trim(),
+            Phone = mobile,
+            FullNameEn = fullName.Trim(),
+            FullNameMr = fullName.Trim(),
+            PasswordHash = passwordHasher.HashPassword(password),
+            IsSuperAdmin = false,
+            IsActive = true,
+        };
+
+        string agentCode = $"AGT-MH-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
+        List<ProtectedAsset> assets = [];
+
+        string? aadhaarDocKey = AddDocAsset(aadhaarDocument, "aadhaar", user.Id, piiProtection, assets);
+        string? panDocKey = AddDocAsset(panDocument, "pan", user.Id, piiProtection, assets);
+
+        FieldAgent agent = new()
+        {
+            UserId = user.Id,
+            AgentCode = agentCode,
+            KycStatus = autoApprove ? AgentKycStatus.Approved : AgentKycStatus.PendingApproval,
+            StatusReason = autoApprove ? "Direct SuperAdmin activation" : null,
+            FullName = fullName.Trim(),
+            MobileNo = mobile,
+            Email = email.Trim(),
+            IdProofType = string.IsNullOrWhiteSpace(idProofType) ? "AADHAAR" : idProofType.Trim().ToUpperInvariant(),
+            PanMasked = piiProtection.MaskPan(panUpper),
+            AadhaarMasked = piiProtection.MaskAadhaar(aadhaarDigits),
+            AadhaarBlindIndex = aadhaarBlindIndex,
+            AadhaarEncrypted = piiProtection.EncryptString(aadhaarDigits),
+            PanBlindIndex = panBlindIndex,
+            PanEncrypted = piiProtection.EncryptString(panUpper),
+            Address = address.Trim(),
+            VillageOrCity = villageOrCity.Trim(),
+            District = district.Trim(),
+            TalukasCsv = talukasCsv.Trim(),
+            BankName = bankName?.Trim(),
+            BankBranch = bankBranch?.Trim(),
+            AccountNumber = accountNumber?.Trim(),
+            IfscCode = ifscCode?.Trim().ToUpperInvariant(),
+            UpiId = upiId?.Trim(),
+            AadhaarDocumentKey = aadhaarDocKey,
+            PanDocumentKey = panDocKey,
+            RequestedCommissionRatePct = requestedCommissionRatePct,
+            ApprovedNewGpRatePct = approvedNewGpRatePct,
+            ApprovedRenewalRatePct = approvedRenewalRatePct,
+            ApprovedByUserId = autoApprove ? approvedByUserId : null,
+            ApprovedAtUtc = autoApprove ? approvedAtUtc : null,
+        };
+
+        return (user, agent, assets);
+    }
+
+    private static string? AddDocAsset(
+        KycFileUploadInput? file,
+        string suffix,
+        Guid ownerUserId,
+        IPiiProtectionService piiProtection,
+        List<ProtectedAsset> assets)
+    {
+        if (file is null)
+        {
+            return null;
+        }
+
+        string key = $"kyc-{ownerUserId:N}-{suffix}-{Guid.NewGuid():N}";
+        assets.Add(new ProtectedAsset
+        {
+            AssetKey = key,
+            TenantId = null,
+            OwnerUserId = ownerUserId,
+            Category = "KYC_DOC",
+            FileName = Path.GetFileName(file.FileName),
+            ContentType = file.ContentType.Trim().ToLowerInvariant(),
+            EncryptedContent = piiProtection.EncryptBytes(file.Content),
+            SizeBytes = file.Content.LongLength,
+        });
+        return key;
     }
 }
 
@@ -366,6 +457,16 @@ internal static class AgentMappingExtensions
             agent.ApprovedNewGpRatePct,
             agent.ApprovedRenewalRatePct,
             agent.AadhaarDocumentKey,
-            agent.PanDocumentKey);
+            agent.PanDocumentKey,
+            agent.Address,
+            agent.VillageOrCity,
+            agent.State,
+            agent.BankName,
+            agent.BankBranch,
+            agent.AccountNumber,
+            agent.IfscCode,
+            agent.UpiId,
+            agent.CreatedAtUtc,
+            agent.ApprovedAtUtc);
 }
 

@@ -1,4 +1,5 @@
 using GPMH.Application.Common.Interfaces;
+using GPMH.Application.DTOs.Agents;
 using GPMH.Application.DTOs.Mutations;
 using GPMH.Application.DTOs.Namuna9;
 using GPMH.Application.DTOs.Namuna9Ka;
@@ -80,6 +81,15 @@ public sealed class QuestPdfStatutoryRenderer(IQrCodeGeneratorService qrCodeGene
 
         DevanagariFontRegistry.EnsureInitialized();
         SubscriptionGstInvoicePdfDocument document = new(model, qrCodeGenerator);
+        return document.GeneratePdf();
+    }
+
+    public byte[] RenderAgentPayoutVoucherPdf(AgentPayoutVoucherPdfModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        DevanagariFontRegistry.EnsureInitialized();
+        AgentPayoutVoucherPdfDocument document = new(model, qrCodeGenerator);
         return document.GeneratePdf();
     }
 }

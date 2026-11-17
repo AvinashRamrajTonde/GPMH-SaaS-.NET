@@ -31,7 +31,8 @@ public sealed record ProvisionTenantDirectCommand(
     string? PaymentReference = null,
     DateTimeOffset? PaymentDateUtc = null,
     int TotalWards = 5,
-    int? PopulationCensus = null) : IRequest<ProvisionedTenantResultDto>;
+    int? PopulationCensus = null,
+    string? ReferralCode = null) : IRequest<ProvisionedTenantResultDto>;
 
 public sealed class ProvisionTenantDirectCommandValidator : AbstractValidator<ProvisionTenantDirectCommand>
 {
@@ -72,6 +73,7 @@ public sealed class ProvisionTenantDirectCommandValidator : AbstractValidator<Pr
 public sealed class ProvisionTenantDirectCommandHandler(
     ISuperAdminProvisioningRepository repository,
     IPlatformBillingRepository billingRepository,
+    IOnboardingRepository onboardingRepository,
     IPasswordHasherService passwordHasher,
     ICurrentUserService currentUserService,
     IDateTimeProvider dateTimeProvider,
@@ -100,6 +102,18 @@ public sealed class ProvisionTenantDirectCommandHandler(
         DateTimeOffset now = dateTimeProvider.UtcNow;
         DateTimeOffset expiry = now.AddDays(request.DurationDays);
 
+        (Guid AgentId, string AgentCode)? refAgent = null;
+        if (!string.IsNullOrWhiteSpace(request.ReferralCode))
+        {
+            refAgent = await onboardingRepository
+                .FindApprovedAgentByCodeAsync(request.ReferralCode.Trim(), cancellationToken)
+                .ConfigureAwait(false)
+                ?? throw new DomainValidationException(new Dictionary<string, string[]>(StringComparer.Ordinal)
+                {
+                    [nameof(request.ReferralCode)] = [$"Referral code '{request.ReferralCode.Trim()}' is invalid or belongs to an unapproved agent."],
+                });
+        }
+
         Tenant tenant = new()
         {
             TenantCode = $"gp-{lgdCode}",
@@ -107,6 +121,8 @@ public sealed class ProvisionTenantDirectCommandHandler(
             NameEn = request.PanchayatNameEn.Trim(),
             NameMr = request.PanchayatNameMr.Trim(),
             SubscriptionExpiresAtUtc = expiry,
+            ReferredByAgentId = refAgent?.AgentId,
+            ReferralCodeUsed = refAgent?.AgentCode,
         };
         tenant.Activate(now);
 

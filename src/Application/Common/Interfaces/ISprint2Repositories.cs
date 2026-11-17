@@ -1,3 +1,4 @@
+using GPMH.Application.DTOs.Agents;
 using GPMH.Application.DTOs.Dashboard;
 using GPMH.Application.DTOs.SuperAdmin;
 using GPMH.Domain.Entities.Agents;
@@ -211,11 +212,75 @@ public interface IAgentRepository
 
     Task<FieldAgent?> FindByIdAsync(Guid agentId, CancellationToken cancellationToken);
 
+    Task<FieldAgent?> FindByAgentCodeAsync(string agentCode, CancellationToken cancellationToken);
+
     Task<User?> FindUserByLoginAsync(string loginIdentifier, CancellationToken cancellationToken);
 
     Task<User?> FindUserByIdAsync(Guid userId, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<FieldAgent>> ListAllAsync(CancellationToken cancellationToken);
+
+    Task<AgentDashboardDto> GetAgentDashboardAsync(Guid agentId, CancellationToken cancellationToken);
+
+    Task<AgentVillagesResponseDto> GetAgentVillagesAsync(Guid agentId, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<AgentCommissionItemDto>> ListAgentCommissionsAsync(
+        Guid agentId,
+        string? status,
+        string? search,
+        CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<AgentPayoutItemDto>> ListAgentPayoutsAsync(Guid agentId, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<SuperAdminAgentSummaryDto>> ListSuperAdminAgentDirectoryAsync(
+        string? district,
+        string? taluka,
+        string? status,
+        string? search,
+        CancellationToken cancellationToken);
+
+    Task<SuperAdminAgentSettlementsDto> GetSuperAdminSettlementsAsync(CancellationToken cancellationToken);
+
+    Task<decimal> GetAvailableRequestableCommissionAsync(Guid agentId, CancellationToken cancellationToken);
+
+    Task AddAgentPayoutAsync(AgentPayout payout, CancellationToken cancellationToken);
+
+    Task<AgentCommission?> TryAccrueCommissionForPaymentAsync(
+        Tenant tenant,
+        TenantSubscriptionPayment payment,
+        Guid actorUserId,
+        ApplicationRole? actorRole,
+        string? ipAddress,
+        DateTimeOffset utcNow,
+        CancellationToken cancellationToken);
+
+    Task<AgentPayoutItemDto> SettleAgentPayoutAsync(
+        Guid agentId,
+        decimal amount,
+        string paymentMode,
+        string utrReference,
+        DateOnly paymentDate,
+        Guid? fulfillRequestedPayoutId,
+        string? receiptAssetKey,
+        string? remarks,
+        Guid actorUserId,
+        ApplicationRole? actorRole,
+        string? ipAddress,
+        DateTimeOffset utcNow,
+        CancellationToken cancellationToken);
+
+    Task<AgentPayoutVoucherPdfModel?> BuildPayoutVoucherModelAsync(
+        Guid payoutId,
+        Guid? restrictToAgentId,
+        CancellationToken cancellationToken);
+
+    Task AddAuditLogAsync(AuditLog log, CancellationToken cancellationToken);
+
+    Task RevokeAllUserRefreshTokensAsync(
+        Guid userId,
+        string reason,
+        DateTimeOffset revokedAtUtc,
+        CancellationToken cancellationToken);
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }

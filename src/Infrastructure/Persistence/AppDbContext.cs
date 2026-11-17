@@ -44,6 +44,9 @@ public sealed class AppDbContext(
     public DbSet<AreaSlabTax> AreaSlabTaxes => Set<AreaSlabTax>();
     public DbSet<WaterTaxMaster> WaterTaxMasters => Set<WaterTaxMaster>();
     public DbSet<FieldAgent> FieldAgents => Set<FieldAgent>();
+    public DbSet<AgentCommission> AgentCommissions => Set<AgentCommission>();
+    public DbSet<AgentPayout> AgentPayouts => Set<AgentPayout>();
+    public DbSet<VoucherCounter> VoucherCounters => Set<VoucherCounter>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -68,6 +71,7 @@ public sealed class AppDbContext(
         ConfigureNamuna8Assessments(modelBuilder);
         ConfigureTaxationMasters(modelBuilder);
         ConfigureFieldAgent(modelBuilder);
+        ConfigureAgentCommissionsAndPayouts(modelBuilder);
         ConfigureAuditLog(modelBuilder);
     }
 
@@ -756,6 +760,57 @@ public sealed class AppDbContext(
             entity.HasIndex(e => e.MobileNo).IsUnique();
             entity.HasIndex(e => e.AadhaarBlindIndex).IsUnique();
             entity.HasIndex(e => e.PanBlindIndex).IsUnique();
+        });
+    }
+
+    private static void ConfigureAgentCommissionsAndPayouts(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AgentCommission>(entity =>
+        {
+            entity.ToTable("agent_commissions");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.CommissionType).HasMaxLength(24).IsRequired();
+            entity.Property(e => e.CollectedAmount).HasPrecision(14, 2);
+            entity.Property(e => e.RatePctSnapshot).HasPrecision(5, 2);
+            entity.Property(e => e.CommissionAmount).HasPrecision(14, 2);
+            entity.Property(e => e.SettledAmount).HasPrecision(14, 2);
+            entity.Property(e => e.Status).HasMaxLength(24).IsRequired();
+            entity.Property(e => e.Notes).HasMaxLength(500);
+            entity.HasIndex(e => new { e.AgentId, e.Status, e.CreatedAtUtc });
+            entity.HasIndex(e => new { e.TenantId, e.CreatedAtUtc });
+            entity.HasIndex(e => e.SubscriptionPaymentId);
+            entity.HasOne<FieldAgent>()
+                .WithMany()
+                .HasForeignKey(e => e.AgentId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<AgentPayout>(entity =>
+        {
+            entity.ToTable("agent_payouts");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.VoucherNo).HasMaxLength(40).IsRequired();
+            entity.Property(e => e.FinancialYear).HasMaxLength(16).IsRequired();
+            entity.Property(e => e.PayoutAmount).HasPrecision(14, 2);
+            entity.Property(e => e.PaymentMode).HasMaxLength(32).IsRequired();
+            entity.Property(e => e.UtrReference).HasMaxLength(120).IsRequired();
+            entity.Property(e => e.Status).HasMaxLength(24).IsRequired();
+            entity.Property(e => e.ReceiptAssetKey).HasMaxLength(128);
+            entity.Property(e => e.Remarks).HasMaxLength(500);
+            entity.HasIndex(e => e.VoucherNo).IsUnique();
+            entity.HasIndex(e => new { e.AgentId, e.Status, e.CreatedAtUtc });
+            entity.HasIndex(e => e.UtrReference);
+            entity.HasOne<FieldAgent>()
+                .WithMany()
+                .HasForeignKey(e => e.AgentId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<VoucherCounter>(entity =>
+        {
+            entity.ToTable("voucher_counters");
+            entity.HasKey(e => new { e.TenantId, e.FinancialYear });
+            entity.Property(e => e.FinancialYear).HasMaxLength(16).IsRequired();
         });
     }
 }

@@ -1,7 +1,10 @@
 using GPMH.Application.DTOs.Agents;
 using GPMH.Application.DTOs.Auth;
+using GPMH.Application.DTOs.Onboarding;
+using GPMH.Application.DTOs.Printing;
 using GPMH.Application.Features.Agents.Commands;
 using GPMH.Application.Features.Agents.Queries;
+using GPMH.Application.Features.Onboarding.Commands;
 using GPMH.WebAPI.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -67,6 +70,20 @@ public sealed class AgentsController(ISender sender) : ControllerBase
         return AuthCookieHelper.BuildAuthResponse(this, bundle, AuthCookieHelper.IsMobileClient(Request, request.ClientType));
     }
 
+    [AllowAnonymous]
+    [HttpGet("validate-referral/{agentCode}")]
+    [ProducesResponseType(typeof(ReferralValidationDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ReferralValidationDto>> ValidateReferral(
+        string agentCode,
+        CancellationToken cancellationToken)
+    {
+        ReferralValidationDto result = await sender
+            .Send(new ValidateAgentReferralQuery(agentCode), cancellationToken)
+            .ConfigureAwait(false);
+
+        return Ok(result);
+    }
+
     [Authorize(Policy = AuthPolicies.RequireFieldAgent)]
     [HttpGet("me")]
     [ProducesResponseType(typeof(AgentProfileDto), StatusCodes.Status200OK)]
@@ -79,6 +96,123 @@ public sealed class AgentsController(ISender sender) : ControllerBase
             .ConfigureAwait(false);
 
         return Ok(profile);
+    }
+
+    [Authorize(Policy = AuthPolicies.RequireFieldAgent)]
+    [HttpGet("dashboard")]
+    [ProducesResponseType(typeof(AgentDashboardDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<AgentDashboardDto>> GetDashboard(CancellationToken cancellationToken)
+    {
+        AgentDashboardDto dashboard = await sender
+            .Send(new GetAgentDashboardQuery(), cancellationToken)
+            .ConfigureAwait(false);
+
+        return Ok(dashboard);
+    }
+
+    [Authorize(Policy = AuthPolicies.RequireFieldAgent)]
+    [HttpGet("villages")]
+    [ProducesResponseType(typeof(AgentVillagesResponseDto), StatusCodes.Status200OK)]
+    public async Task<ActionResult<AgentVillagesResponseDto>> GetVillages(CancellationToken cancellationToken)
+    {
+        AgentVillagesResponseDto villages = await sender
+            .Send(new GetAgentVillagesQuery(), cancellationToken)
+            .ConfigureAwait(false);
+
+        return Ok(villages);
+    }
+
+    [Authorize(Policy = AuthPolicies.RequireFieldAgent)]
+    [HttpGet("commissions")]
+    [ProducesResponseType(typeof(IReadOnlyList<AgentCommissionItemDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<AgentCommissionItemDto>>> ListCommissions(
+        [FromQuery] string? status = null,
+        [FromQuery] string? search = null,
+        CancellationToken cancellationToken = default)
+    {
+        IReadOnlyList<AgentCommissionItemDto> rows = await sender
+            .Send(new GetAgentCommissionsQuery(status, search), cancellationToken)
+            .ConfigureAwait(false);
+
+        return Ok(rows);
+    }
+
+    [Authorize(Policy = AuthPolicies.RequireFieldAgent)]
+    [HttpGet("payouts")]
+    [ProducesResponseType(typeof(IReadOnlyList<AgentPayoutItemDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<IReadOnlyList<AgentPayoutItemDto>>> ListPayouts(CancellationToken cancellationToken)
+    {
+        IReadOnlyList<AgentPayoutItemDto> rows = await sender
+            .Send(new GetAgentPayoutsQuery(), cancellationToken)
+            .ConfigureAwait(false);
+
+        return Ok(rows);
+    }
+
+    [Authorize(Policy = AuthPolicies.RequireFieldAgent)]
+    [HttpPost("payouts/request")]
+    [ProducesResponseType(typeof(AgentPayoutItemDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<AgentPayoutItemDto>> RequestPayout(
+        [FromBody] RequestAgentPayoutCommand command,
+        CancellationToken cancellationToken)
+    {
+        AgentPayoutItemDto created = await sender.Send(command, cancellationToken).ConfigureAwait(false);
+        return StatusCode(StatusCodes.Status201Created, created);
+    }
+
+    [Authorize(Policy = AuthPolicies.RequireFieldAgent)]
+    [HttpPut("profile")]
+    [ProducesResponseType(typeof(AgentProfileDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<AgentProfileDto>> UpdateProfile(
+        [FromBody] UpdateAgentProfileCommand command,
+        CancellationToken cancellationToken)
+    {
+        AgentProfileDto updated = await sender.Send(command, cancellationToken).ConfigureAwait(false);
+        return Ok(updated);
+    }
+
+    [Authorize(Policy = AuthPolicies.RequireFieldAgent)]
+    [HttpPost("change-password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ChangePassword(
+        [FromBody] ChangeAgentPasswordCommand command,
+        CancellationToken cancellationToken)
+    {
+        await sender.Send(command, cancellationToken).ConfigureAwait(false);
+        return NoContent();
+    }
+
+    [Authorize(Policy = AuthPolicies.RequireFieldAgent)]
+    [HttpPost("register-gp")]
+    [ProducesResponseType(typeof(OnboardingStatusDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<OnboardingStatusDto>> RegisterGp(
+        [FromBody] RegisterAgentGpCommand command,
+        CancellationToken cancellationToken)
+    {
+        OnboardingStatusDto created = await sender.Send(command, cancellationToken).ConfigureAwait(false);
+        return StatusCode(StatusCodes.Status201Created, created);
+    }
+
+    [Authorize(Policy = AuthPolicies.RequireFieldAgent)]
+    [HttpGet("payouts/{id:guid}/voucher.pdf")]
+    [Produces("application/pdf")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> DownloadPayoutVoucherPdf(Guid id, CancellationToken cancellationToken)
+    {
+        GeneratedPdfFileDto file = await sender
+            .Send(new GetAgentPayoutVoucherPdfQuery(id, RestrictToCurrentAgent: true), cancellationToken)
+            .ConfigureAwait(false);
+
+        Response.Headers.ContentDisposition = $"inline; filename=\"{file.FileName}\"";
+        return File(file.Content, "application/pdf");
     }
 
     private static async Task<KycFileUploadInput?> ReadFormFileAsync(IFormFile? file, CancellationToken cancellationToken)

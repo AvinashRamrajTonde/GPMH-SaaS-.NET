@@ -13,7 +13,8 @@ public sealed class SuperAdminProvisioningRepository(
     AppDbContext dbContext,
     ITenantContext tenantContext,
     IDefaultFormulaSeeder formulaSeeder,
-    IDateTimeProvider dateTimeProvider)
+    IDateTimeProvider dateTimeProvider,
+    IAgentRepository agentRepository)
     : ISuperAdminProvisioningRepository
 {
     public Task<IReadOnlyList<SuperAdminTenantSummaryDto>> ListTenantsAsync(CancellationToken cancellationToken) =>
@@ -802,6 +803,18 @@ public sealed class SuperAdminProvisioningRepository(
             await dbContext.TenantSubscriptionPayments.AddAsync(payment, cancellationToken).ConfigureAwait(false);
 
             await formulaSeeder.SeedDefaultsForTenantAsync(tenant.Id, cancellationToken).ConfigureAwait(false);
+
+            if (tenant.ReferredByAgentId.HasValue && payment.Amount > 0m)
+            {
+                await agentRepository.TryAccrueCommissionForPaymentAsync(
+                    tenant,
+                    payment,
+                    payment.RecordedByUserId,
+                    ApplicationRole.SuperAdmin,
+                    ipAddress: null,
+                    utcNow: payment.PaymentDateUtc,
+                    cancellationToken).ConfigureAwait(false);
+            }
 
             await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             await tx.CommitAsync(cancellationToken).ConfigureAwait(false);

@@ -1,11 +1,7 @@
-using GPMH.Application.DTOs.Agents;
 using GPMH.Application.DTOs.Printing;
 using GPMH.Application.DTOs.SuperAdmin;
-using GPMH.Application.Features.Agents.Commands;
-using GPMH.Application.Features.Agents.Queries;
 using GPMH.Application.Features.SuperAdmin.Commands;
 using GPMH.Application.Features.SuperAdmin.Queries;
-using GPMH.Domain.Enums;
 using GPMH.WebAPI.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -324,46 +320,7 @@ public sealed class SuperAdminTenantsController(ISender sender) : ControllerBase
         PlatformPaymentAccountDto updated = await sender.Send(command, cancellationToken).ConfigureAwait(false);
         return Ok(updated);
     }
-
-    [HttpGet("agents")]
-    [Authorize(Policy = AuthPolicies.RequireSuperAdminOrSupportRead)]
-    [ProducesResponseType(typeof(IReadOnlyList<AgentProfileDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IReadOnlyList<AgentProfileDto>>> ListAgents(CancellationToken cancellationToken)
-    {
-        IReadOnlyList<AgentProfileDto> agents = await sender
-            .Send(new GetSuperAdminAgentsQuery(), cancellationToken)
-            .ConfigureAwait(false);
-
-        return Ok(agents);
-    }
-
-    [HttpPost("agents/{agentId:guid}/status")]
-    [Authorize(Policy = AuthPolicies.RequireSuperAdmin)]
-    [ProducesResponseType(typeof(AgentProfileDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<AgentProfileDto>> UpdateAgentStatus(
-        Guid agentId,
-        [FromBody] UpdateAgentStatusRequest request,
-        CancellationToken cancellationToken)
-    {
-        AgentProfileDto updated = await sender.Send(
-            new UpdateAgentStatusCommand(
-                agentId,
-                request.Status,
-                request.ApprovedNewGpRatePct,
-                request.ApprovedRenewalRatePct,
-                request.Reason),
-            cancellationToken).ConfigureAwait(false);
-
-        return Ok(updated);
-    }
 }
-
-public sealed record UpdateAgentStatusRequest(
-    AgentKycStatus Status,
-    decimal? ApprovedNewGpRatePct = null,
-    decimal? ApprovedRenewalRatePct = null,
-    string? Reason = null);
 
 public sealed record UpdateTenantStatusRequest(
     string Action,

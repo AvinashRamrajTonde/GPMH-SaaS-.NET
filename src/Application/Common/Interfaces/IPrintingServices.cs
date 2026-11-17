@@ -1,3 +1,4 @@
+using GPMH.Application.DTOs.Agents;
 using GPMH.Application.DTOs.Mutations;
 using GPMH.Application.DTOs.Namuna9;
 using GPMH.Application.DTOs.Namuna9Ka;
@@ -40,6 +41,8 @@ public interface IStatutoryPdfRenderer
     byte[] RenderNamuna10DualReceiptPdf(Namuna10DualReceiptPdfModel model);
 
     byte[] RenderSubscriptionGstInvoicePdf(GstSubscriptionInvoicePdfModel model);
+
+    byte[] RenderAgentPayoutVoucherPdf(AgentPayoutVoucherPdfModel model);
 }
 
 public interface IPrintDataRepository

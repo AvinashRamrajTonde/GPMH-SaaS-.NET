@@ -557,6 +557,7 @@ public sealed class ApproveTenantPaymentCommandValidator : AbstractValidator<App
 public sealed class ApproveTenantPaymentCommandHandler(
     ISuperAdminProvisioningRepository repository,
     IPlatformBillingRepository billingRepository,
+    IAgentRepository agentRepository,
     ICurrentUserService currentUserService,
     IDateTimeProvider dateTimeProvider)
     : IRequestHandler<ApproveTenantPaymentCommand, TenantPaymentSubmissionDto>
@@ -643,6 +644,14 @@ public sealed class ApproveTenantPaymentCommandHandler(
             submission.UpdatedAtUtc = now;
 
             await repository.AddSubscriptionPaymentAsync(payment, ct).ConfigureAwait(false);
+            await agentRepository.TryAccrueCommissionForPaymentAsync(
+                tenant,
+                payment,
+                actorUserId,
+                currentUserService.Role,
+                currentUserService.IpAddress,
+                now,
+                ct).ConfigureAwait(false);
             await repository.AddAuditLogAsync(
                 SubscriptionGstHelper.BuildPlatformAudit(
                     tenantId: tenant.Id,
