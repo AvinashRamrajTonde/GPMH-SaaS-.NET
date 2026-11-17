@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState, type PropsWithChildren } from 'react';
 import { setClientSessionContext } from '../services/apiClient';
 import { sprint2Api, type AuthenticatedUser, type AuthResponse } from '../services/sprint2Api';
-import { AuthContext } from './useAuth';
+import { superAdminApi, type SupportImpersonationResult } from '../services/superAdminApi';
+import { AuthContext, type SupportImpersonationSession } from './useAuth';
 
 const SESSION_HINT_KEY = 'gpmh_has_session';
 
@@ -30,8 +31,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [user, setUser] = useState<AuthenticatedUser | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isBootstrapping, setIsBootstrapping] = useState(() => hasSessionHint());
+  const [impersonationSession, setImpersonationSession] =
+    useState<SupportImpersonationSession | null>(null);
 
   const applySession = useCallback((auth: AuthResponse) => {
+    setImpersonationSession(null);
     setSessionHint(true);
     setAccessToken(auth.accessToken);
     setUser(auth.user);
@@ -89,28 +93,94 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const switchTenant = useCallback(
     async (tenantId: string) => {
+      if (impersonationSession) return;
       const auth = await sprint2Api.refresh(tenantId);
       applySession(auth);
     },
-    [applySession],
+    [applySession, impersonationSession],
   );
 
+  const startSupportImpersonation = useCallback(
+    (result: SupportImpersonationResult) => {
+      if (!accessToken || !user) return;
+      const originalToken = impersonationSession?.originalToken ?? accessToken;
+      const originalUser = impersonationSession?.originalUser ?? user;
+      setImpersonationSession({
+        originalToken,
+        originalUser,
+        targetTenantId: result.targetTenantId,
+        targetTenantNameEn: result.targetTenantNameEn,
+        targetTenantNameMr: result.targetTenantNameMr,
+        targetLgdCode: result.targetLgdCode,
+        reason: result.reason,
+        expiresAtUtc: result.expiresAtUtc,
+      });
+      setAccessToken(result.accessToken);
+      setUser({
+        userId: originalUser.userId,
+        username: originalUser.username,
+        fullNameEn: originalUser.fullNameEn,
+        fullNameMr: originalUser.fullNameMr,
+        role: 'Auditor',
+        activeTenantId: result.targetTenantId,
+        memberships: [{ tenantId: result.targetTenantId, role: 'Auditor', isDefault: true }],
+      });
+      setClientSessionContext(result.targetTenantId, result.accessToken);
+    },
+    [accessToken, user, impersonationSession],
+  );
+
+  const exitSupportImpersonation = useCallback(async () => {
+    const current = impersonationSession;
+    if (!current) return;
+    try {
+      await superAdminApi.exitImpersonation(current.targetTenantId);
+    } catch {
+      // Token may have expired on server; still restore the SuperAdmin / Support_Admin session.
+    } finally {
+      setImpersonationSession(null);
+      setAccessToken(current.originalToken);
+      setUser(current.originalUser);
+      setClientSessionContext(current.originalUser.activeTenantId, current.originalToken);
+    }
+  }, [impersonationSession]);
+
   const logout = useCallback(async () => {
+    if (impersonationSession) {
+      try {
+        await superAdminApi.exitImpersonation(impersonationSession.targetTenantId);
+      } catch {
+        // Best-effort exit log
+      }
+    }
     try {
       await sprint2Api.logout();
     } catch {
       // Clear local session state even if network logout fails
     } finally {
+      setImpersonationSession(null);
       setSessionHint(false);
       setAccessToken(null);
       setUser(null);
       setClientSessionContext(null, null);
     }
-  }, []);
+  }, [impersonationSession]);
 
   return (
     <AuthContext.Provider
-      value={{ user, accessToken, isBootstrapping, login, loginAgent, switchTenant, logout }}
+      value={{
+        user,
+        accessToken,
+        isBootstrapping,
+        impersonationSession,
+        isImpersonating: impersonationSession !== null,
+        login,
+        loginAgent,
+        switchTenant,
+        logout,
+        startSupportImpersonation,
+        exitSupportImpersonation,
+      }}
     >
       {children}
     </AuthContext.Provider>

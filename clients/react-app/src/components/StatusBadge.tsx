@@ -24,9 +24,13 @@ export function RoleBadge({
         ? dark
           ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
           : 'bg-teal-100 text-teal-900 border-teal-300'
-        : dark
-          ? 'bg-slate-800 text-slate-200 border-slate-700'
-          : 'bg-brand-100 text-brand-900 border-brand-200';
+        : normalized === 'Support_Admin'
+          ? dark
+            ? 'bg-sky-500/20 text-sky-300 border-sky-500/40'
+            : 'bg-sky-100 text-sky-900 border-sky-300'
+          : dark
+            ? 'bg-slate-800 text-slate-200 border-slate-700'
+            : 'bg-brand-100 text-brand-900 border-brand-200';
 
   return (
     <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-bold ${base}`}>

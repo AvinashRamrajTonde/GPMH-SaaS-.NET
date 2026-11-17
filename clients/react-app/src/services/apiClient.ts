@@ -10,6 +10,8 @@ export interface ProblemDetails {
   kycStatus?: string;
   agentCode?: string;
   reason?: string;
+  errorCode?: string;
+  subscriptionStatus?: string;
   helplinePhone?: string;
   helplineEmail?: string;
 }
@@ -107,10 +109,11 @@ export async function apiFetchBlobUrl(relativePath: string): Promise<string> {
 export async function apiDownloadFile(
   relativePath: string,
   fallbackFilename: string,
+  acceptHeader = 'application/pdf, application/json',
 ): Promise<{ blob: Blob; fileName: string }> {
   const cleanPath = relativePath.replace(/^\/+/, '');
   const headers = buildAuthHeaders();
-  headers.set('Accept', 'application/pdf, application/json');
+  headers.set('Accept', acceptHeader);
 
   const response = await fetch(`${API_BASE_URL}${cleanPath}`, {
     headers,

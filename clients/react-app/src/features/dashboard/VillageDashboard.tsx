@@ -8,6 +8,8 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  Clock,
+  CreditCard,
   Droplets,
   FilePlus2,
   FileSpreadsheet,
@@ -26,7 +28,8 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import { ApiProblemError } from '../../services/apiClient';
 import { sprint2Api, type TaxPreviewRequest } from '../../services/sprint2Api';
-import { formatDateTime, formatInr } from '../../utils/formatters';
+import { formatDateOnly, formatDateTime, formatInr } from '../../utils/formatters';
+import { SubscriptionRenewalModal } from './SubscriptionRenewalModal';
 
 interface ConstructionPreset {
   code: string;
@@ -89,6 +92,7 @@ export function VillageDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [checklistExpanded, setChecklistExpanded] = useState(true);
+  const [showRenewalModal, setShowRenewalModal] = useState(false);
 
   // Authoritative Server Capital Value Simulator state
   const [constructionCode, setConstructionCode] = useState('HUT_MUD');
@@ -286,6 +290,14 @@ export function VillageDashboard() {
                   <span>
                     {t('dashboard.ayBadge')} {summary.activeAssessmentYear}
                   </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowRenewalModal(true)}
+                    className="ml-1 inline-flex items-center gap-1 rounded-md border border-white/25 bg-white/10 px-2 py-0.5 text-[11px] font-bold text-white hover:bg-white/20 transition"
+                  >
+                    <CreditCard className="h-3 w-3" />
+                    <span>{t('subscription.viewStatusBtn')}</span>
+                  </button>
                 </span>
               ) : (
                 t('dashboard.lead')
@@ -409,6 +421,65 @@ export function VillageDashboard() {
           </div>
         </div>
       )}
+
+      {/* GP Subscription Expiry / Renewal Alert Banner */}
+      {summary &&
+        (summary.showExpiryWarning30Days ||
+          summary.subscriptionStatus === 'Expired' ||
+          summary.subscriptionStatus === 'Suspended' ||
+          summary.subscriptionStatus === 'PendingApproval') && (
+          <section
+            className={`flex flex-wrap items-center justify-between gap-4 rounded-2xl border p-4 shadow-xs ${
+              summary.subscriptionStatus === 'Expired' || summary.subscriptionStatus === 'Suspended'
+                ? 'border-rose-300 bg-rose-50 text-rose-950'
+                : 'border-amber-300 bg-amber-50 text-amber-950'
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                  summary.subscriptionStatus === 'Expired' || summary.subscriptionStatus === 'Suspended'
+                    ? 'bg-rose-600 text-white'
+                    : 'bg-amber-500 text-slate-950'
+                }`}
+              >
+                <Clock className="h-5 w-5" />
+              </div>
+              <div className="space-y-0.5 text-xs">
+                <h2 className="text-sm font-extrabold">
+                  {summary.subscriptionStatus === 'PendingApproval'
+                    ? t('subscription.pendingBannerTitle')
+                    : summary.subscriptionStatus === 'Expired' || summary.subscriptionStatus === 'Suspended'
+                      ? t('subscription.expiredBannerTitle', {
+                          status: t(`tenantStatus.${summary.subscriptionStatus}`),
+                        })
+                      : t('subscription.warningBannerTitle', {
+                          days: Math.max(0, summary.daysUntilExpiry ?? 0),
+                        })}
+                </h2>
+                <p className="text-[11px] opacity-90">
+                  {t('subscription.bannerSubtitle', {
+                    date: formatDateOnly(summary.subscriptionExpiresAtUtc, i18n.language),
+                    fee: formatInr(summary.annualRenewalFee ?? 6000),
+                  })}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowRenewalModal(true)}
+              className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-extrabold shadow-xs transition ${
+                summary.subscriptionStatus === 'Expired' || summary.subscriptionStatus === 'Suspended'
+                  ? 'bg-rose-700 text-white hover:bg-rose-800'
+                  : 'bg-amber-600 text-white hover:bg-amber-700'
+              }`}
+            >
+              <CreditCard className="h-4 w-4" />
+              <span>{t('subscription.renewNowBtn')}</span>
+            </button>
+          </section>
+        )}
 
       {/* System Setup Checklist Banner (Interactive & Collapsible) */}
       {summary && (
@@ -783,6 +854,10 @@ export function VillageDashboard() {
           </div>
         </div>
       </section>
+
+      {showRenewalModal && (
+        <SubscriptionRenewalModal onClose={() => setShowRenewalModal(false)} />
+      )}
     </div>
   );
 }
