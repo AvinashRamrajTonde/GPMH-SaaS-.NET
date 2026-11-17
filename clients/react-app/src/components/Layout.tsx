@@ -1,8 +1,10 @@
+import { useQueryClient } from '@tanstack/react-query';
 import {
   Building2,
   ClipboardCheck,
   ClipboardList,
   Crown,
+  Eye,
   FileSpreadsheet,
   GitBranch,
   History,
@@ -24,8 +26,8 @@ import {
 } from 'lucide-react';
 import { useEffect, useState, type PropsWithChildren } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, NavLink, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/useAuth';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth, type SupportImpersonationSession } from '../context/useAuth';
 import { setAppLanguage, type SupportedLocale } from '../i18n';
 import {
   applyFontSize,
@@ -46,15 +48,115 @@ const FONT_OPTIONS: { size: FontSizeOption; label: string; ariaKey: string }[] =
   { size: 18, label: 'A+', ariaKey: 'accessibility.fontLarger' },
 ];
 
+function SupportImpersonationBanner({
+  session,
+  onExit,
+}: {
+  session: SupportImpersonationSession;
+  onExit: () => Promise<void>;
+}) {
+  const { t, i18n } = useTranslation();
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  const [exiting, setExiting] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setNowMs(Date.now());
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const expiresMs = Date.parse(session.expiresAtUtc);
+  const remainingSec = Number.isNaN(expiresMs)
+    ? 0
+    : Math.max(0, Math.floor((expiresMs - nowMs) / 1000));
+  const mins = Math.floor(remainingSec / 60);
+  const secs = remainingSec % 60;
+  const countdown = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+  async function handleExit() {
+    setExiting(true);
+    try {
+      await onExit();
+    } finally {
+      setExiting(false);
+    }
+  }
+
+  return (
+    <div
+      role="status"
+      className="sticky top-0 z-50 border-b border-amber-500/60 bg-gradient-to-r from-amber-950 via-rose-950 to-amber-950 px-4 py-2 text-xs text-amber-50 shadow-lg no-print"
+    >
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-300">
+            <Eye className="h-3.5 w-3.5" />
+            {t('impersonation.bannerBadge')}
+          </span>
+          <span className="font-bold text-white">
+            {t('impersonation.targetVillageLabel')}{' '}
+            {i18n.language === 'mr' ? session.targetTenantNameMr : session.targetTenantNameEn}
+          </span>
+          <span className="mono rounded bg-white/10 px-2 py-0.5 text-[11px] font-bold text-amber-200">
+            {t('impersonation.lgdLabel', { code: session.targetLgdCode })}
+          </span>
+          <span
+            className={`mono rounded px-2 py-0.5 text-[11px] font-extrabold ${
+              remainingSec <= 60 ? 'bg-rose-600 text-white' : 'bg-amber-500 text-slate-950'
+            }`}
+          >
+            {remainingSec > 0
+              ? `${t('impersonation.remainingLabel')} ${countdown}`
+              : t('impersonation.expiredLabel')}
+          </span>
+          <span className="hidden xl:inline text-[11px] text-amber-100/80">
+            {t('impersonation.reasonLabel')} {session.reason} · {t('impersonation.writesBlockedHint')}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          disabled={exiting}
+          onClick={() => void handleExit()}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-amber-400 px-3 py-1 text-[11px] font-extrabold text-slate-950 hover:bg-amber-300 disabled:opacity-60 transition"
+        >
+          <LogOut className="h-3.5 w-3.5" />
+          <span>{exiting ? t('impersonation.exitingBtn') : t('impersonation.exitBtn')}</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function Layout({ children }: PropsWithChildren) {
   const { t, i18n } = useTranslation();
-  const { user, switchTenant, logout } = useAuth();
+  const {
+    user,
+    impersonationSession,
+    isImpersonating,
+    switchTenant,
+    logout,
+    exitSupportImpersonation,
+  } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [fontSize, setFontSize] = useState<FontSizeOption>(() => getSavedFontSize());
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [switchingTenant, setSwitchingTenant] = useState(false);
+
+  const isHqRole = !isImpersonating && (user?.role === 'SuperAdmin' || user?.role === 'Support_Admin');
+  const isAgentRole = !isImpersonating && user?.role === 'Field_Agent';
+  const showGpMenus = !user || isImpersonating || (!isHqRole && !isAgentRole);
+
+  async function handleExitImpersonation() {
+    await exitSupportImpersonation();
+    queryClient.clear();
+    void navigate('/superadmin');
+  }
 
   useEffect(() => {
     applyFontSize(fontSize);
@@ -193,6 +295,12 @@ export function Layout({ children }: PropsWithChildren) {
   if (isDarkConsole) {
     return (
       <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+        {impersonationSession && (
+          <SupportImpersonationBanner
+            session={impersonationSession}
+            onExit={handleExitImpersonation}
+          />
+        )}
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-amber-500 focus:px-3 focus:py-2 focus:text-xs focus:font-bold focus:text-slate-950"
@@ -238,12 +346,14 @@ export function Layout({ children }: PropsWithChildren) {
 
             <div className="flex flex-wrap items-center gap-2">
               <nav className="flex flex-wrap items-center gap-1.5 text-xs">
-                <Link
-                  to="/dashboard"
-                  className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 font-semibold text-slate-200 hover:bg-slate-700 transition"
-                >
-                  {t('nav.dashboard')}
-                </Link>
+                {!isAgentRole && (
+                  <Link
+                    to="/dashboard"
+                    className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 font-semibold text-slate-200 hover:bg-slate-700 transition"
+                  >
+                    {t('nav.dashboard')}
+                  </Link>
+                )}
                 {!isDarkSuperAdmin && (
                   <Link
                     to="/agent/login"
@@ -261,6 +371,22 @@ export function Layout({ children }: PropsWithChildren) {
                   </Link>
                 )}
                 {isDarkSuperAdmin && (
+                  <Link
+                    to="/superadmin"
+                    className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 font-semibold text-slate-200 hover:bg-slate-700 transition"
+                  >
+                    {t('nav.superadmin')}
+                  </Link>
+                )}
+                {isDarkSuperAdmin && (
+                  <Link
+                    to="/superadmin/agents"
+                    className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 font-semibold text-amber-300 hover:bg-amber-500/20 transition"
+                  >
+                    {t('nav.superadminAgents')}
+                  </Link>
+                )}
+                {isDarkSuperAdmin && user?.role === 'SuperAdmin' && (
                   <Link
                     to="/onboarding"
                     className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 font-semibold text-slate-200 hover:bg-slate-700 transition"
@@ -327,7 +453,14 @@ export function Layout({ children }: PropsWithChildren) {
     }`;
 
   return (
-    <div className="min-h-screen flex bg-surface text-ink">
+    <div className="min-h-screen flex flex-col bg-surface text-ink">
+      {impersonationSession && (
+        <SupportImpersonationBanner
+          session={impersonationSession}
+          onExit={handleExitImpersonation}
+        />
+      )}
+      <div className="flex min-h-0 flex-1">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-brand-700 focus:px-3 focus:py-2 focus:text-xs focus:font-bold focus:text-white"
@@ -375,6 +508,8 @@ export function Layout({ children }: PropsWithChildren) {
 
           <nav className="flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-2.5 py-4" aria-label="Primary Sidebar">
             {/* Core Group */}
+            {showGpMenus && (
+            <>
             <div className="space-y-1">
               {!sidebarCollapsed && (
                 <p className="px-2.5 text-[10.5px] font-bold uppercase tracking-wider text-slate-400">
@@ -395,19 +530,21 @@ export function Layout({ children }: PropsWithChildren) {
                 )}
               </NavLink>
 
-              <NavLink to="/onboarding" className={navLinkClass} onClick={() => setMobileOpen(false)}>
-                {({ isActive }) => (
-                  <>
-                    {isActive && (
-                      <span className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-brand-700" />
-                    )}
-                    <span className={iconBoxClass(isActive)}>
-                      <ClipboardCheck className="h-[18px] w-[18px]" />
-                    </span>
-                    {!sidebarCollapsed && <span className="truncate">{t('nav.onboarding')}</span>}
-                  </>
-                )}
-              </NavLink>
+              {!isImpersonating && (
+                <NavLink to="/onboarding" className={navLinkClass} onClick={() => setMobileOpen(false)}>
+                  {({ isActive }) => (
+                    <>
+                      {isActive && (
+                        <span className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-brand-700" />
+                      )}
+                      <span className={iconBoxClass(isActive)}>
+                        <ClipboardCheck className="h-[18px] w-[18px]" />
+                      </span>
+                      {!sidebarCollapsed && <span className="truncate">{t('nav.onboarding')}</span>}
+                    </>
+                  )}
+                </NavLink>
+              )}
 
               <NavLink to="/properties" className={navLinkClass} onClick={() => setMobileOpen(false)}>
                 {({ isActive }) => (
@@ -502,17 +639,13 @@ export function Layout({ children }: PropsWithChildren) {
               <NavLink to="/namuna-10/collect" className={navLinkClass} onClick={() => setMobileOpen(false)}>
                 {({ isActive }) => (
                   <>
+                    {isActive && (
+                      <span className="absolute bottom-2 left-0 top-2 w-[3px] rounded-r-full bg-brand-700" />
+                    )}
                     <span className={iconBoxClass(isActive)}>
                       <ReceiptText className="h-[18px] w-[18px]" />
                     </span>
-                    {!sidebarCollapsed && (
-                      <span className="flex flex-1 items-center justify-between gap-2 min-w-0">
-                        <span className="truncate">{t('nav.receipts')}</span>
-                        <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[9.5px] font-semibold text-slate-500">
-                          S5
-                        </span>
-                      </span>
-                    )}
+                    {!sidebarCollapsed && <span className="truncate">{t('nav.receipts')}</span>}
                   </>
                 )}
               </NavLink>
@@ -567,40 +700,66 @@ export function Layout({ children }: PropsWithChildren) {
                 )}
               </NavLink>
             </div>
+            </>
+            )}
 
             {/* External & HQ Portals */}
+            {(!user || isHqRole || isAgentRole) && (
             <div className="space-y-1">
               {!sidebarCollapsed && (
                 <p className="px-2.5 text-[10.5px] font-bold uppercase tracking-wider text-slate-400">
                   {t('nav.sectionPortals')}
                 </p>
               )}
-              <NavLink to="/superadmin" className={navLinkClass} onClick={() => setMobileOpen(false)}>
-                {({ isActive }) => (
-                  <>
-                    <span className={iconBoxClass(isActive)}>
-                      <Crown className="h-[18px] w-[18px]" />
-                    </span>
-                    {!sidebarCollapsed && <span className="truncate">{t('nav.superadmin')}</span>}
-                  </>
-                )}
-              </NavLink>
+              {(!user || isHqRole) && (
+                <>
+                  <NavLink to="/superadmin" end className={navLinkClass} onClick={() => setMobileOpen(false)}>
+                    {({ isActive }) => (
+                      <>
+                        <span className={iconBoxClass(isActive)}>
+                          <Crown className="h-[18px] w-[18px]" />
+                        </span>
+                        {!sidebarCollapsed && <span className="truncate">{t('nav.superadmin')}</span>}
+                      </>
+                    )}
+                  </NavLink>
+                  <NavLink
+                    to="/superadmin/agents"
+                    className={navLinkClass}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <span className={iconBoxClass(isActive)}>
+                          <UserCheck className="h-[18px] w-[18px]" />
+                        </span>
+                        {!sidebarCollapsed && (
+                          <span className="truncate">{t('nav.superadminAgents')}</span>
+                        )}
+                      </>
+                    )}
+                  </NavLink>
+                </>
+              )}
 
-              <NavLink
-                to={user?.role === 'Field_Agent' ? '/agent/dashboard' : '/agent/login'}
-                className={navLinkClass}
-                onClick={() => setMobileOpen(false)}
-              >
-                {({ isActive }) => (
-                  <>
-                    <span className={iconBoxClass(isActive)}>
-                      <UserCheck className="h-[18px] w-[18px]" />
-                    </span>
-                    {!sidebarCollapsed && <span className="truncate">{t('nav.agentPortal')}</span>}
-                  </>
-                )}
-              </NavLink>
+              {(!user || isAgentRole) && (
+                <NavLink
+                  to={isAgentRole ? '/agent/dashboard' : '/agent/login'}
+                  className={navLinkClass}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  {({ isActive }) => (
+                    <>
+                      <span className={iconBoxClass(isActive)}>
+                        <UserCheck className="h-[18px] w-[18px]" />
+                      </span>
+                      {!sidebarCollapsed && <span className="truncate">{t('nav.agentPortal')}</span>}
+                    </>
+                  )}
+                </NavLink>
+              )}
             </div>
+            )}
           </nav>
         </div>
 
@@ -667,7 +826,7 @@ export function Layout({ children }: PropsWithChildren) {
                 <select
                   aria-label={t('nav.switchTenant')}
                   value={user.activeTenantId ?? ''}
-                  disabled={switchingTenant}
+                  disabled={switchingTenant || isImpersonating}
                   onChange={(e) => void handleTenantChange(e.target.value)}
                   className="rounded-lg border border-line bg-surface px-2 py-1 font-mono text-xs font-semibold text-ink"
                 >
@@ -716,6 +875,7 @@ export function Layout({ children }: PropsWithChildren) {
             <span>{t('footer.helpline')}</span>
           </div>
         </footer>
+      </div>
       </div>
     </div>
   );

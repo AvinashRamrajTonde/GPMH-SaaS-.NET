@@ -235,6 +235,20 @@ export interface UploadedAssetResponse {
   sizeBytes: number;
 }
 
+export interface PlatformPaymentAccountSummary {
+  accountName: string;
+  bankName: string;
+  branchName: string;
+  accountNumber: string;
+  ifscCode: string;
+  upiId: string;
+  annualFee: number;
+  gstPercent: number;
+  gstin: string | null;
+  supportPhone: string | null;
+  supportEmail: string | null;
+}
+
 export interface DashboardSummary {
   tenantId: string;
   panchayatNameEn: string;
@@ -265,6 +279,12 @@ export interface DashboardSummary {
     actorRole: string | null;
     timestampUtc: string;
   }[];
+  subscriptionStatus?: string;
+  subscriptionExpiresAtUtc?: string | null;
+  daysUntilExpiry?: number | null;
+  showExpiryWarning30Days?: boolean;
+  annualRenewalFee?: number;
+  platformPaymentInfo?: PlatformPaymentAccountSummary | null;
 }
 
 export interface DashboardSearchResult {
@@ -336,6 +356,21 @@ export interface SuperAdminTenantSummary {
   status: string;
   subscriptionExpiresAtUtc: string | null;
   setupProgressPct: number;
+  effectiveStatus: string;
+  daysUntilExpiry: number | null;
+  isTrial: boolean;
+  isDeleted: boolean;
+  deletedAtUtc: string | null;
+  adminUsername: string | null;
+  adminPhone: string | null;
+  totalWards: number;
+  populationCensus: number | null;
+  propertiesCount: number;
+  citizensCount: number;
+  taxDemanded: number;
+  taxCollected: number;
+  referredByAgentId: string | null;
+  referralCodeUsed: string | null;
 }
 
 export interface AgentRegistrationResult {
@@ -524,13 +559,20 @@ export const sprint2Api = {
     adminPassword: string,
     adminEmail: string | null,
     wizard: CompleteOnboardingPayload,
+    referralCode?: string | null,
   ) =>
     apiRequest<OnboardingStatus>('onboarding/register-gp', {
       method: 'POST',
-      body: JSON.stringify({ adminUsername, adminPassword, adminEmail, wizard }),
+      body: JSON.stringify({
+        adminUsername,
+        adminPassword,
+        adminEmail,
+        wizard,
+        ...(referralCode ? { referralCode } : {}),
+      }),
     }),
 
-  uploadProtectedAsset: (category: 'SIGNATURE' | 'STAMP' | 'QR', file: File) => {
+  uploadProtectedAsset: (category: 'SIGNATURE' | 'STAMP' | 'QR' | 'PAYMENT_SLIP', file: File) => {
     const form = new FormData();
     form.append('category', category);
     form.append('file', file);

@@ -124,6 +124,55 @@ export interface VerifiedExtractPublicDto {
   issuedAtUtc: string;
 }
 
+export interface VerifiedReceiptPublicDto {
+  isValid: boolean;
+  token: string;
+  tenantId: string;
+  receiptId: string;
+  lgdCode: string;
+  panchayatNameEn: string;
+  panchayatNameMr: string;
+  tehsilName: string;
+  districtName: string;
+  assessmentYearLabel: string;
+  receiptNo: string;
+  bookNo: string;
+  receiptDate: string;
+  wardNo: string;
+  propertyNo: string;
+  primaryOwnerNameMr: string;
+  primaryOwnerNameEn: string;
+  paymentMode: string;
+  totalPaid: number;
+  discountGiven: number;
+  isCancelled: boolean;
+  cancelReason?: string | null;
+  cancelledAtUtc?: string | null;
+  issuedAtUtc: string;
+}
+
+async function verifyPublicResource<T>(relativePath: string): Promise<T> {
+  const response = await fetch(`${getApiBaseUrl()}${relativePath}`, {
+    headers: { Accept: 'application/json' },
+  });
+
+  if (!response.ok) {
+    let problem: ProblemDetails = {
+      title: 'Verification Failed',
+      status: response.status,
+      detail: response.statusText,
+    };
+    try {
+      problem = (await response.json()) as ProblemDetails;
+    } catch {
+      // Non-JSON
+    }
+    throw new ApiProblemError(problem);
+  }
+
+  return (await response.json()) as T;
+}
+
 function buildFilterQuery(params: {
   propertyId?: string;
   wardNo?: string;
@@ -194,27 +243,16 @@ export const printApi = {
     triggerBlobDownload(blob, fileName);
   },
 
-  async verifyPublicExtract(token: string): Promise<VerifiedExtractPublicDto> {
-    const response = await fetch(
-      `${getApiBaseUrl()}public/verify/extract/${encodeURIComponent(token)}`,
-      { headers: { Accept: 'application/json' } },
+  verifyPublicExtract(token: string): Promise<VerifiedExtractPublicDto> {
+    return verifyPublicResource<VerifiedExtractPublicDto>(
+      `public/verify/extract/${encodeURIComponent(token)}`,
     );
+  },
 
-    if (!response.ok) {
-      let problem: ProblemDetails = {
-        title: 'Verification Failed',
-        status: response.status,
-        detail: response.statusText,
-      };
-      try {
-        problem = (await response.json()) as ProblemDetails;
-      } catch {
-        // Non-JSON
-      }
-      throw new ApiProblemError(problem);
-    }
-
-    return (await response.json()) as VerifiedExtractPublicDto;
+  verifyPublicReceipt(token: string): Promise<VerifiedReceiptPublicDto> {
+    return verifyPublicResource<VerifiedReceiptPublicDto>(
+      `public/verify/receipt/${encodeURIComponent(token)}`,
+    );
   },
 };
 

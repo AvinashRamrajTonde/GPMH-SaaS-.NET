@@ -1,8 +1,11 @@
 using GPMH.Application.Common.Interfaces;
+using GPMH.Application.DTOs.Agents;
 using GPMH.Application.DTOs.Mutations;
 using GPMH.Application.DTOs.Namuna9;
 using GPMH.Application.DTOs.Namuna9Ka;
+using GPMH.Application.DTOs.Namuna10;
 using GPMH.Application.DTOs.Printing;
+using GPMH.Application.DTOs.SuperAdmin;
 using QuestPDF.Fluent;
 
 namespace GPMH.Infrastructure.Printing;
@@ -60,6 +63,33 @@ public sealed class QuestPdfStatutoryRenderer(IQrCodeGeneratorService qrCodeGene
 
         DevanagariFontRegistry.EnsureInitialized();
         Namuna9KaBillPdfDocument document = new(model, qrCodeGenerator);
+        return document.GeneratePdf();
+    }
+
+    public byte[] RenderNamuna10DualReceiptPdf(Namuna10DualReceiptPdfModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        DevanagariFontRegistry.EnsureInitialized();
+        Namuna10DualReceiptPdfDocument document = new(model, qrCodeGenerator);
+        return document.GeneratePdf();
+    }
+
+    public byte[] RenderSubscriptionGstInvoicePdf(GstSubscriptionInvoicePdfModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        DevanagariFontRegistry.EnsureInitialized();
+        SubscriptionGstInvoicePdfDocument document = new(model, qrCodeGenerator);
+        return document.GeneratePdf();
+    }
+
+    public byte[] RenderAgentPayoutVoucherPdf(AgentPayoutVoucherPdfModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+
+        DevanagariFontRegistry.EnsureInitialized();
+        AgentPayoutVoucherPdfDocument document = new(model, qrCodeGenerator);
         return document.GeneratePdf();
     }
 }

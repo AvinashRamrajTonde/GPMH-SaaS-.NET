@@ -543,7 +543,15 @@ function PartitionWizardEditor({
             </p>
 
             {eligibility.blockReason ? (
-              <p className="mt-1 text-xs text-rose-800 leading-relaxed">{eligibility.blockReason}</p>
+              <div className="mt-1 space-y-2">
+                <p className="text-xs text-rose-800 leading-relaxed">{eligibility.blockReason}</p>
+                <Link
+                  to={`/namuna-10/collect?propertyId=${encodeURIComponent(eligibility.propertyId)}`}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-rose-700 px-3 py-1.5 text-[11px] font-bold text-white hover:bg-rose-800"
+                >
+                  {t('namuna10.settleDuesInNamuna10Btn')}
+                </Link>
+              </div>
             ) : (
               <p className="mt-1 text-xs text-emerald-800 leading-relaxed">
                 {t('partition.zeroDuesClearedDesc')}

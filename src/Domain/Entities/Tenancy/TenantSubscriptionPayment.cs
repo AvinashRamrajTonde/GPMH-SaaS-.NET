@@ -11,8 +11,11 @@ public sealed class TenantSubscriptionPayment : BaseEntity, IGlobalEntity
     public required string PlanName { get; set; }
     public required string PaymentMode { get; set; }
     public decimal Amount { get; set; }
+    public decimal GstAmount { get; set; }
     public int DurationDays { get; set; }
     public string? PaymentReference { get; set; }
+    public string? InvoiceNo { get; set; }
+    public Guid? SubmissionId { get; set; }
     public DateTimeOffset PaymentDateUtc { get; set; }
     public Guid RecordedByUserId { get; set; }
     public string? Notes { get; set; }

@@ -8,6 +8,11 @@ public sealed record ExtractVerifyPayloadDto(
     Guid AssessmentYearId,
     DateTimeOffset IssuedAtUtc);
 
+public sealed record ReceiptVerifyPayloadDto(
+    Guid TenantId,
+    Guid ReceiptId,
+    DateTimeOffset IssuedAtUtc);
+
 public sealed record VerifiedExtractPublicDto(
     bool IsValid,
     string Token,
@@ -30,6 +35,32 @@ public sealed record VerifiedExtractPublicDto(
     decimal TotalAnnualTax,
     bool IsTaxExempt,
     string Status,
+    DateTimeOffset IssuedAtUtc);
+
+public sealed record VerifiedReceiptPublicDto(
+    bool IsValid,
+    string Token,
+    Guid TenantId,
+    Guid ReceiptId,
+    string LgdCode,
+    string PanchayatNameEn,
+    string PanchayatNameMr,
+    string TehsilName,
+    string DistrictName,
+    string AssessmentYearLabel,
+    string ReceiptNo,
+    string BookNo,
+    DateOnly ReceiptDate,
+    string WardNo,
+    string PropertyNo,
+    string PrimaryOwnerNameMr,
+    string PrimaryOwnerNameEn,
+    string PaymentMode,
+    decimal TotalPaid,
+    decimal DiscountGiven,
+    bool IsCancelled,
+    string? CancelReason,
+    DateTimeOffset? CancelledAtUtc,
     DateTimeOffset IssuedAtUtc);
 
 public sealed record GeneratedPdfFileDto(

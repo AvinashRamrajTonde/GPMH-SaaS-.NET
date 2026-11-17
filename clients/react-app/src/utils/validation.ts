@@ -78,3 +78,17 @@ export function evaluatePasswordStrength(password: string): PasswordStrengthResu
   };
 }
 
+export function generateStrongPassword(): string {
+  const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const lower = 'abcdefghijkmnopqrstuvwxyz';
+  const digits = '23456789';
+  const symbols = '@#$!';
+  const all = upper + lower + digits;
+  const pick = (pool: string) => pool[Math.floor(Math.random() * pool.length)];
+  let pwd = pick(upper) + pick(lower) + pick(digits) + pick(symbols);
+  for (let i = 0; i < 8; i++) {
+    pwd += pick(all);
+  }
+  return pwd;
+}
+

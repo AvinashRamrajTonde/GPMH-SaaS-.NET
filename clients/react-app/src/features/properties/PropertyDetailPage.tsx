@@ -12,6 +12,7 @@ import {
   Printer,
   ShieldCheck,
   Users,
+  Wallet,
 } from 'lucide-react';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -137,6 +138,15 @@ export function PropertyDetailPage() {
               >
                 <FileSpreadsheet className="h-3.5 w-3.5" />
                 {t('namuna9Ka.viewDemandBillBtn')}
+              </Link>
+            )}
+            {prop.demand && prop.demand.pendingBalance > 0 && (
+              <Link
+                to={`/namuna-10/collect?propertyId=${encodeURIComponent(prop.id)}`}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 font-bold text-indigo-800 hover:bg-indigo-100"
+              >
+                <Wallet className="h-3.5 w-3.5" />
+                {t('namuna10.collectTaxBtn')}
               </Link>
             )}
             <Link

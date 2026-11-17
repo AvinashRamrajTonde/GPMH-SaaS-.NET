@@ -35,7 +35,7 @@ export function LoginPage() {
     setSubmitting(true);
     try {
       const auth = await login(username.trim(), password, tenantId.trim() || null);
-      if (auth.user.role === 'SuperAdmin') {
+      if (auth.user.role === 'SuperAdmin' || auth.user.role === 'Support_Admin') {
         void navigate('/superadmin');
       } else if (auth.user.role === 'Field_Agent') {
         void navigate('/agent/dashboard');
@@ -107,7 +107,7 @@ export function LoginPage() {
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <Link
               to={
-                user.role === 'SuperAdmin'
+                user.role === 'SuperAdmin' || user.role === 'Support_Admin'
                   ? '/superadmin'
                   : user.role === 'Field_Agent'
                     ? '/agent/dashboard'

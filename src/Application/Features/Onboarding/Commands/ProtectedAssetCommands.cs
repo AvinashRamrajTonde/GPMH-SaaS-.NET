@@ -20,7 +20,7 @@ public sealed class UploadProtectedAssetCommandValidator : AbstractValidator<Upl
 {
     private static readonly HashSet<string> AllowedCategories = new(StringComparer.OrdinalIgnoreCase)
     {
-        "SIGNATURE", "STAMP", "QR", "MUTATION_DOC", "MUTATIONDOC", "PARTITION_DEED",
+        "SIGNATURE", "STAMP", "QR", "MUTATION_DOC", "MUTATIONDOC", "PARTITION_DEED", "PAYMENT_SLIP", "SUBSCRIPTION_SLIP", "PAYOUT_RECEIPT",
     };
 
     private static readonly HashSet<string> AllowedMimeTypes = new(StringComparer.OrdinalIgnoreCase)
@@ -31,7 +31,7 @@ public sealed class UploadProtectedAssetCommandValidator : AbstractValidator<Upl
     public UploadProtectedAssetCommandValidator()
     {
         RuleFor(x => x.Category).NotEmpty().Must(c => AllowedCategories.Contains(c.Trim()))
-            .WithMessage("Category must be SIGNATURE, STAMP, QR, MUTATION_DOC, or PARTITION_DEED.");
+            .WithMessage("Category must be SIGNATURE, STAMP, QR, MUTATION_DOC, PARTITION_DEED, or PAYMENT_SLIP.");
         RuleFor(x => x.FileName).NotEmpty().MaximumLength(255);
         RuleFor(x => x.ContentType).NotEmpty().Must(ct => AllowedMimeTypes.Contains(ct.Trim()))
             .WithMessage("Only PNG, JPEG, WebP images or PDF documents are permitted.");
@@ -49,10 +49,14 @@ public sealed class UploadProtectedAssetCommandHandler(
 {
     public async Task<UploadedAssetDto> Handle(UploadProtectedAssetCommand request, CancellationToken cancellationToken)
     {
-        Guid tenantId = tenantContext.CurrentTenantId
-            ?? throw new TenantAccessDeniedException("Authenticated tenant context is required.");
         Guid userId = currentUserService.UserId
             ?? throw new AuthenticationFailedException("Authenticated user context is required.");
+        string category = request.Category.Trim().ToUpperInvariant();
+        Guid? tenantId = tenantContext.CurrentTenantId;
+        if (!tenantId.HasValue && !(currentUserService.Role == ApplicationRole.SuperAdmin && category is "PAYOUT_RECEIPT"))
+        {
+            throw new TenantAccessDeniedException("Authenticated tenant context is required.");
+        }
 
         string safeExtension = Path.GetExtension(request.FileName).ToLowerInvariant();
         if (safeExtension is not (".png" or ".jpg" or ".jpeg" or ".webp" or ".pdf")
@@ -64,8 +68,8 @@ public sealed class UploadProtectedAssetCommandHandler(
             });
         }
 
-        string category = request.Category.Trim().ToUpperInvariant();
-        string assetKey = $"gp-{tenantId:N}-{category.ToLowerInvariant()}-{Guid.NewGuid():N}";
+        string scopePrefix = tenantId.HasValue ? $"gp-{tenantId.Value:N}" : "global";
+        string assetKey = $"{scopePrefix}-{category.ToLowerInvariant()}-{Guid.NewGuid():N}";
         byte[] encrypted = piiProtectionService.EncryptBytes(request.Content);
 
         ProtectedAsset asset = new()
@@ -128,7 +132,7 @@ public sealed class GetProtectedAssetQueryHandler(
             .ConfigureAwait(false)
             ?? throw new NotFoundException(nameof(ProtectedAsset), request.AssetKey);
 
-        if (currentUserService.Role != ApplicationRole.SuperAdmin)
+        if (currentUserService.Role is not (ApplicationRole.SuperAdmin or ApplicationRole.Support_Admin))
         {
             if (asset.TenantId.HasValue)
             {

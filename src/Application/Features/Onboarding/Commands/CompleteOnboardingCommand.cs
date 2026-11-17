@@ -62,7 +62,8 @@ public sealed record RegisterSelfServiceGpCommand(
     string AdminUsername,
     string AdminPassword,
     string? AdminEmail,
-    CompleteOnboardingCommand Wizard) : IRequest<OnboardingStatusDto>;
+    CompleteOnboardingCommand Wizard,
+    string? ReferralCode = null) : IRequest<OnboardingStatusDto>;
 
 public sealed class CompleteOnboardingCommandValidator : AbstractValidator<CompleteOnboardingCommand>
 {
@@ -311,15 +312,81 @@ public sealed class RegisterSelfServiceGpCommandHandler(
         }
 
         DateTimeOffset now = dateTimeProvider.UtcNow;
+        (Guid AgentId, string AgentCode)? refAgent = null;
+        if (!string.IsNullOrWhiteSpace(request.ReferralCode))
+        {
+            refAgent = await onboardingRepository
+                .FindApprovedAgentByCodeAsync(request.ReferralCode.Trim(), cancellationToken)
+                .ConfigureAwait(false)
+                ?? throw new DomainValidationException(new Dictionary<string, string[]>(StringComparer.Ordinal)
+                {
+                    [nameof(request.ReferralCode)] = [$"Referral code '{request.ReferralCode.Trim()}' is invalid or belongs to an unapproved agent."],
+                });
+        }
+
+        (OnboardingStatusDto dto, _) = await GpRegistrationHelper.RegisterAsync(
+            username,
+            request.AdminPassword,
+            request.AdminEmail,
+            w,
+            refAgent,
+            now,
+            onboardingRepository,
+            passwordHasher,
+            cancellationToken).ConfigureAwait(false);
+
+        return dto;
+    }
+}
+
+internal static class GpRegistrationHelper
+{
+    public static async Task<(OnboardingStatusDto StatusDto, Guid TenantId)> RegisterAsync(
+        string adminUsername,
+        string adminPassword,
+        string? adminEmail,
+        CompleteOnboardingCommand w,
+        (Guid AgentId, string AgentCode)? refAgent,
+        DateTimeOffset now,
+        IOnboardingRepository onboardingRepository,
+        IPasswordHasherService passwordHasher,
+        CancellationToken cancellationToken)
+    {
+        string lgdCode = w.LgdCode.Trim();
+        string username = adminUsername.Trim();
+
+        if (await onboardingRepository.ExistsTenantWithLgdAsync(lgdCode, null, cancellationToken).ConfigureAwait(false))
+        {
+            throw new DomainValidationException(new Dictionary<string, string[]>(StringComparer.Ordinal)
+            {
+                [nameof(w.LgdCode)] = [$"Gram Panchayat with LGD code '{lgdCode}' is already registered."],
+            });
+        }
+
+        if (await onboardingRepository.ExistsUsernameAsync(username, cancellationToken).ConfigureAwait(false))
+        {
+            throw new DomainValidationException(new Dictionary<string, string[]>(StringComparer.Ordinal)
+            {
+                ["AdminUsername"] = [$"Username '{username}' is already taken."],
+            });
+        }
+
         Tenant tenant = new()
         {
             TenantCode = $"gp-{lgdCode}",
             LgdCode = lgdCode,
             NameEn = w.PanchayatNameEn.Trim(),
             NameMr = w.PanchayatNameMr.Trim(),
-            SubscriptionExpiresAtUtc = now.AddDays(365),
+            Status = w.ActivateTenant ? TenantStatus.Active : TenantStatus.PendingApproval,
+            SubscriptionExpiresAtUtc = w.ActivateTenant ? now.AddDays(365) : null,
+            ReferredByAgentId = refAgent?.AgentId,
+            ReferralCodeUsed = refAgent?.AgentCode,
         };
-        tenant.Activate(now);
+
+        if (w.ActivateTenant)
+        {
+            tenant.Activate(now);
+        }
 
         TenantDatabaseMapping mapping = new()
         {
@@ -354,11 +421,11 @@ public sealed class RegisterSelfServiceGpCommandHandler(
         User adminUser = new()
         {
             Username = username,
-            Email = request.AdminEmail?.Trim(),
+            Email = adminEmail?.Trim(),
             Phone = w.GramsevakMobile?.Trim(),
             FullNameEn = string.IsNullOrWhiteSpace(w.GramsevakName) ? username : w.GramsevakName.Trim(),
             FullNameMr = string.IsNullOrWhiteSpace(w.GramsevakName) ? username : w.GramsevakName.Trim(),
-            PasswordHash = passwordHasher.HashPassword(request.AdminPassword),
+            PasswordHash = passwordHasher.HashPassword(adminPassword),
         };
 
         TenantMembership membership = new()
@@ -383,7 +450,7 @@ public sealed class RegisterSelfServiceGpCommandHandler(
             w.SeedDefaultFormulas,
             cancellationToken).ConfigureAwait(false);
 
-        return new OnboardingStatusDto(
+        OnboardingStatusDto dto = new(
             tenant.Id,
             tenant.Status.ToString(),
             gp.SetupProgressPct,
@@ -429,6 +496,8 @@ public sealed class RegisterSelfServiceGpCommandHandler(
                 b.OpeningBalance)).ToList(),
             w.SeedDefaultFormulas,
             w.Provenance);
+
+        return (dto, tenant.Id);
     }
 }
 

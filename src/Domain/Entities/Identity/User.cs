@@ -11,6 +11,7 @@ public sealed class User : BaseEntity, IGlobalEntity
     public required string FullNameEn { get; set; }
     public required string PasswordHash { get; set; }
     public bool IsSuperAdmin { get; set; }
+    public bool IsSupportAdmin { get; set; }
     public bool IsActive { get; set; } = true;
 }
 

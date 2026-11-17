@@ -39,11 +39,14 @@ public static class DependencyInjection
         services.AddScoped<IPartitionRepository, PartitionRepository>();
         services.AddScoped<INamuna9Repository, Namuna9Repository>();
         services.AddScoped<INamuna9KaRepository, Namuna9KaRepository>();
+        services.AddScoped<INamuna10Repository, Namuna10Repository>();
         services.AddScoped<IFormulaMasterRepository, FormulaMasterRepository>();
         services.AddScoped<IDefaultFormulaSeeder, DefaultFormulaSeeder>();
         services.AddScoped<IOnboardingRepository, OnboardingRepository>();
         services.AddScoped<IDashboardReadRepository, DashboardReadRepository>();
         services.AddScoped<ISuperAdminProvisioningRepository, SuperAdminProvisioningRepository>();
+        services.AddScoped<IPlatformBillingRepository, PlatformBillingRepository>();
+        services.AddScoped<ITenantLicenseChecker, PlatformBillingRepository>();
         services.AddScoped<IAgentRepository, AgentRepository>();
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<SecurityOptions>(configuration.GetSection(SecurityOptions.SectionName));

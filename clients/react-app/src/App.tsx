@@ -6,7 +6,6 @@ import { AuthProvider } from './context/AuthContext';
 import { DashboardPage } from './pages/DashboardPage';
 import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
-import { PlannedModulePage } from './pages/PlannedModulePage';
 
 const OnboardingLgdPage = lazy(() =>
   import('./pages/OnboardingLgdPage').then((m) => ({ default: m.OnboardingLgdPage })),
@@ -30,6 +29,9 @@ const Namuna8PrintPage = lazy(() =>
 );
 const ExtractVerifyPage = lazy(() =>
   import('./features/print/ExtractVerifyPage').then((m) => ({ default: m.ExtractVerifyPage })),
+);
+const ReceiptVerifyPage = lazy(() =>
+  import('./features/namuna10/ReceiptVerifyPage').then((m) => ({ default: m.ReceiptVerifyPage })),
 );
 const MutationRegisterPage = lazy(() =>
   import('./features/mutations/MutationRegisterPage').then((m) => ({
@@ -57,6 +59,11 @@ const SuperAdminProvisionPage = lazy(() =>
     default: m.SuperAdminProvisionPage,
   })),
 );
+const SuperAdminAgentsPage = lazy(() =>
+  import('./features/superadmin/SuperAdminAgentsPage').then((m) => ({
+    default: m.SuperAdminAgentsPage,
+  })),
+);
 const AgentLoginPage = lazy(() =>
   import('./features/agents/AgentLoginPage').then((m) => ({ default: m.AgentLoginPage })),
 );
@@ -74,6 +81,11 @@ const Namuna9DemandRegisterPage = lazy(() =>
 const Namuna9KaBillsPage = lazy(() =>
   import('./features/namuna9/Namuna9KaBillsPage').then((m) => ({
     default: m.Namuna9KaBillsPage,
+  })),
+);
+const Namuna10RegisterPage = lazy(() =>
+  import('./features/namuna10/Namuna10RegisterPage').then((m) => ({
+    default: m.Namuna10RegisterPage,
   })),
 );
 
@@ -110,6 +122,7 @@ export function App() {
                 <Route path="/" element={<DashboardPage />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/onboarding" element={<OnboardingLgdPage />} />
+                <Route path="/register" element={<OnboardingLgdPage />} />
                 <Route path="/properties" element={<PropertiesPage />} />
                 <Route path="/namuna-8" element={<PropertiesPage />} />
                 <Route path="/namuna-8/add" element={<PropertyFormPage />} />
@@ -118,6 +131,7 @@ export function App() {
                 <Route path="/namuna-8/print" element={<Namuna8PrintPage />} />
                 <Route path="/namuna-8/print/:id" element={<Namuna8PrintPage />} />
                 <Route path="/verify/extract/:token" element={<ExtractVerifyPage />} />
+                <Route path="/verify/receipt/:token" element={<ReceiptVerifyPage />} />
                 <Route path="/namuna-8/partition" element={<PropertyPartitionWizardPage />} />
                 <Route path="/namuna-8/partition/:id" element={<PropertyPartitionWizardPage />} />
                 <Route path="/citizens" element={<CitizensPage />} />
@@ -127,16 +141,15 @@ export function App() {
                 <Route path="/audit/:entityName/:entityId" element={<AuditLogPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/superadmin" element={<SuperAdminProvisionPage />} />
+                <Route path="/superadmin/agents" element={<SuperAdminAgentsPage />} />
                 <Route path="/superadmin/provision-gp" element={<SuperAdminProvisionPage />} />
                 <Route path="/agent/register" element={<AgentRegisterPage />} />
                 <Route path="/agent/login" element={<AgentLoginPage />} />
                 <Route path="/agent/dashboard" element={<AgentWorkspacePage />} />
                 <Route path="/namuna-9" element={<Namuna9DemandRegisterPage />} />
                 <Route path="/namuna-9/register" element={<Namuna9DemandRegisterPage />} />
-                <Route
-                  path="/namuna-10/collect"
-                  element={<PlannedModulePage titleKey="dashboard.actionCollect" sprintNumber={5} />}
-                />
+                <Route path="/namuna-10" element={<Namuna10RegisterPage />} />
+                <Route path="/namuna-10/collect" element={<Namuna10RegisterPage />} />
                 <Route path="/namuna-9ka/generate" element={<Namuna9KaBillsPage />} />
                 <Route path="/namuna-9ka/bills" element={<Namuna9KaBillsPage />} />
                 <Route path="/namuna-8/mutation" element={<MutationRegisterPage />} />
