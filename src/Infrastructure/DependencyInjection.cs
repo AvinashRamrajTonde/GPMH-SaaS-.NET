@@ -45,6 +45,8 @@ public static class DependencyInjection
         services.AddScoped<IOnboardingRepository, OnboardingRepository>();
         services.AddScoped<IDashboardReadRepository, DashboardReadRepository>();
         services.AddScoped<ISuperAdminProvisioningRepository, SuperAdminProvisioningRepository>();
+        services.AddScoped<IPlatformBillingRepository, PlatformBillingRepository>();
+        services.AddScoped<ITenantLicenseChecker, PlatformBillingRepository>();
         services.AddScoped<IAgentRepository, AgentRepository>();
         services.Configure<JwtOptions>(configuration.GetSection(JwtOptions.SectionName));
         services.Configure<SecurityOptions>(configuration.GetSection(SecurityOptions.SectionName));

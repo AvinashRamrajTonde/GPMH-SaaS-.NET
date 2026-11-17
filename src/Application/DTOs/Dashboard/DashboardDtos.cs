@@ -15,6 +15,19 @@ public sealed record DashboardActivityItemDto(
     string? ActorRole,
     DateTimeOffset TimestampUtc);
 
+public sealed record PlatformPaymentAccountSummaryDto(
+    string AccountName,
+    string BankName,
+    string BranchName,
+    string AccountNumber,
+    string IfscCode,
+    string UpiId,
+    decimal AnnualFee,
+    decimal GstPercent,
+    string? Gstin,
+    string? SupportPhone,
+    string? SupportEmail);
+
 public sealed record DashboardSummaryDto(
     Guid TenantId,
     string PanchayatNameEn,
@@ -31,7 +44,13 @@ public sealed record DashboardSummaryDto(
     decimal WaterAndSpecialCollection,
     int TodayReceipts,
     IReadOnlyList<SetupChecklistItemDto> ChecklistSteps,
-    IReadOnlyList<DashboardActivityItemDto> RecentActivity);
+    IReadOnlyList<DashboardActivityItemDto> RecentActivity,
+    string SubscriptionStatus = "Active",
+    DateTimeOffset? SubscriptionExpiresAtUtc = null,
+    int? DaysUntilExpiry = null,
+    bool ShowExpiryWarning30Days = false,
+    decimal AnnualRenewalFee = 6000.00m,
+    PlatformPaymentAccountSummaryDto? PlatformPaymentInfo = null);
 
 public sealed record DashboardPropertyHitDto(
     Guid Id,

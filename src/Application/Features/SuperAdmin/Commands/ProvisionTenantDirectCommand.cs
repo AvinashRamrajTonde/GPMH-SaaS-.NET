@@ -71,6 +71,7 @@ public sealed class ProvisionTenantDirectCommandValidator : AbstractValidator<Pr
 
 public sealed class ProvisionTenantDirectCommandHandler(
     ISuperAdminProvisioningRepository repository,
+    IPlatformBillingRepository billingRepository,
     IPasswordHasherService passwordHasher,
     ICurrentUserService currentUserService,
     IDateTimeProvider dateTimeProvider,
@@ -171,14 +172,24 @@ public sealed class ProvisionTenantDirectCommandHandler(
             ? $"SA-{now:yyyyMMddHHmmss}-{lgdCode}"
             : request.PaymentReference.Trim();
 
+        PlatformPaymentAccount plat = await billingRepository
+            .GetOrCreatePlatformAccountAsync(cancellationToken)
+            .ConfigureAwait(false);
+        string invoiceNo = await billingRepository
+            .GenerateNextInvoiceNumberAsync(now.Year, cancellationToken)
+            .ConfigureAwait(false);
+        decimal gstAmount = SubscriptionGstHelper.ComputeInclusiveGst(request.PaymentAmount, plat.GstPercent);
+
         TenantSubscriptionPayment payment = new()
         {
             TenantId = tenant.Id,
             PlanName = request.PlanName.Trim(),
             PaymentMode = request.PaymentMode.Trim().ToUpperInvariant(),
             Amount = request.PaymentAmount,
+            GstAmount = gstAmount,
             DurationDays = request.DurationDays,
             PaymentReference = paymentRef,
+            InvoiceNo = invoiceNo,
             PaymentDateUtc = request.PaymentDateUtc ?? now,
             RecordedByUserId = actorUserId,
             Notes = $"Direct SuperAdmin provisioning ({request.PlanName.Trim()})",

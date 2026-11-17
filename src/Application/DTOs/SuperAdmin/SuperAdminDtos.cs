@@ -1,3 +1,5 @@
+using GPMH.Application.DTOs.Dashboard;
+
 namespace GPMH.Application.DTOs.SuperAdmin;
 
 public sealed record ProvisionedTenantResultDto(
@@ -24,5 +26,195 @@ public sealed record SuperAdminTenantSummaryDto(
     string TehsilName,
     string Status,
     DateTimeOffset? SubscriptionExpiresAtUtc,
-    int SetupProgressPct);
+    int SetupProgressPct,
+    string EffectiveStatus = "Active",
+    int? DaysUntilExpiry = null,
+    bool IsTrial = false,
+    bool IsDeleted = false,
+    DateTimeOffset? DeletedAtUtc = null,
+    string? AdminUsername = null,
+    string? AdminPhone = null,
+    int TotalWards = 0,
+    int? PopulationCensus = null,
+    int PropertiesCount = 0,
+    int CitizensCount = 0,
+    decimal TaxDemanded = 0m,
+    decimal TaxCollected = 0m,
+    Guid? ReferredByAgentId = null,
+    string? ReferralCodeUsed = null);
+
+public sealed record SuperAdminDashboardStatsDto(
+    int TotalVillages,
+    int ActiveVillages,
+    int PendingActivation,
+    int ExpiredVillages,
+    int SuspendedVillages,
+    int TrashCount,
+    int PendingPaymentSubmissions,
+    int ExpiringIn30Days,
+    int TotalCitizens,
+    int TotalProperties,
+    decimal TotalTaxDemandedStatewide,
+    decimal TotalTaxCollectedStatewide,
+    decimal CollectionPercentage,
+    decimal TotalPlatformRevenue);
+
+public sealed record SuperAdminTenantUserDto(
+    Guid UserId,
+    string Username,
+    string FullNameEn,
+    string FullNameMr,
+    string? Phone,
+    string? Email,
+    string Role,
+    bool IsActive);
+
+public sealed record TenantSubscriptionHistoryItemDto(
+    Guid PaymentId,
+    string PlanName,
+    string PaymentMode,
+    decimal Amount,
+    decimal GstAmount,
+    int DurationDays,
+    string? PaymentReference,
+    string? InvoiceNo,
+    DateTimeOffset PaymentDateUtc,
+    string? Notes);
+
+public sealed record TenantPaymentSubmissionDto(
+    Guid SubmissionId,
+    Guid TenantId,
+    string LgdCode,
+    string PanchayatNameEn,
+    string PanchayatNameMr,
+    string DistrictName,
+    Guid SubmittedByUserId,
+    string SubmittedByUsername,
+    string PlanName,
+    string PaymentMode,
+    decimal Amount,
+    string UtrReference,
+    DateOnly PaymentDate,
+    string? SlipAssetKey,
+    string Status,
+    string? RejectionReason,
+    Guid? ReviewedByUserId,
+    DateTimeOffset? ReviewedAtUtc,
+    Guid? ApprovedSubscriptionPaymentId,
+    string? InvoiceNo,
+    string? Notes,
+    DateTimeOffset CreatedAtUtc);
+
+public sealed record SuperAdminAuditLogItemDto(
+    Guid Id,
+    Guid? TenantId,
+    string? TenantNameEn,
+    string? LgdCode,
+    string EntityName,
+    string EntityId,
+    string Action,
+    string? ActorId,
+    string? ActorRole,
+    string? OldValuesJson,
+    string? NewValuesJson,
+    string? IpAddress,
+    DateTimeOffset TimestampUtc);
+
+public sealed record SuperAdminTenantDetailDto(
+    SuperAdminTenantSummaryDto Summary,
+    string DistrictCode,
+    string TehsilCode,
+    string? Pincode,
+    string? CensusCode,
+    string? OfficeAddress,
+    string? SarpanchName,
+    string? SarpanchMobile,
+    string? GramsevakName,
+    string? GramsevakMobile,
+    string? PrimaryUpiId,
+    string? ActiveAssessmentYear,
+    int ProtectedAssetsCount,
+    int BankAccountsCount,
+    IReadOnlyList<SuperAdminTenantUserDto> Users,
+    IReadOnlyList<TenantSubscriptionHistoryItemDto> SubscriptionPayments,
+    IReadOnlyList<TenantPaymentSubmissionDto> PaymentSubmissions,
+    IReadOnlyList<SuperAdminAuditLogItemDto> RecentAuditLogs);
+
+public sealed record SupportImpersonationResultDto(
+    string AccessToken,
+    DateTimeOffset ExpiresAtUtc,
+    int ExpiresInSeconds,
+    Guid TargetTenantId,
+    string TargetTenantCode,
+    string TargetLgdCode,
+    string TargetTenantNameEn,
+    string TargetTenantNameMr,
+    bool ReadOnly,
+    string Reason);
+
+public sealed record ResetTenantAdminPasswordResultDto(
+    Guid TenantId,
+    string Username,
+    DateTimeOffset ResetAtUtc);
+
+public sealed record PlatformPaymentAccountDto(
+    Guid Id,
+    string AccountName,
+    string BankName,
+    string BranchName,
+    string AccountNumber,
+    string IfscCode,
+    string UpiId,
+    decimal AnnualFee,
+    decimal GstPercent,
+    string? Gstin,
+    string? SupportPhone,
+    string? SupportEmail,
+    bool IsActive,
+    DateTimeOffset UpdatedAtUtc);
+
+public sealed record GpSubscriptionStatusDto(
+    Guid TenantId,
+    string LgdCode,
+    string PanchayatNameEn,
+    string PanchayatNameMr,
+    string Status,
+    string EffectiveStatus,
+    DateTimeOffset? SubscriptionExpiresAtUtc,
+    int? DaysUntilExpiry,
+    bool ShowExpiryWarning30Days,
+    PlatformPaymentAccountSummaryDto PlatformPaymentAccount,
+    IReadOnlyList<TenantPaymentSubmissionDto> RecentSubmissions,
+    IReadOnlyList<TenantSubscriptionHistoryItemDto> PaymentHistory);
+
+public sealed record GstSubscriptionInvoicePdfModel(
+    string InvoiceNo,
+    DateTimeOffset IssuedAtUtc,
+    Guid TenantId,
+    string LgdCode,
+    string PanchayatNameEn,
+    string PanchayatNameMr,
+    string DistrictName,
+    string TehsilName,
+    string? OfficeAddress,
+    string? Pincode,
+    string PlanName,
+    string PaymentMode,
+    string UtrReference,
+    DateOnly PaymentDate,
+    int DurationDays,
+    DateTimeOffset? ValidUntilUtc,
+    decimal TotalAmountPaid,
+    decimal TaxableBaseAmount,
+    decimal GstPercent,
+    decimal GstAmount,
+    string AmountInWordsMr,
+    string VendorAccountName,
+    string VendorBankName,
+    string VendorAccountNumber,
+    string VendorIfscCode,
+    string VendorUpiId,
+    string? VendorGstin,
+    string? SupportPhone,
+    string? SupportEmail);
 

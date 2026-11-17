@@ -14,4 +14,6 @@ public interface ICurrentUserService
     string? IpAddress { get; }
     string? UserAgent { get; }
     bool IsAuthenticated { get; }
+    bool IsSupportImpersonation { get; }
+    Guid? ImpersonatorUserId { get; }
 }

@@ -62,7 +62,8 @@ public sealed record RegisterSelfServiceGpCommand(
     string AdminUsername,
     string AdminPassword,
     string? AdminEmail,
-    CompleteOnboardingCommand Wizard) : IRequest<OnboardingStatusDto>;
+    CompleteOnboardingCommand Wizard,
+    string? ReferralCode = null) : IRequest<OnboardingStatusDto>;
 
 public sealed class CompleteOnboardingCommandValidator : AbstractValidator<CompleteOnboardingCommand>
 {
@@ -311,15 +312,32 @@ public sealed class RegisterSelfServiceGpCommandHandler(
         }
 
         DateTimeOffset now = dateTimeProvider.UtcNow;
+        (Guid AgentId, string AgentCode)? refAgent = null;
+        if (!string.IsNullOrWhiteSpace(request.ReferralCode))
+        {
+            refAgent = await onboardingRepository
+                .FindApprovedAgentByCodeAsync(request.ReferralCode.Trim(), cancellationToken)
+                .ConfigureAwait(false);
+        }
+
         Tenant tenant = new()
         {
             TenantCode = $"gp-{lgdCode}",
             LgdCode = lgdCode,
             NameEn = w.PanchayatNameEn.Trim(),
             NameMr = w.PanchayatNameMr.Trim(),
-            SubscriptionExpiresAtUtc = now.AddDays(365),
+            Status = w.ActivateTenant ? TenantStatus.Active : TenantStatus.PendingApproval,
+            SubscriptionExpiresAtUtc = w.ActivateTenant ? now.AddDays(365) : null,
+            ReferredByAgentId = refAgent?.AgentId,
+            ReferralCodeUsed = string.IsNullOrWhiteSpace(request.ReferralCode)
+                ? null
+                : (refAgent?.AgentCode ?? request.ReferralCode.Trim().ToUpperInvariant()),
         };
-        tenant.Activate(now);
+
+        if (w.ActivateTenant)
+        {
+            tenant.Activate(now);
+        }
 
         TenantDatabaseMapping mapping = new()
         {

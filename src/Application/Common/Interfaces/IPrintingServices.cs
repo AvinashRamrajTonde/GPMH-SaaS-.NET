@@ -3,6 +3,7 @@ using GPMH.Application.DTOs.Namuna9;
 using GPMH.Application.DTOs.Namuna9Ka;
 using GPMH.Application.DTOs.Namuna10;
 using GPMH.Application.DTOs.Printing;
+using GPMH.Application.DTOs.SuperAdmin;
 
 namespace GPMH.Application.Common.Interfaces;
 
@@ -37,6 +38,8 @@ public interface IStatutoryPdfRenderer
     byte[] RenderNamuna9KaBillsPdf(Namuna9KaPdfDocumentModel model);
 
     byte[] RenderNamuna10DualReceiptPdf(Namuna10DualReceiptPdfModel model);
+
+    byte[] RenderSubscriptionGstInvoicePdf(GstSubscriptionInvoicePdfModel model);
 }
 
 public interface IPrintDataRepository

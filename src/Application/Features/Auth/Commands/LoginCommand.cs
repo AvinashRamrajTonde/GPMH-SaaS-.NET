@@ -98,6 +98,11 @@ public sealed class LoginCommandHandler(
             return (ApplicationRole.SuperAdmin, requestedTenantId, null);
         }
 
+        if (user.IsSupportAdmin)
+        {
+            return (ApplicationRole.Support_Admin, requestedTenantId, null);
+        }
+
         if (memberships.Count == 0)
         {
             FieldAgent? agent = await agentRepository

@@ -19,6 +19,12 @@ public interface IJwtTokenService
         Guid? tenantId,
         Guid? agentId = null);
 
+    (string AccessToken, DateTimeOffset ExpiresAtUtc) CreateImpersonationToken(
+        User impersonator,
+        Tenant targetTenant,
+        ApplicationRole impersonatorRole,
+        TimeSpan duration);
+
     (string RawToken, string TokenHash) CreateRefreshToken();
 
     string ComputeTokenHash(string rawToken);

@@ -1,6 +1,9 @@
 using GPMH.Application.DTOs.Onboarding;
+using GPMH.Application.DTOs.Printing;
+using GPMH.Application.DTOs.SuperAdmin;
 using GPMH.Application.Features.Onboarding.Commands;
 using GPMH.Application.Features.Onboarding.Queries;
+using GPMH.Application.Features.Onboarding.Subscription;
 using GPMH.WebAPI.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -90,6 +93,54 @@ public sealed class OnboardingController(ISender sender) : ControllerBase
             .ConfigureAwait(false);
 
         return File(asset.Content, asset.ContentType, asset.FileName);
+    }
+
+    [HttpGet("subscription-status")]
+    [Authorize(Policy = AuthPolicies.RequireGpStaff)]
+    [ProducesResponseType(typeof(GpSubscriptionStatusDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<GpSubscriptionStatusDto>> GetSubscriptionStatus(CancellationToken cancellationToken)
+    {
+        GpSubscriptionStatusDto result = await sender
+            .Send(new GetGpSubscriptionStatusQuery(), cancellationToken)
+            .ConfigureAwait(false);
+
+        return Ok(result);
+    }
+
+    [HttpPost("subscription-payments")]
+    [Authorize(Policy = AuthPolicies.RequireGpAdmin)]
+    [ProducesResponseType(typeof(TenantPaymentSubmissionDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<TenantPaymentSubmissionDto>> SubmitSubscriptionPayment(
+        [FromBody] SubmitTenantPaymentCommand command,
+        CancellationToken cancellationToken)
+    {
+        TenantPaymentSubmissionDto created = await sender.Send(command, cancellationToken).ConfigureAwait(false);
+        return StatusCode(StatusCodes.Status201Created, created);
+    }
+
+    [HttpGet("subscription-payments/{id:guid}/invoice.pdf")]
+    [Authorize(Policy = AuthPolicies.RequireGpStaff)]
+    [Produces("application/pdf")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> DownloadSubscriptionInvoicePdf(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        GeneratedPdfFileDto file = await sender
+            .Send(new GetTenantSubscriptionInvoicePdfQuery(id), cancellationToken)
+            .ConfigureAwait(false);
+
+        Response.Headers.ContentDisposition = $"inline; filename=\"{file.FileName}\"";
+        return File(file.Content, "application/pdf");
     }
 }
 

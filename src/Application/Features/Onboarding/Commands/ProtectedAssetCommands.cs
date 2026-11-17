@@ -20,7 +20,7 @@ public sealed class UploadProtectedAssetCommandValidator : AbstractValidator<Upl
 {
     private static readonly HashSet<string> AllowedCategories = new(StringComparer.OrdinalIgnoreCase)
     {
-        "SIGNATURE", "STAMP", "QR", "MUTATION_DOC", "MUTATIONDOC", "PARTITION_DEED",
+        "SIGNATURE", "STAMP", "QR", "MUTATION_DOC", "MUTATIONDOC", "PARTITION_DEED", "PAYMENT_SLIP", "SUBSCRIPTION_SLIP",
     };
 
     private static readonly HashSet<string> AllowedMimeTypes = new(StringComparer.OrdinalIgnoreCase)
@@ -31,7 +31,7 @@ public sealed class UploadProtectedAssetCommandValidator : AbstractValidator<Upl
     public UploadProtectedAssetCommandValidator()
     {
         RuleFor(x => x.Category).NotEmpty().Must(c => AllowedCategories.Contains(c.Trim()))
-            .WithMessage("Category must be SIGNATURE, STAMP, QR, MUTATION_DOC, or PARTITION_DEED.");
+            .WithMessage("Category must be SIGNATURE, STAMP, QR, MUTATION_DOC, PARTITION_DEED, or PAYMENT_SLIP.");
         RuleFor(x => x.FileName).NotEmpty().MaximumLength(255);
         RuleFor(x => x.ContentType).NotEmpty().Must(ct => AllowedMimeTypes.Contains(ct.Trim()))
             .WithMessage("Only PNG, JPEG, WebP images or PDF documents are permitted.");

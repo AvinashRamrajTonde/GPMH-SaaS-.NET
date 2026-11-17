@@ -1,6 +1,7 @@
 using GPMH.Application.Common.Interfaces;
 using GPMH.Domain.Entities.Identity;
 using GPMH.Domain.Entities.Tenancy;
+using GPMH.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace GPMH.Infrastructure.Persistence.Repositories;
@@ -162,6 +163,21 @@ public sealed class OnboardingRepository(
         }
 
         await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<(Guid AgentId, string AgentCode)?> FindApprovedAgentByCodeAsync(
+        string referralCode,
+        CancellationToken cancellationToken)
+    {
+        string normalized = referralCode.Trim().ToUpperInvariant();
+        var agent = await dbContext.FieldAgents
+            .AsNoTracking()
+            .Where(a => a.KycStatus == AgentKycStatus.Approved && a.AgentCode.ToUpper() == normalized)
+            .Select(a => new { a.Id, a.AgentCode })
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+
+        return agent is null ? null : (agent.Id, agent.AgentCode);
     }
 
     public Task SaveChangesAsync(CancellationToken cancellationToken) =>

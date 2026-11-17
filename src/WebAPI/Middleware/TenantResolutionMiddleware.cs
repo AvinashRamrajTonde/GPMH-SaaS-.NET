@@ -40,7 +40,15 @@ public sealed class TenantResolutionMiddleware(RequestDelegate next)
                 throw new TenantAccessDeniedException("Authenticated user context is required for tenant selection.");
             }
 
-            if (currentUserService.Role != ApplicationRole.SuperAdmin)
+            if (currentUserService.IsSupportImpersonation)
+            {
+                if (!Guid.TryParse(context.User.FindFirst("tenant_id")?.Value, out Guid impersonatedTenantId) ||
+                    impersonatedTenantId != requestedTenantId)
+                {
+                    throw new TenantAccessDeniedException("Support impersonation session cannot switch to a different tenant.");
+                }
+            }
+            else if (currentUserService.Role is not (ApplicationRole.SuperAdmin or ApplicationRole.Support_Admin))
             {
                 bool isMember = await membershipValidator
                     .IsActiveMemberAsync(userId, requestedTenantId, context.RequestAborted)
@@ -58,7 +66,8 @@ public sealed class TenantResolutionMiddleware(RequestDelegate next)
             && Guid.TryParse(context.User.FindFirst("tenant_id")?.Value, out Guid claimTenantId)
             && claimTenantId != Guid.Empty)
         {
-            bool isMember = currentUserService.Role == ApplicationRole.SuperAdmin ||
+            bool isMember = currentUserService.IsSupportImpersonation ||
+                currentUserService.Role is ApplicationRole.SuperAdmin or ApplicationRole.Support_Admin ||
                 await membershipValidator
                     .IsActiveMemberAsync(currentUserService.UserId!.Value, claimTenantId, context.RequestAborted)
                     .ConfigureAwait(false);

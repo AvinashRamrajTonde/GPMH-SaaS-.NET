@@ -17,6 +17,8 @@ public sealed class AppDbContext(
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<TenantDatabaseMapping> TenantDatabaseMappings => Set<TenantDatabaseMapping>();
     public DbSet<TenantSubscriptionPayment> TenantSubscriptionPayments => Set<TenantSubscriptionPayment>();
+    public DbSet<PlatformPaymentAccount> PlatformPaymentAccounts => Set<PlatformPaymentAccount>();
+    public DbSet<TenantPaymentSubmission> TenantPaymentSubmissions => Set<TenantPaymentSubmission>();
     public DbSet<ProtectedAsset> ProtectedAssets => Set<ProtectedAsset>();
     public DbSet<User> Users => Set<User>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
@@ -52,6 +54,8 @@ public sealed class AppDbContext(
         ConfigureTenant(modelBuilder);
         ConfigureTenantDatabaseMapping(modelBuilder);
         ConfigureTenantSubscriptionPayment(modelBuilder);
+        ConfigurePlatformPaymentAccount(modelBuilder);
+        ConfigureTenantPaymentSubmission(modelBuilder);
         ConfigureProtectedAsset(modelBuilder);
         ConfigureUser(modelBuilder);
         ConfigureRefreshToken(modelBuilder);
@@ -77,8 +81,10 @@ public sealed class AppDbContext(
             entity.Property(e => e.LgdCode).HasMaxLength(32).IsRequired();
             entity.Property(e => e.NameEn).HasMaxLength(200).IsRequired();
             entity.Property(e => e.NameMr).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.ReferralCodeUsed).HasMaxLength(40);
             entity.HasIndex(e => e.TenantCode).IsUnique();
             entity.HasIndex(e => e.LgdCode).IsUnique();
+            entity.HasIndex(e => new { e.IsDeleted, e.Status });
         });
     }
 
@@ -490,7 +496,7 @@ public sealed class AppDbContext(
             entity.HasKey(e => e.Id);
             entity.Property(e => e.EntityName).HasMaxLength(120).IsRequired();
             entity.Property(e => e.EntityId).HasMaxLength(120).IsRequired();
-            entity.Property(e => e.Action).HasMaxLength(32).IsRequired();
+            entity.Property(e => e.Action).HasMaxLength(64).IsRequired();
             entity.Property(e => e.ActorId).HasMaxLength(64);
             entity.Property(e => e.ActorRole).HasMaxLength(64);
             entity.Property(e => e.CorrelationId).HasMaxLength(120);
@@ -510,9 +516,72 @@ public sealed class AppDbContext(
             entity.Property(e => e.PlanName).HasMaxLength(40).IsRequired();
             entity.Property(e => e.PaymentMode).HasMaxLength(32).IsRequired();
             entity.Property(e => e.Amount).HasPrecision(14, 2);
+            entity.Property(e => e.GstAmount).HasPrecision(14, 2);
             entity.Property(e => e.PaymentReference).HasMaxLength(120);
+            entity.Property(e => e.InvoiceNo).HasMaxLength(40);
             entity.Property(e => e.Notes).HasMaxLength(500);
             entity.HasIndex(e => new { e.TenantId, e.PaymentDateUtc });
+            entity.HasIndex(e => e.InvoiceNo).IsUnique();
+        });
+    }
+
+    private static void ConfigurePlatformPaymentAccount(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<PlatformPaymentAccount>(entity =>
+        {
+            entity.ToTable("platform_payment_accounts");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.AccountName).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.BankName).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.BranchName).HasMaxLength(200).IsRequired();
+            entity.Property(e => e.AccountNumber).HasMaxLength(64).IsRequired();
+            entity.Property(e => e.IfscCode).HasMaxLength(20).IsRequired();
+            entity.Property(e => e.UpiId).HasMaxLength(120).IsRequired();
+            entity.Property(e => e.AnnualFee).HasPrecision(14, 2);
+            entity.Property(e => e.GstPercent).HasPrecision(5, 2);
+            entity.Property(e => e.Gstin).HasMaxLength(32);
+            entity.Property(e => e.SupportPhone).HasMaxLength(32);
+            entity.Property(e => e.SupportEmail).HasMaxLength(200);
+
+            entity.HasData(new PlatformPaymentAccount
+            {
+                Id = PlatformPaymentAccount.DefaultAccountId,
+                AccountName = "Maharashtra GP Digital Network",
+                BankName = "State Bank of India",
+                BranchName = "Nariman Point, Mumbai",
+                AccountNumber = "39876543210",
+                IfscCode = "SBIN0001234",
+                UpiId = "epanchayatraj@sbi",
+                AnnualFee = 6000.00m,
+                GstPercent = 18.00m,
+                Gstin = "27AABCM1234F1Z5",
+                SupportPhone = "0721-2550101",
+                SupportEmail = "support@epanchayat-mh.gov.in",
+                IsActive = true,
+                CreatedAtUtc = new DateTimeOffset(2026, 4, 1, 0, 0, 0, TimeSpan.Zero),
+            });
+        });
+    }
+
+    private static void ConfigureTenantPaymentSubmission(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<TenantPaymentSubmission>(entity =>
+        {
+            entity.ToTable("tenant_payment_submissions");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.PlanName).HasMaxLength(40).IsRequired();
+            entity.Property(e => e.PaymentMode).HasMaxLength(32).IsRequired();
+            entity.Property(e => e.Amount).HasPrecision(14, 2);
+            entity.Property(e => e.UtrReference).HasMaxLength(100).IsRequired();
+            entity.Property(e => e.SlipAssetKey).HasMaxLength(128);
+            entity.Property(e => e.Status).HasMaxLength(24).IsRequired();
+            entity.Property(e => e.RejectionReason).HasMaxLength(500);
+            entity.Property(e => e.InvoiceNo).HasMaxLength(40);
+            entity.Property(e => e.Notes).HasMaxLength(500);
+            entity.HasIndex(e => new { e.TenantId, e.Status });
+            entity.HasIndex(e => e.Status);
+            entity.HasIndex(e => e.UtrReference);
+            entity.HasIndex(e => e.InvoiceNo);
         });
     }
 

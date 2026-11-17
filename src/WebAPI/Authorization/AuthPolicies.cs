@@ -5,6 +5,8 @@ namespace GPMH.WebAPI.Authorization;
 public static class AuthPolicies
 {
     public const string RequireSuperAdmin = nameof(RequireSuperAdmin);
+    public const string RequireSuperAdminOrSupportRead = nameof(RequireSuperAdminOrSupportRead);
+    public const string RequireSuperAdminOrSupportExit = nameof(RequireSuperAdminOrSupportExit);
     public const string RequireGramsevak = nameof(RequireGramsevak);
     public const string RequireGpAdmin = nameof(RequireGpAdmin);
     public const string RequireGpStaff = nameof(RequireGpStaff);
@@ -18,6 +20,13 @@ public static class AuthPolicies
     {
         services.AddAuthorizationBuilder()
             .AddPolicy(RequireSuperAdmin, p => p.RequireRole(nameof(ApplicationRole.SuperAdmin)))
+            .AddPolicy(RequireSuperAdminOrSupportRead, p => p.RequireRole(
+                nameof(ApplicationRole.SuperAdmin),
+                nameof(ApplicationRole.Support_Admin)))
+            .AddPolicy(RequireSuperAdminOrSupportExit, p => p.RequireAssertion(ctx =>
+                ctx.User.IsInRole(nameof(ApplicationRole.SuperAdmin)) ||
+                ctx.User.IsInRole(nameof(ApplicationRole.Support_Admin)) ||
+                string.Equals(ctx.User.FindFirst("support_impersonation")?.Value, "true", StringComparison.OrdinalIgnoreCase)))
             .AddPolicy(RequireGramsevak, p => p.RequireRole(
                 nameof(ApplicationRole.SuperAdmin),
                 nameof(ApplicationRole.Gramsevak)))

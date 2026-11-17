@@ -2,6 +2,7 @@ using GPMH.Application.Common.Exceptions;
 using GPMH.Application.Common.Interfaces;
 using GPMH.Application.DTOs.Dashboard;
 using GPMH.Domain.Entities.Tenancy;
+using GPMH.Domain.Enums;
 using GPMH.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
@@ -131,6 +132,36 @@ public sealed class DashboardReadRepository(
                 : activeReceipts)
             .Sum(r => TaxReceiptHeadAllocation.FromJson(r.HeadAllocationJson).TotalWaterAllocated);
 
+        PlatformPaymentAccount? plat = await dbContext.PlatformPaymentAccounts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.IsActive, cancellationToken)
+            .ConfigureAwait(false);
+
+        DateTimeOffset nowUtc = dateTimeProvider.UtcNow;
+        int? daysUntilExpiry = tenant.SubscriptionExpiresAtUtc.HasValue
+            ? (int)Math.Floor((tenant.SubscriptionExpiresAtUtc.Value.UtcDateTime.Date - nowUtc.UtcDateTime.Date).TotalDays)
+            : null;
+        string effectiveSubStatus = tenant.Status == TenantStatus.Active &&
+            tenant.SubscriptionExpiresAtUtc.HasValue &&
+            tenant.SubscriptionExpiresAtUtc.Value < nowUtc
+                ? nameof(TenantStatus.Expired)
+                : tenant.Status.ToString();
+        bool showExpiryWarning30Days = daysUntilExpiry.HasValue && daysUntilExpiry.Value <= 30;
+        PlatformPaymentAccountSummaryDto? platDto = plat is null
+            ? null
+            : new PlatformPaymentAccountSummaryDto(
+                AccountName: plat.AccountName,
+                BankName: plat.BankName,
+                BranchName: plat.BranchName,
+                AccountNumber: plat.AccountNumber,
+                IfscCode: plat.IfscCode,
+                UpiId: plat.UpiId,
+                AnnualFee: plat.AnnualFee,
+                GstPercent: plat.GstPercent,
+                Gstin: plat.Gstin,
+                SupportPhone: plat.SupportPhone,
+                SupportEmail: plat.SupportEmail);
+
         return new DashboardSummaryDto(
             TenantId: tenantId,
             PanchayatNameEn: gp?.PanchayatNameEn ?? tenant.NameEn,
@@ -147,7 +178,13 @@ public sealed class DashboardReadRepository(
             WaterAndSpecialCollection: waterAndSpecialCollection,
             TodayReceipts: todayReceipts,
             ChecklistSteps: checklist,
-            RecentActivity: recentActivity);
+            RecentActivity: recentActivity,
+            SubscriptionStatus: effectiveSubStatus,
+            SubscriptionExpiresAtUtc: tenant.SubscriptionExpiresAtUtc,
+            DaysUntilExpiry: daysUntilExpiry,
+            ShowExpiryWarning30Days: showExpiryWarning30Days,
+            AnnualRenewalFee: plat?.AnnualFee ?? 6000.00m,
+            PlatformPaymentInfo: platDto);
     }
 
     public async Task<DashboardSearchResultDto> SearchTenantRecordsAsync(

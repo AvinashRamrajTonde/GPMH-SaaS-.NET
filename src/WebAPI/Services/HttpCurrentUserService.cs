@@ -51,4 +51,19 @@ public sealed class HttpCurrentUserService(IHttpContextAccessor httpContextAcces
 
     public bool IsAuthenticated =>
         httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated == true && UserId.HasValue;
+
+    public bool IsSupportImpersonation =>
+        string.Equals(
+            httpContextAccessor.HttpContext?.User.FindFirstValue("support_impersonation"),
+            "true",
+            StringComparison.OrdinalIgnoreCase);
+
+    public Guid? ImpersonatorUserId
+    {
+        get
+        {
+            string? raw = httpContextAccessor.HttpContext?.User.FindFirstValue("impersonator_id");
+            return Guid.TryParse(raw, out Guid id) ? id : null;
+        }
+    }
 }

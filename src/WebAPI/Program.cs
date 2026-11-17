@@ -163,8 +163,10 @@ try
 
     app.UseCors("FrontendPolicy");
     app.UseAuthentication();
+    app.UseMiddleware<ImpersonationWriteGuardMiddleware>();
     app.UseAuthorization();
     app.UseMiddleware<TenantResolutionMiddleware>();
+    app.UseMiddleware<TenantLicenseMiddleware>();
 
     app.MapControllers();
     app.MapHealthChecks("/health/ready");
